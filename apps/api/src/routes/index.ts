@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import { createAppointmentsRouter } from '../modules/appointments/appointments.routes.js';
 import { createCatalogueRouter } from '../modules/catalogue/catalogue.routes.js';
 import { createShowroomsRouter } from '../modules/showrooms/showrooms.routes.js';
 import { createUsedVehiclesRouter } from '../modules/used-vehicles/used-vehicles.routes.js';
@@ -16,6 +17,7 @@ export function createApiRouter({ databaseProbe }: ApiRouterOptions): Router {
   router.use(createShowroomsRouter());
   router.use(createCatalogueRouter());
   router.use(createUsedVehiclesRouter());
+  router.use(createAppointmentsRouter());
 
   return router;
 }
