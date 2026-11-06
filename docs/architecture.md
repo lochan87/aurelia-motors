@@ -2,7 +2,7 @@
 
 ## 1. Purpose and status
 
-Aurelia Motors is a car dealership platform for Lucknow. The current repository contains **Milestone 1 (Foundation)**, **Milestone 2 (Vehicle Catalogue, Inventory & Pricing)**, **Milestone 3 (Bookings & Capacity)**, and **Milestone 4 (Secure Staff Authentication, Role-Based Access Control, and Dealership Operations Dashboard)**.
+Aurelia Motors is a car dealership platform for Lucknow. The current repository contains **Milestone 1 (Foundation)**, **Milestone 2 (Vehicle Catalogue, Inventory & Pricing)**, **Milestone 3 (Bookings & Capacity)**, **Milestone 4 (Secure Staff Authentication, Role-Based Access Control, and Dealership Operations Dashboard)**, and **Milestone 5 (Customer Enquiries, Lead CRM, Automatic Lead Assignment, Portal CSV Imports, and Response-Time Tracking)**.
 
 The architecture is a modular monolith. That is the right amount of structure for one dealership group with a small number of showrooms and workshops: it keeps transactions, capacity rules, and authorization in one place, while preserving clear feature boundaries.
 
@@ -73,11 +73,22 @@ The system defines 4 staff roles:
 
 The system guarantees that the last active administrator cannot be deactivated or demoted (`CANNOT_DEMOTE_LAST_ADMIN`), preventing permanent lockout from the management console.
 
+### 4.4 Lead CRM, Assignment & SLA Tracking
+
+1. **Omnichannel Ingestion:** Public web enquiry modal and third-party portal CSV ingestion pipelines. Enforces DPDP Act 2023 digital privacy consent.
+2. **Deterministic Workload Balancing:** Selects active sales consultants assigned to the enquiry showroom based on minimum active lead count. Used-car leads prioritize `USED_CAR_STAFF`.
+3. **Response-Time Rule:** Only an explicit recorded outreach activity (`POST /api/staff/leads/:id/activities`) establishes `firstResponseAt`. Automatic routing or enquiry creation does not count as a human contact.
+4. **SLA Benchmarking:** Real-time SLA overdue calculation against configured duration (default: 30 minutes).
+5. **Portal CSV Ingestion & Deduplication:** Safe RFC 4180 parsing, two-phase preview and execution, and duplicate detection against external IDs and 7-day customer/model collisions.
+
 ## 5. Frontend Portal Architecture
 
 - `/staff/login`: Staff login page with demo reviewer quick-fill buttons.
-- `/staff/dashboard`: Role-aware operations overview displaying database-backed metrics, location scoping banners, and recent activity.
+- `/staff/dashboard`: Role-aware operations overview displaying database-backed metrics, location scoping banners, recent activity, and CRM lead KPIs.
 - `/staff/appointments`: Scoped test drive and workshop booking queue with unmasked customer contact information.
+- `/staff/leads`: Real-time CRM lead inbox with status tabs, source filter, showroom filter, search, urgency sort, and response badges.
+- `/staff/leads/:id`: Complete lead profile with customer details, lifecycle status transitions, outreach logger, internal notes, and activity timeline.
+- `/staff/leads/import`: Admin portal CSV upload interface with live preview table, duplicate analysis, and batch execution.
 - `/staff/team`: Staff directory and user provisioning dialog (Admin only).
 - Global `<AuthProvider>` and `useAuth()` hook providing user context and CSRF coordination.
 - `<ProtectedRoute>` enforcing authentication and role clearance with friendly access-denied fallbacks.

@@ -89,8 +89,37 @@ This plan sequences **trust-critical foundations** (pricing, capacity, consent, 
   - Built-in Change Password modal in staff layout.
 - 66 passing automated tests covering all auth, RBAC, scoping, and safeguard behaviors.
 
+### Milestone 5: Customer Enquiries, Lead CRM, Automatic Lead Assignment, Portal CSV Imports, and Response-Time Tracking (complete)
+
+- Database models: `Lead`, `LeadActivity`, `LeadNote`, `LeadStatusHistory`, `LeadImportBatch`.
+- Applied Prisma migration: `20261106115505_lead_crm_and_enquiries`.
+- Omnichannel customer enquiry capture:
+  - Rate-limited `POST /api/enquiries` endpoint with DPDP Act 2023 consent capture.
+  - Interactive Enquiry Modal on new vehicle detail pages, certified detail pages, and homepage showroom section.
+  - Duplicate enquiry protection preventing spam within 30-minute windows.
+- Deterministic workload-balanced lead assignment engine:
+  - Matches showroom, active status, role (`SALES_CONSULTANT`, `USED_CAR_STAFF`), and least active assigned leads.
+  - Breaks ties using least recently assigned consultant.
+  - Handles fallback to unassigned queue when no eligible staff are configured.
+- First-human-response SLA tracking:
+  - Submitting an enquiry or assigning it does **not** count as a human response.
+  - Only an explicitly recorded contact action (`POST /api/staff/leads/:id/activities`) establishes `firstResponseAt`.
+  - Calculates response duration against configured SLA (default 30 minutes, `LEAD_RESPONSE_SLA_MINUTES`).
+  - Flags overdue leads dynamically with urgency indicators.
+- Third-party aggregator portal CSV ingestion:
+  - Safe RFC 4180-compliant CSV parser with quote, comma, and newline handling.
+  - Two-phase ingestion: Preview (`/api/staff/leads/import/preview`) validating rows and flagging duplicates, followed by execution (`/api/staff/leads/import`).
+  - Automatic deduplication against external lead IDs and recent contact/model combinations.
+  - Batch audit trail with `batchReference`, filename, author, imported count, and duplicate count.
+  - Sample test file provided at `sample-leads.csv`.
+- Protected Staff CRM Frontend:
+  - `/staff/leads`: Lead inbox with status tabs, source filter, showroom filter, search, urgency sort, and SLA response badges.
+  - `/staff/leads/:id`: Complete lead profile with customer contact links, lifecycle status transitions, outreach logger, internal notes, and activity timeline.
+  - `/staff/leads/import`: Admin CSV upload interface with live preview table and batch execution.
+  - Dashboard integration: Inbound enquiry metrics, overdue SLA counter, and recent leads table on `/staff/dashboard`.
+- 80 passing automated tests covering enquiry capture, duplicate prevention, routing, response tracking, scoping, and CSV batch processing.
+
 ## 3. Future milestones
 
-- **Milestone 5:** Lead CRM, portal CSV import, assignment rules, response time tracking.
 - **Milestone 6:** Public CMS editing (offers, banners, price publishing).
 - **Milestone 7:** AI-assisted lead summarization and vehicle recommendations.

@@ -45,16 +45,17 @@ Outputs:
 
 Create production configuration in the platform's secret manager, not in Git. The API reads a root `.env` only as a local-development convenience; hosted environments should inject variables directly.
 
-| Variable                | Required       | Production guidance                                                              |
-| ----------------------- | -------------- | -------------------------------------------------------------------------------- |
-| `NODE_ENV`              | Yes            | `production`                                                                     |
-| `DATABASE_URL`          | Yes            | Managed PostgreSQL URL, TLS enabled, least-privilege application role            |
-| `API_HOST`              | Yes            | Usually `0.0.0.0` inside a container or `127.0.0.1` behind a local reverse proxy |
-| `API_PORT`              | Yes            | Port exposed to the platform or reverse proxy                                    |
-| `CORS_ORIGINS`          | Yes            | Exact production web origins, comma-separated; no wildcard                       |
-| `CSRF_SECRET`           | Recommended    | 32+ byte random secret used for HMAC-SHA256 CSRF verification                    |
-| `AURELIA_DEMO_PASSWORD` | No             | Default initial password for seeded demo staff accounts (development only)       |
-| `VITE_API_URL`          | Web build only | Public API base URL; baked into the bundle at build time                         |
+| Variable                    | Required       | Production guidance                                                              |
+| --------------------------- | -------------- | -------------------------------------------------------------------------------- |
+| `NODE_ENV`                  | Yes            | `production`                                                                     |
+| `DATABASE_URL`              | Yes            | Managed PostgreSQL URL, TLS enabled, least-privilege application role            |
+| `API_HOST`                  | Yes            | Usually `0.0.0.0` inside a container or `127.0.0.1` behind a local reverse proxy |
+| `API_PORT`                  | Yes            | Port exposed to the platform or reverse proxy                                    |
+| `CORS_ORIGINS`              | Yes            | Exact production web origins, comma-separated; no wildcard                       |
+| `CSRF_SECRET`               | Recommended    | 32+ byte random secret used for HMAC-SHA256 CSRF verification                    |
+| `LEAD_RESPONSE_SLA_MINUTES` | No             | Target first-human-response SLA window in minutes (default 30)                   |
+| `AURELIA_DEMO_PASSWORD`     | No             | Default initial password for seeded demo staff accounts (development only)       |
+| `VITE_API_URL`              | Web build only | Public API base URL; baked into the bundle at build time                         |
 
 `VITE_*` values are readable by every browser. Never place a database password, API key, AI key, or session secret in a `VITE_*` variable.
 

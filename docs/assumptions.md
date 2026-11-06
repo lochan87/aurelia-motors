@@ -27,7 +27,7 @@ Open questions:
 | Vehicle catalogue & pricing (M2)            | Complete: 5 models, 15 variants, 20 colours, on-road price breakdowns, certified pre-owned      |
 | Bookings & capacity (M3)                    | Complete: test drives, workshop services, concurrency locks, DPDP privacy, cancellation         |
 | Staff Auth & RBAC (M4)                      | Complete: Argon2id auth, secure HttpOnly sessions, CSRF, location scoping, dashboards, team CMS |
-| Lead CRM & portal CSV import (M5)           | Planned for next milestone                                                                      |
+| Lead CRM & portal CSV import (M5)           | Complete: enquiry modal, CRM inbox, deterministic routing, 30m human-response SLA, CSV imports  |
 | Public CMS editing (offers, banners) (M6)   | Planned for future milestone                                                                    |
 | AI lead summarization & recommendations(M7) | Planned for future milestone                                                                    |
 
@@ -46,7 +46,7 @@ Open questions:
 | Token storage      | **No `localStorage` auth tokens.** HttpOnly cookie + in-memory CSRF token      |
 | ORM                | Prisma 6.19.3, pinned for stability                                            |
 | Database           | PostgreSQL 18.1 for local verification; managed PostgreSQL for production      |
-| Tests              | Vitest and Supertest (66 automated tests)                                      |
+| Tests              | Vitest and Supertest (80 automated tests)                                      |
 | Node module format | ESM in API and shared packages                                                 |
 | Money              | Integer paise, INR, Indian digit grouping                                      |
 | Time               | UTC storage, `Asia/Kolkata` business timezone                                  |
@@ -90,3 +90,13 @@ The brief mentions an "email calculator". This is interpreted as an **EMI calcul
 - **Administrator Safeguard:** The server strictly rejects deactivating or demoting the last remaining active administrator account, preventing accidental dealership-wide lockouts.
 - **Audit Logging:** Every authentication attempt (success, failure, bad password, inactive account, password change, logout) is recorded in `AuthenticationAuditEvent`.
 - **Reviewer Accounts:** Seeded accounts use the demo password `Aurelia2026!` (configurable via `AURELIA_DEMO_PASSWORD`).
+
+### 4.6 Lead CRM, Omnichannel Enquiries, Assignment & SLA Tracking
+
+- **Omnichannel Ingestion:** Captures web enquiries via public modal and third-party portal leads via RFC 4180-compliant CSV upload.
+- **Deterministic Workload Balancing:** Evaluates active staff assigned to the enquired showroom and selects the consultant with the lowest active lead count (`NEW`, `ASSIGNED`, `CONTACTED`, `QUALIFIED`, `NEGOTIATING`). Ties are broken by oldest assignment timestamp.
+- **Dedicated Specialist Routing:** Used car enquiries prioritize staff with role `USED_CAR_STAFF` stationed at that location.
+- **Response-Time Rule:** Submitting an enquiry or assigning it to a consultant strictly does **not** count as a human response. Only an explicitly recorded contact action (`POST /api/staff/leads/:id/activities`) establishes `firstResponseAt`.
+- **SLA Benchmark:** Default response SLA is 30 minutes during working hours, configurable via `LEAD_RESPONSE_SLA_MINUTES`. Leads exceeding 30 minutes without contact are flagged `isOverdue: true`.
+- **Portal Deduplication:** CSV rows are checked against existing `externalLeadId` records and recent phone/model combinations within 7 days. Duplicate rows are skipped during execution with metrics recorded on `LeadImportBatch`.
+- **DPDP Act 2023 Compliance:** Public enquiry submission enforces explicit digital privacy consent, recorded in `CustomerConsent` with purpose `CUSTOMER_ENQUIRY` and notice version.
