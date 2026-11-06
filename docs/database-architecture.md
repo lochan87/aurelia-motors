@@ -131,6 +131,121 @@ model AuthenticationAuditEvent {
   @@index([eventType, createdAt])
   @@map("authentication_audit_events")
 }
+
+model UsedCarPriceProposal {
+  id                 String         @id @default(cuid())
+  usedVehicleId      String
+  proposedPricePaise BigInt
+  originalPricePaise BigInt
+  differencePaise    BigInt
+  reason             String
+  status             ProposalStatus @default(PENDING)
+  proposedByStaffId  String
+  reviewedByStaffId  String?
+  reviewNotes        String?
+  reviewedAt         DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  usedVehicle     UsedVehicle @relation(fields: [usedVehicleId], references: [id], onDelete: Cascade)
+  proposedByStaff StaffUser   @relation("ProposedPriceChanges", fields: [proposedByStaffId], references: [id])
+  reviewedByStaff StaffUser?  @relation("ReviewedPriceChanges", fields: [reviewedByStaffId], references: [id])
+
+  @@index([usedVehicleId])
+  @@index([status])
+  @@map("used_car_price_proposals")
+}
+
+model PromotionOffer {
+  id           String    @id @default(cuid())
+  title        String
+  description  String
+  badgeText    String?
+  imageUrl     String?
+  ctaLabel     String    @default("Enquire Now")
+  ctaUrl       String    @default("/contact")
+  startDate    DateTime
+  endDate      DateTime
+  isPublished  Boolean   @default(true)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([isPublished, displayOrder])
+  @@map("promotion_offers")
+}
+
+model HomepageBanner {
+  id           String    @id @default(cuid())
+  headline     String
+  subheadline  String?
+  badgeText    String?
+  imageUrl     String
+  ctaLabel     String    @default("Explore Details")
+  ctaUrl       String    @default("/test-drive")
+  startDate    DateTime?
+  endDate      DateTime?
+  isPublished  Boolean   @default(true)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([isPublished, displayOrder])
+  @@map("homepage_banners")
+}
+
+model TradeInRequest {
+  id                         String           @id @default(cuid())
+  reference                  String           @unique
+  customerId                 String
+  showroomId                 String
+  make                       String
+  model                      String
+  variant                    String?
+  registrationYear           Int
+  mileageKm                  Int
+  ownershipCount             Int              @default(1)
+  condition                  VehicleCondition
+  fuelType                   String?
+  transmission               String?
+  estimatedValuationMinPaise BigInt
+  estimatedValuationMaxPaise BigInt
+  offeredValuationPaise      BigInt?
+  status                     TradeInStatus    @default(SUBMITTED)
+  customerNotes              String?
+  staffNotes                 String?
+  assignedStaffId            String?
+  createdAt                  DateTime         @default(now())
+  updatedAt                  DateTime         @updatedAt
+
+  customer      Customer   @relation(fields: [customerId], references: [id])
+  showroom      Showroom   @relation(fields: [showroomId], references: [id])
+  assignedStaff StaffUser? @relation("AssignedTradeIns", fields: [assignedStaffId], references: [id])
+
+  @@index([reference])
+  @@index([customerId])
+  @@index([showroomId])
+  @@index([status])
+  @@map("trade_in_requests")
+}
+
+model StaffNotification {
+  id          String           @id @default(cuid())
+  staffUserId String
+  title       String
+  message     String
+  type        NotificationType
+  linkUrl     String?
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  readAt      DateTime?
+
+  staffUser StaffUser @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+
+  @@index([staffUserId, isRead])
+  @@index([createdAt])
+  @@map("staff_notifications")
+}
 ```
 
 ## 3. Database conventions

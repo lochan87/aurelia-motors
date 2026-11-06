@@ -119,7 +119,42 @@ This plan sequences **trust-critical foundations** (pricing, capacity, consent, 
   - Dashboard integration: Inbound enquiry metrics, overdue SLA counter, and recent leads table on `/staff/dashboard`.
 - 80 passing automated tests covering enquiry capture, duplicate prevention, routing, response tracking, scoping, and CSV batch processing.
 
+### Milestone 6: Admin CMS, Price Management, Offers, EMI Calculator, Trade-In Requests, and AI-Assisted Lead Operations (complete)
+
+- Database models: `UsedCarPriceProposal`, `PromotionOffer`, `HomepageBanner`, `TradeInRequest`, `StaffNotification`.
+- Extended models: `CustomerConsent` (added `verificationStatus`), `Lead` (added `consentStatus`).
+- Applied Prisma migration: `20261106125318_milestone6_admin_cms_pricing_finance_ai`.
+- Admin CMS for Vehicle Catalogue & Inventory:
+  - `admin/cms.service.ts` & `cms.routes.ts`: Endpoints for models, variants, showroom inventory stock units, and price books.
+  - Price book publication safeguards: overlapping date validation prevents concurrent active price books for identical facility scopes.
+  - Web UI: `/staff/inventory` (Admin model/variant/stock unit management) and `/staff/pricing` (Price book tariff governance and itemized tax breakdowns).
+- Used Car Price Approval Governance:
+  - `admin/used-car-pricing.service.ts` & `used-car-pricing.routes.ts`: Proposals created by used car staff or admins.
+  - Separation of duties: proposer cannot self-approve or self-reject (`403 SELF_APPROVAL_FORBIDDEN`).
+  - Stale proposal protection: detects vehicle price drift between submission and review (`409 STALE_PROPOSAL`).
+  - Web UI: `/staff/used-car-pricing` with self-approval button disabling and difference calculations.
+- Dealership Content CMS (Banners & Offers):
+  - `content/content.service.ts` & `content.routes.ts`: Public `/banners` and `/offers`, and admin CRUD at `/admin/content/*`.
+  - Web UI: Public homepage hero banners & promotional offers grid (`/`), and admin management at `/staff/content`.
+- Reducing-Balance EMI & Finance Calculator:
+  - Pure integer-paise formula in `packages/shared/src/finance.ts` (`calculateEmi`).
+  - Interactive sliders for tenure (12-84 months), interest rate (7.0%-16.0%), and down payment with principal vs interest visual ratio bar on vehicle detail pages.
+- Customer Trade-In & Vehicle Valuation Pipeline:
+  - `trade-ins/trade-ins.service.ts` & `trade-ins.routes.ts`: Instant depreciation heuristic calculation (`/api/trade-ins/estimate`) and submission (`POST /api/trade-ins`).
+  - Generates unique reference (`TRD-2026-XXXXX`), records DPDP consent, creates CRM lead, dispatches staff notification, and auto-assigns used car staff.
+  - Web UI: Trade-In modal on vehicle detail and certified pages, and staff management queue at `/staff/trade-ins`.
+- Grounded AI-Assisted Lead Operations:
+  - `ai/ai.service.ts` & `ai.routes.ts`: Grounded on live CRM timeline, Lucknow showroom stock, and tariff data.
+  - Structured lead intent and urgency summarization (`/api/staff/ai/:leadId/summary`).
+  - Channel-specific response drafts (WhatsApp, Email proposal, Phone script) with human-in-the-loop review and 1-click insertion into the outreach logger.
+  - Real PostgreSQL stock recommendation matching customer budget and body type preferences.
+  - DPDP provenance notice for external portal leads requiring explicit channel verification.
+  - Web UI: `LeadAiAssistant` component embedded directly inside `/staff/leads/:id`.
+- Staff Notifications System:
+  - `notifications/notifications.service.ts` & `notifications.routes.ts`: Event-driven notifications for price approvals, trade-in assignments, and lead assignments.
+  - Web UI: `StaffNotificationsPopover` in top operational navigation bar with real-time unread badge.
+- 110 passing automated tests covering CMS management, used-car price approval workflows, trade-in requests, content management, notifications, and AI assistance.
+
 ## 3. Future milestones
 
-- **Milestone 6:** Public CMS editing (offers, banners, price publishing).
-- **Milestone 7:** AI-assisted lead summarization and vehicle recommendations.
+- **Milestone 7:** Final packaging, end-to-end integration verification, and production containerization.

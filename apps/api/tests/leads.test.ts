@@ -138,6 +138,26 @@ describe('Lead CRM, Enquiries & Response Tracking API', () => {
       expect(savedLead?.assignedStaffId).not.toBeNull();
     });
 
+    it('executes enquiry creation and assignment within strict performance SLA (<500ms)', async () => {
+      const startTime = Date.now();
+      const response = await request(app).post('/api/enquiries').send({
+        fullName: 'Performance Tester',
+        phone: '9839999888',
+        email: 'perf.tester@test.leads.com',
+        showroomId: gomtiShowroomId,
+        modelId: sampleModelId,
+        customerRequirements: 'SLA verification enquiry',
+        preferredContactMethod: 'EMAIL',
+        privacyConsent: true,
+      });
+      const durationMs = Date.now() - startTime;
+
+      expect(response.status).toBe(201);
+      expect(response.body.data.assignmentDurationMs).toBeDefined();
+      expect(response.body.data.assignmentDurationMs).toBeLessThan(350);
+      expect(durationMs).toBeLessThan(1500); // Under 1.5s total HTTP response (well under 25s 4G SLA)
+    });
+
     it('rejects enquiry when DPDP consent is false', async () => {
       const response = await request(app).post('/api/enquiries').send({
         fullName: 'No Consent User',

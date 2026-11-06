@@ -5,12 +5,13 @@ temporary brand is **Aurelia Motors**; it will be replaced when the legal entity
 partnerships are confirmed.
 
 This repository contains the verified foundation, **Milestone 2 — Vehicle Catalogue,
-Inventory, and On-Road Pricing**, **Milestone 3 — End-to-End Test-Drive and Service Booking System**, **Milestone 4 — Secure Staff Authentication, Role-Based Access Control, and Dealership Operations Dashboard**, and **Milestone 5 — Customer Enquiries, Lead CRM, Automatic Lead Assignment, Portal CSV Imports, and Response-Time Tracking**.
+Inventory, and On-Road Pricing**, **Milestone 3 — End-to-End Test-Drive and Service Booking System**, **Milestone 4 — Secure Staff Authentication, Role-Based Access Control, and Dealership Operations Dashboard**, **Milestone 5 — Customer Enquiries, Lead CRM, Automatic Lead Assignment, Portal CSV Imports, and Response-Time Tracking**, and **Milestone 6 — Admin CMS, Price Management, Offers, EMI Calculator, Trade-In Requests, and AI-Assisted Lead Operations**.
 It delivers a fully database-backed vehicle catalogue, transparent itemized on-road pricing calculations,
 showroom-scoped inventory tracking, certified pre-owned listings with inspection audits,
 capacity-enforced customer booking workflows, a secure internal staff operations portal with Argon2id authentication,
 strict location-based access control, operational metrics, an omnichannel customer enquiry capture pipeline,
-deterministic workload-balanced lead routing, third-party portal CSV import and deduplication, and 30-minute first-human-response SLA tracking.
+deterministic workload-balanced lead routing, third-party portal CSV import and deduplication, 30-minute first-human-response SLA tracking,
+dealership content & price governance CMS, used car price approvals with separation of duties, reducing-balance EMI calculation, online trade-in valuations, and grounded AI lead intelligence.
 
 ## What is implemented
 
@@ -20,11 +21,13 @@ deterministic workload-balanced lead routing, third-party portal CSV import and 
   certified used vehicles, immutable inspection reports, demo vehicles, test-drive appointments,
   workshops, workshop operating hours, service packages, service appointments, customers, DPDP consents,
   staff users, staff sessions, staff location assignments, authentication audit logs, leads,
-  lead contact activities, lead internal notes, lead status audit history, and import batches.
+  lead contact activities, lead internal notes, lead status audit history, import batches,
+  used car price proposals, promotion offers, homepage banners, trade-in requests, and staff notifications.
 - Idempotent sample-data seeding (`npm run db:seed`) generating 3 showrooms, 5 vehicle models,
   15 variants, 20 colour options, 282 specifications, 45 showroom inventory units, 4 price books,
   264 price components, 10 certified used-car files with 90 inspection items, 13 demo vehicles,
-  2 authorized service workshops, 5 service types, and 6 staff accounts across roles and Lucknow facilities.
+  2 authorized service workshops, 5 service types, 6 staff accounts across roles and Lucknow facilities,
+  homepage banners, and promotional campaigns.
 - Public & Staff REST API endpoints:
   - `POST /api/enquiries` (rate-limited public enquiry capture with DPDP consent and automated consultant routing)
   - `GET /api/staff/leads` (location-scoped paginated CRM inbox with status, source, showroom, and urgency filters)
@@ -37,6 +40,22 @@ deterministic workload-balanced lead routing, third-party portal CSV import and 
   - `POST /api/staff/leads/import/preview` (Admin only: validates third-party portal CSV rows, detects duplicates)
   - `POST /api/staff/leads/import` (Admin only: executes batch ingestion and automated consultant assignment)
   - `GET /api/staff/leads/imports` (Admin only: lists batch ingestion history with row metrics)
+  - `GET /api/admin/cms/models`, `POST /api/admin/cms/models`, `PATCH /api/admin/cms/models/:id`, `DELETE /api/admin/cms/models/:id` (Admin model CMS)
+  - `POST /api/admin/cms/models/:id/variants`, `PATCH /api/admin/cms/variants/:id`, `DELETE /api/admin/cms/variants/:id` (Admin variant CMS)
+  - `GET /api/admin/cms/inventory`, `POST /api/admin/cms/inventory`, `PATCH /api/admin/cms/inventory/:id` (Admin showroom inventory unit CMS)
+  - `GET /api/admin/cms/price-books`, `POST /api/admin/cms/price-books`, `PUT /api/admin/cms/price-books/:id/entries/:variantId`, `POST /api/admin/cms/price-books/:id/publish`, `POST /api/admin/cms/price-books/:id/archive` (Price book governance and overlap prevention)
+  - `POST /api/staff/used-vehicles/:id/propose-price` (Used car staff price proposal submission)
+  - `GET /api/staff/used-car-pricing/proposals`, `POST /api/staff/used-car-pricing/proposals/:id/approve`, `POST /api/staff/used-car-pricing/proposals/:id/reject` (Price approvals with separation-of-duties and drift protection)
+  - `GET /api/banners` and `GET /api/offers` (Public marketing content)
+  - `GET /api/admin/content/banners`, `POST /api/admin/content/banners`, `PATCH /api/admin/content/banners/:id`, `DELETE /api/admin/content/banners/:id` (Admin banner CMS)
+  - `GET /api/admin/content/offers`, `POST /api/admin/content/offers`, `PATCH /api/admin/content/offers/:id`, `DELETE /api/admin/content/offers/:id` (Admin offer CMS)
+  - `POST /api/trade-ins/estimate` (Instant valuation estimation by depreciation heuristics)
+  - `POST /api/trade-ins` (Trade-in submission with reference generation, CRM lead creation, and notifications)
+  - `GET /api/staff/trade-ins`, `GET /api/staff/trade-ins/:id`, `PATCH /api/staff/trade-ins/:id` (Staff trade-in queue and valuation offer management)
+  - `GET /api/staff/notifications`, `GET /api/staff/notifications/unread-count`, `PATCH /api/staff/notifications/:id/read`, `POST /api/staff/notifications/mark-all-read` (Staff notifications)
+  - `POST /api/staff/ai/:leadId/summary` (AI-assisted structured lead intent & urgency summary)
+  - `POST /api/staff/ai/:leadId/response-draft` (Human-in-the-loop tailored response drafting for WhatsApp, Email, Phone script)
+  - `POST /api/staff/ai/:leadId/recommendations` (Grounded PostgreSQL inventory matching recommendations)
   - `GET /api/showrooms` and `GET /api/showrooms/:code`
   - `GET /api/catalogue/models` (search, bodyType/fuelType/transmission filters, price bounds, sorting)
   - `GET /api/catalogue/models/:slug` (variants, colours, specs, and showroom availability)
@@ -62,8 +81,18 @@ deterministic workload-balanced lead routing, third-party portal CSV import and 
   - `GET /api/staff/dashboard` (real database aggregations strictly scoped by role & location assignments)
   - `GET /api/staff/appointments` (location-scoped appointment queue with unmasked customer details for staff)
   - `GET /api/health` (PostgreSQL probe with status envelope)
-- Shared TypeScript contracts and integer-paise pricing calculation helpers (`@aurelia/shared`).
+- Shared TypeScript contracts, finance arithmetic, and integer-paise pricing calculation helpers (`@aurelia/shared`).
 - Premium frontend pages:
+  - Reducing-Balance EMI & Finance Calculator with interactive tenure, interest rate, and down payment sliders on vehicle detail pages
+  - Customer Vehicle Trade-In Modal with live valuation estimate bands and DPDP consent on vehicle and certified pages
+  - Promotional Offers and Hero Banners section on homepage
+  - Staff Notifications Popover in the operational header with unread badge and quick navigation
+  - Staff Trade-Ins Valuation Queue at `/staff/trade-ins`
+  - Staff Used Car Price Approval Queue at `/staff/used-car-pricing` with separation-of-duties validation
+  - Dealership Catalogue & Stock Inventory CMS at `/staff/inventory` (Admin only)
+  - Dealership Tariff & Price Book CMS at `/staff/pricing` (Admin only)
+  - Dealership Marketing Banners & Offers CMS at `/staff/content` (Admin only)
+  - Grounded AI Assistant widget embedded directly inside the Lead Detail page (`/staff/leads/:id`) with 1-click draft insertion into outreach logger
   - Interactive Enquiry Modal on new vehicle pages, certified vehicle pages, and home visit section
   - Protected Lead CRM Inbox at `/staff/leads` with status tabs, SLA urgency badges, and showroom scoping
   - Protected Lead Detail and Follow-up page at `/staff/leads/:id` with first-response logging, internal notes, and audit timeline
@@ -83,7 +112,7 @@ deterministic workload-balanced lead routing, third-party portal CSV import and 
   - Protected staff directory and provisioning at `/staff/team` (Admin only, with last-admin safeguard)
   - Built-in Change Password modal in staff layout
   - Editorial brand landing page (`/`), privacy notice (`/privacy`), and 404 route (`*`)
-- 80 automated tests across unit and Supertest integration suites (including enquiry submission, duplicate protection, DPDP consent, deterministic workload balancing, first-response SLA tracking, location scoping, portal CSV preview, and batch execution).
+- 110 automated tests across unit and Supertest integration suites (including CMS operations, used-car price approvals, trade-in requests, content management, notifications, grounded AI assistant, enquiry submission, duplicate protection, DPDP consent, deterministic workload balancing, first-response SLA tracking, location scoping, portal CSV preview, and batch execution).
 - Passing ESLint, Prettier, strict TypeScript, and production build checks.
 
 ## Stack and versions
