@@ -57,10 +57,20 @@ describe('Lead CRM, Enquiries & Response Tracking API', () => {
       where: { lead: { customer: { email: { contains: 'test.leads' } } } },
     });
     await prisma.lead.deleteMany({
-      where: { customer: { email: { contains: 'test.leads' } } },
+      where: {
+        OR: [
+          { customer: { email: { contains: 'test.leads' } } },
+          { customer: { phone: '9876500111' } },
+        ],
+      },
     });
     await prisma.customer.deleteMany({
-      where: { email: { contains: 'test.leads' } },
+      where: {
+        OR: [
+          { email: { contains: 'test.leads' } },
+          { phone: '9876500111' },
+        ],
+      },
     });
 
     // 3. Login Admin
@@ -96,10 +106,20 @@ describe('Lead CRM, Enquiries & Response Tracking API', () => {
       where: { lead: { customer: { email: { contains: 'test.leads' } } } },
     });
     await prisma.lead.deleteMany({
-      where: { customer: { email: { contains: 'test.leads' } } },
+      where: {
+        OR: [
+          { customer: { email: { contains: 'test.leads' } } },
+          { customer: { phone: '9876500111' } },
+        ],
+      },
     });
     await prisma.customer.deleteMany({
-      where: { email: { contains: 'test.leads' } },
+      where: {
+        OR: [
+          { email: { contains: 'test.leads' } },
+          { phone: '9876500111' },
+        ],
+      },
     });
   });
 

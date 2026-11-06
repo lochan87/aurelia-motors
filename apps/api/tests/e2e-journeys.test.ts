@@ -138,7 +138,7 @@ describe('End-to-End Dealership System Journeys & Integration Verification', () 
         .post('/api/enquiries')
         .send({
           fullName: `Rajesh Sharma ${uniqueSuffix}`,
-          phone: `98765${uniqueSuffix.padStart(5, '0')}`,
+          phone: `91111${uniqueSuffix.padStart(5, '0')}`,
           email: `rajesh.${uniqueSuffix}@test.e2e.in`,
           showroomId: centralShowroom.id,
           modelId: testVariant.model.id,
