@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import argon2 from 'argon2';
 
 import {
   BodyType,
@@ -10,6 +11,7 @@ import {
   PriceKind,
   PrismaClient,
   SpecificationGroup,
+  StaffRole,
   StockStatus,
   Transmission,
 } from '@prisma/client';
@@ -1677,6 +1679,145 @@ async function seedUsedCars(
   }
 }
 
+interface StaffSeed {
+  email: string;
+  fullName: string;
+  phone: string;
+  role: StaffRole;
+  showroomCodes?: string[];
+  workshopCodes?: string[];
+}
+
+const staffSeeds: StaffSeed[] = [
+  {
+    email: 'admin@aureliamotors.com',
+    fullName: 'Kabir Singhania',
+    phone: '+91 98765 00001',
+    role: StaffRole.ADMIN,
+  },
+  {
+    email: 'sales.central@aureliamotors.com',
+    fullName: 'Ananya Roy',
+    phone: '+91 98765 00002',
+    role: StaffRole.SALES_CONSULTANT,
+    showroomCodes: ['LKO-CENTRAL'],
+  },
+  {
+    email: 'sales.gomti@aureliamotors.com',
+    fullName: 'Rohan Mehra',
+    phone: '+91 98765 00003',
+    role: StaffRole.SALES_CONSULTANT,
+    showroomCodes: ['LKO-GOMTI'],
+  },
+  {
+    email: 'usedcars@aureliamotors.com',
+    fullName: 'Vikramaditya Joshi',
+    phone: '+91 98765 00004',
+    role: StaffRole.USED_CAR_STAFF,
+    showroomCodes: ['LKO-GOMTI'],
+  },
+  {
+    email: 'service.gomti@aureliamotors.com',
+    fullName: 'Deepak Saxena',
+    phone: '+91 98765 00005',
+    role: StaffRole.SERVICE_ADVISOR,
+    workshopCodes: ['WS-GOMTI'],
+  },
+  {
+    email: 'service.sgc@aureliamotors.com',
+    fullName: 'Pooja Kashyap',
+    phone: '+91 98765 00006',
+    role: StaffRole.SERVICE_ADVISOR,
+    workshopCodes: ['WS-SGC'],
+  },
+];
+
+async function seedStaffUsers(showrooms: Map<string, string>) {
+  const defaultPassword = process.env.AURELIA_DEMO_PASSWORD || 'Aurelia2026!';
+  const hashedPassword = await argon2.hash(defaultPassword);
+  let count = 0;
+
+  for (const seed of staffSeeds) {
+    let staffUser = await prisma.staffUser.findUnique({
+      where: { email: seed.email },
+    });
+
+    if (!staffUser) {
+      staffUser = await prisma.staffUser.create({
+        data: {
+          email: seed.email,
+          fullName: seed.fullName,
+          phone: seed.phone,
+          role: seed.role,
+          passwordHash: hashedPassword,
+          isActive: true,
+        },
+      });
+    } else {
+      // Idempotent: preserve existing passwordHash if staff user already exists!
+      staffUser = await prisma.staffUser.update({
+        where: { id: staffUser.id },
+        data: {
+          fullName: seed.fullName,
+          phone: seed.phone,
+          role: seed.role,
+          isActive: true,
+        },
+      });
+    }
+
+    // Assign showrooms
+    if (seed.showroomCodes) {
+      for (const code of seed.showroomCodes) {
+        const showroomId = showrooms.get(code);
+        if (showroomId) {
+          await prisma.staffLocationAssignment.upsert({
+            where: {
+              staffUserId_showroomId: {
+                staffUserId: staffUser.id,
+                showroomId,
+              },
+            },
+            update: { isPrimary: true },
+            create: {
+              staffUserId: staffUser.id,
+              showroomId,
+              isPrimary: true,
+            },
+          });
+        }
+      }
+    }
+
+    // Assign workshops
+    if (seed.workshopCodes) {
+      for (const code of seed.workshopCodes) {
+        const workshop = await prisma.workshop.findUnique({ where: { code } });
+        if (workshop) {
+          await prisma.staffLocationAssignment.upsert({
+            where: {
+              staffUserId_workshopId: {
+                staffUserId: staffUser.id,
+                workshopId: workshop.id,
+              },
+            },
+            update: { isPrimary: true },
+            create: {
+              staffUserId: staffUser.id,
+              workshopId: workshop.id,
+              isPrimary: true,
+            },
+          });
+        }
+      }
+    }
+
+    count++;
+  }
+
+  return count;
+}
+
 async function main() {
   const showrooms = await seedShowrooms();
   const { models, variants } = await seedCatalogue();
@@ -1686,6 +1827,7 @@ async function main() {
   const demoVehiclesCount = await seedDemoFleet(showrooms, variants);
   const workshopsCount = await seedWorkshops(showrooms);
   const serviceTypesCount = await seedServiceTypes();
+  const staffCount = await seedStaffUsers(showrooms);
 
   const [showroomCount, modelCount, variantCount, colourCount, imageCount, specCount] =
     await Promise.all([
@@ -1735,6 +1877,7 @@ async function main() {
     demoVehicles: demoVehiclesCount,
     workshops: workshopsCount,
     serviceTypes: serviceTypesCount,
+    staffUsers: staffCount,
   });
 }
 

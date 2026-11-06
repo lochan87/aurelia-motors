@@ -26,6 +26,7 @@ model Showroom {
   demoVehicles           DemoVehicle[]
   testDriveAppointments TestDriveAppointment[]
   workshops              Workshop[]
+  staffAssignments       StaffLocationAssignment[]
 
   @@index([city, isActive])
   @@map("showrooms")
@@ -495,6 +496,7 @@ model Workshop {
   showroom       Showroom?                @relation(fields: [showroomId], references: [id], onDelete: SetNull)
   operatingHours WorkshopOperatingHours[]
   appointments   ServiceAppointment[]
+  staffAssignments StaffLocationAssignment[]
 
   @@index([city, isActive])
   @@map("workshops")
@@ -570,3 +572,91 @@ model ServiceAppointment {
   @@index([bookingReference])
   @@map("service_appointments")
 }
+
+// ---------------------------------------------------------------------------
+// Staff Authentication, RBAC, and Sessions
+// ---------------------------------------------------------------------------
+
+enum StaffRole {
+  ADMIN
+  SALES_CONSULTANT
+  USED_CAR_STAFF
+  SERVICE_ADVISOR
+}
+
+model StaffUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  role         StaffRole
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions            StaffSession[]
+  locationAssignments StaffLocationAssignment[]
+  auditEvents         AuthenticationAuditEvent[]
+
+  @@index([email, isActive])
+  @@index([role, isActive])
+  @@map("staff_users")
+}
+
+model StaffSession {
+  id           String    @id @default(cuid())
+  tokenHash    String    @unique
+  staffUserId  String
+  expiresAt    DateTime
+  createdAt    DateTime  @default(now())
+  lastActiveAt DateTime  @default(now())
+  revokedAt    DateTime?
+  ipHash       String?
+  userAgent    String?
+
+  staffUser StaffUser @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+
+  @@index([staffUserId, revokedAt])
+  @@index([expiresAt])
+  @@map("staff_sessions")
+}
+
+model StaffLocationAssignment {
+  id          String   @id @default(cuid())
+  staffUserId String
+  showroomId  String?
+  workshopId  String?
+  isPrimary   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  staffUser StaffUser  @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+  showroom  Showroom?  @relation(fields: [showroomId], references: [id], onDelete: Cascade)
+  workshop  Workshop?  @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+
+  @@unique([staffUserId, showroomId])
+  @@unique([staffUserId, workshopId])
+  @@index([staffUserId])
+  @@index([showroomId])
+  @@index([workshopId])
+  @@map("staff_location_assignments")
+}
+
+model AuthenticationAuditEvent {
+  id          String   @id @default(cuid())
+  staffUserId String?
+  email       String
+  eventType   String
+  ipHash      String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  staffUser StaffUser? @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+
+  @@index([staffUserId, createdAt])
+  @@index([email, createdAt])
+  @@index([eventType, createdAt])
+  @@map("authentication_audit_events")
+}
+
