@@ -1,4 +1,7 @@
 import type {
+  AiLeadSummary,
+  AiResponseDraft,
+  AiVehicleRecommendation,
   ApiResponse,
   CancelBookingInput,
   CancelBookingResult,
@@ -12,6 +15,7 @@ import type {
   CsvImportPreviewResponse,
   DashboardMetricOverview,
   ExecuteCsvImportResponse,
+  HomepageBannerDto,
   LeadDetail,
   LeadFilterQuery,
   LeadMetrics,
@@ -22,19 +26,24 @@ import type {
   ModelSummary,
   OnRoadPriceBreakdown,
   PaginatedResult,
+  PromotionOfferDto,
   ServiceAvailabilityResponse,
   ServiceBookingConfirmation,
   ServiceTypeSummary,
   ShowroomSummary,
+  StaffNotificationDto,
   StaffUserSummary,
   TestDriveAvailabilityResponse,
   TestDriveBookingConfirmation,
+  TradeInEstimateResult,
+  TradeInRequestDto,
   UnifiedBookingDetails,
   UpdateLeadStatusInput,
   AddLeadNoteInput,
   RecordContactActivityInput,
   ReassignLeadInput,
   UpdateStaffInput,
+  UsedCarPriceProposalDto,
   UsedVehicleDetail,
   UsedVehicleFilterQuery,
   UsedVehicleSummary,
@@ -141,6 +150,62 @@ async function patchJson<T, B = unknown>(endpoint: string, bodyData: B): Promise
     credentials: 'include',
     headers,
     body: JSON.stringify(bodyData),
+  });
+
+  const body = (await response.json()) as ApiResponse<T>;
+  if (!body.success) {
+    throw new ApiError(body.error.code, body.error.message, body.error.details);
+  }
+
+  return body.data;
+}
+
+async function putJson<T, B = unknown>(endpoint: string, bodyData: B): Promise<T> {
+  const url = API_BASE.startsWith('http')
+    ? new URL(`${API_BASE}${endpoint}`)
+    : new URL(`${API_BASE}${endpoint}`, window.location.origin);
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+
+  if (currentCsrfToken) {
+    headers['X-CSRF-Token'] = currentCsrfToken;
+  }
+
+  const response = await fetch(url.toString(), {
+    method: 'PUT',
+    credentials: 'include',
+    headers,
+    body: JSON.stringify(bodyData),
+  });
+
+  const body = (await response.json()) as ApiResponse<T>;
+  if (!body.success) {
+    throw new ApiError(body.error.code, body.error.message, body.error.details);
+  }
+
+  return body.data;
+}
+
+async function deleteJson<T>(endpoint: string): Promise<T> {
+  const url = API_BASE.startsWith('http')
+    ? new URL(`${API_BASE}${endpoint}`)
+    : new URL(`${API_BASE}${endpoint}`, window.location.origin);
+
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+  };
+
+  if (currentCsrfToken) {
+    headers['X-CSRF-Token'] = currentCsrfToken;
+  }
+
+  const response = await fetch(url.toString(), {
+    method: 'DELETE',
+    credentials: 'include',
+    headers,
   });
 
   const body = (await response.json()) as ApiResponse<T>;
@@ -313,4 +378,137 @@ export const api = {
         vehiclePlate: string;
       }>;
     }>('/staff/appointments'),
+
+  // Public Content & Marketing
+  getBanners: () => fetchJson<{ items: HomepageBannerDto[]; total: number }>('/banners'),
+  getOffers: () => fetchJson<{ items: PromotionOfferDto[]; total: number }>('/offers'),
+
+  // Public Trade-In Requests
+  calculateTradeInEstimate: (data: {
+    make: string;
+    model: string;
+    registrationYear: number;
+    mileageKm: number;
+    condition: string;
+    ownershipCount?: number;
+  }) => postJson<TradeInEstimateResult>('/trade-ins/estimate', data),
+  submitTradeIn: (data: {
+    fullName: string;
+    phone: string;
+    email: string;
+    showroomId: string;
+    make: string;
+    model: string;
+    variant?: string;
+    registrationYear: number;
+    mileageKm: number;
+    ownershipCount?: number;
+    condition: string;
+    fuelType?: string;
+    transmission?: string;
+    customerNotes?: string;
+    privacyConsent: boolean;
+  }) =>
+    postJson<{
+      reference: string;
+      estimatedValuationMinPaise: number;
+      estimatedValuationMaxPaise: number;
+      disclaimer: string;
+      message: string;
+    }>('/trade-ins', data),
+
+  // Staff Trade-Ins
+  staffGetTradeIns: (status?: string) =>
+    fetchJson<{ items: TradeInRequestDto[]; total: number }>('/staff/trade-ins', { status }),
+  staffGetTradeInDetail: (id: string) => fetchJson<TradeInRequestDto>(`/staff/trade-ins/${id}`),
+  staffUpdateTradeIn: (
+    id: string,
+    data: { status?: string; offeredValuationPaise?: number; staffNotes?: string },
+  ) => patchJson<TradeInRequestDto>(`/staff/trade-ins/${id}`, data),
+
+  // Used Car Pricing Proposals
+  proposeUsedCarPrice: (vehicleId: string, data: { proposedPricePaise: number; reason: string }) =>
+    postJson<UsedCarPriceProposalDto>(`/staff/used-vehicles/${vehicleId}/propose-price`, data),
+  listUsedCarProposals: (params?: { status?: string; usedVehicleId?: string }) =>
+    fetchJson<{ items: UsedCarPriceProposalDto[]; total: number }>(
+      '/staff/used-car-pricing/proposals',
+      params,
+    ),
+  approvePriceProposal: (id: string, data?: { reviewNotes?: string }) =>
+    postJson<UsedCarPriceProposalDto>(
+      `/staff/used-car-pricing/proposals/${id}/approve`,
+      data || {},
+    ),
+  rejectPriceProposal: (id: string, data: { reviewNotes: string }) =>
+    postJson<UsedCarPriceProposalDto>(`/staff/used-car-pricing/proposals/${id}/reject`, data),
+
+  // Staff Notifications
+  getNotifications: () =>
+    fetchJson<{ items: StaffNotificationDto[]; total: number }>('/staff/notifications'),
+  getUnreadNotificationCount: () =>
+    fetchJson<{ unreadCount: number }>('/staff/notifications/unread-count'),
+  markNotificationRead: (id: string) =>
+    patchJson<StaffNotificationDto>(`/staff/notifications/${id}/read`, {}),
+  markAllNotificationsRead: () =>
+    postJson<{ markedCount: number }>('/staff/notifications/mark-all-read', {}),
+
+  // AI-Assisted Lead Operations
+  getLeadAiSummary: (leadId: string) => postJson<AiLeadSummary>(`/staff/ai/${leadId}/summary`, {}),
+  generateLeadResponseDraft: (leadId: string, channel: 'EMAIL' | 'WHATSAPP' | 'PHONE_SCRIPT') =>
+    postJson<AiResponseDraft>(`/staff/ai/${leadId}/response-draft`, { channel }),
+  getLeadVehicleRecommendations: (leadId: string) =>
+    postJson<AiVehicleRecommendation>(`/staff/ai/${leadId}/recommendations`, {}),
+
+  // Admin CMS
+  adminGetModels: () =>
+    fetchJson<{ items: Record<string, unknown>[]; total: number }>('/admin/cms/models'),
+  adminGetModelDetail: (id: string) =>
+    fetchJson<Record<string, unknown>>(`/admin/cms/models/${id}`),
+  adminCreateModel: (data: Record<string, unknown>) =>
+    postJson<Record<string, unknown>>('/admin/cms/models', data),
+  adminUpdateModel: (id: string, data: Record<string, unknown>) =>
+    patchJson<Record<string, unknown>>(`/admin/cms/models/${id}`, data),
+  adminDeactivateModel: (id: string) =>
+    deleteJson<Record<string, unknown>>(`/admin/cms/models/${id}`),
+  adminCreateVariant: (modelId: string, data: Record<string, unknown>) =>
+    postJson<Record<string, unknown>>(`/admin/cms/models/${modelId}/variants`, data),
+  adminUpdateVariant: (id: string, data: Record<string, unknown>) =>
+    patchJson<Record<string, unknown>>(`/admin/cms/variants/${id}`, data),
+  adminDeactivateVariant: (id: string) =>
+    deleteJson<Record<string, unknown>>(`/admin/cms/variants/${id}`),
+  adminGetInventory: (params?: { showroomId?: string; status?: string }) =>
+    fetchJson<{ items: Record<string, unknown>[]; total: number }>('/admin/cms/inventory', params),
+  adminCreateInventory: (data: Record<string, unknown>) =>
+    postJson<Record<string, unknown>>('/admin/cms/inventory', data),
+  adminUpdateInventory: (id: string, data: Record<string, unknown>) =>
+    patchJson<Record<string, unknown>>(`/admin/cms/inventory/${id}`, data),
+  adminGetPriceBooks: () =>
+    fetchJson<{ items: Record<string, unknown>[]; total: number }>('/admin/cms/price-books'),
+  adminGetPriceBookDetail: (id: string) =>
+    fetchJson<Record<string, unknown>>(`/admin/cms/price-books/${id}`),
+  adminCreatePriceBook: (data: Record<string, unknown>) =>
+    postJson<Record<string, unknown>>('/admin/cms/price-books', data),
+  adminUpsertPriceEntry: (bookId: string, variantId: string, data: Record<string, unknown>) =>
+    putJson<Record<string, unknown>>(`/admin/cms/price-books/${bookId}/entries/${variantId}`, data),
+  adminPublishPriceBook: (id: string) =>
+    postJson<Record<string, unknown>>(`/admin/cms/price-books/${id}/publish`, {}),
+  adminArchivePriceBook: (id: string) =>
+    postJson<Record<string, unknown>>(`/admin/cms/price-books/${id}/archive`, {}),
+  adminGetBanners: () =>
+    fetchJson<{ items: HomepageBannerDto[]; total: number }>('/admin/content/banners'),
+  adminCreateBanner: (data: Record<string, unknown>) =>
+    postJson<HomepageBannerDto>('/admin/content/banners', data),
+  adminUpdateBanner: (id: string, data: Record<string, unknown>) =>
+    patchJson<HomepageBannerDto>(`/admin/content/banners/${id}`, data),
+  adminDeleteBanner: (id: string) =>
+    deleteJson<{ success: boolean }>(`/admin/content/banners/${id}`),
+  adminGetOffers: () =>
+    fetchJson<{ items: PromotionOfferDto[]; total: number }>('/admin/content/offers'),
+  adminCreateOffer: (data: Record<string, unknown>) =>
+    postJson<PromotionOfferDto>('/admin/content/offers', data),
+  adminUpdateOffer: (id: string, data: Record<string, unknown>) =>
+    patchJson<PromotionOfferDto>(`/admin/content/offers/${id}`, data),
+  adminDeleteOffer: (id: string) => deleteJson<{ success: boolean }>(`/admin/content/offers/${id}`),
 };
+
+export const apiClient = api;

@@ -77,6 +77,31 @@ const AdminStaffPage = lazy(() =>
     default: module.AdminStaffPage,
   })),
 );
+const StaffTradeInsPage = lazy(() =>
+  import('./pages/staff/staff-trade-ins-page').then((module) => ({
+    default: module.StaffTradeInsPage,
+  })),
+);
+const StaffUsedCarPricingPage = lazy(() =>
+  import('./pages/staff/staff-used-car-pricing-page').then((module) => ({
+    default: module.StaffUsedCarPricingPage,
+  })),
+);
+const AdminInventoryPage = lazy(() =>
+  import('./pages/staff/admin-inventory-page').then((module) => ({
+    default: module.AdminInventoryPage,
+  })),
+);
+const AdminPricingPage = lazy(() =>
+  import('./pages/staff/admin-pricing-page').then((module) => ({
+    default: module.AdminPricingPage,
+  })),
+);
+const AdminContentPage = lazy(() =>
+  import('./pages/staff/admin-content-page').then((module) => ({
+    default: module.AdminContentPage,
+  })),
+);
 
 export function App() {
   return (
@@ -111,10 +136,25 @@ export function App() {
                 <Route path="staff/appointments" element={<StaffAppointmentsPage />} />
                 <Route path="staff/leads" element={<StaffLeadsPage />} />
                 <Route path="staff/leads/:id" element={<StaffLeadDetailPage />} />
+                <Route
+                  element={
+                    <ProtectedRoute
+                      allowedRoles={['ADMIN', 'USED_CAR_STAFF', 'SALES_CONSULTANT']}
+                    />
+                  }
+                >
+                  <Route path="staff/trade-ins" element={<StaffTradeInsPage />} />
+                </Route>
+                <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'USED_CAR_STAFF']} />}>
+                  <Route path="staff/used-car-pricing" element={<StaffUsedCarPricingPage />} />
+                </Route>
                 {/* Admin Only Clearance */}
                 <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                   <Route path="staff/leads/import" element={<StaffLeadImportPage />} />
                   <Route path="staff/team" element={<AdminStaffPage />} />
+                  <Route path="staff/inventory" element={<AdminInventoryPage />} />
+                  <Route path="staff/pricing" element={<AdminPricingPage />} />
+                  <Route path="staff/content" element={<AdminContentPage />} />
                 </Route>
               </Route>
             </Route>

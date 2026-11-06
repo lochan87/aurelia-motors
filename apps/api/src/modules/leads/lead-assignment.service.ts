@@ -149,6 +149,16 @@ export class LeadAssignmentService {
           reason: routingReason,
         },
       });
+
+      await client.staffNotification.create({
+        data: {
+          staffUserId: assignedStaffId,
+          type: 'NEW_LEAD',
+          title: 'New Lead Assigned',
+          message: routingReason,
+          linkUrl: `/staff/leads/${leadId}`,
+        },
+      });
     } else {
       await client.leadActivity.create({
         data: {

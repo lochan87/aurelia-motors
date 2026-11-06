@@ -24,6 +24,7 @@ import type {
 import { api } from '../../lib/api-client';
 import { useAuth } from '../../lib/use-auth';
 import { buttonStyles } from '../../components/ui/button-styles';
+import { LeadAiAssistant } from '../../components/leads/lead-ai-assistant';
 
 function statusBadge(status: LeadStatus) {
   switch (status) {
@@ -240,6 +241,16 @@ export function StaffLeadDetailPage() {
     }
   };
 
+  const handleApplyDraft = (params: {
+    channel: 'PHONE' | 'EMAIL' | 'WHATSAPP';
+    summary: string;
+    details: string;
+  }) => {
+    setContactMethod(params.channel);
+    setContactSummary(params.summary);
+    setContactDetails(params.details);
+  };
+
   return (
     <div className="space-y-6">
       {/* Back button */}
@@ -374,8 +385,11 @@ export function StaffLeadDetailPage() {
       </div>
 
       {/* Grid: Action Center (Left) & Timeline / Notes (Right) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">
+          {/* Grounded AI Assistant (Human-in-the-Loop) */}
+          <LeadAiAssistant lead={lead} onApplyDraft={handleApplyDraft} />
+
           {/* Action 1: Record Human Contact Activity */}
           <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-2 border-b border-stone-100 pb-3">

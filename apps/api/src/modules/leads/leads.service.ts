@@ -118,6 +118,7 @@ export class LeadsService {
 
     // 4. Create or update customer record, consent, and lead inside transaction
     const leadReference = generateLeadReference();
+    const startTime = performance.now();
 
     const createdLead = await this.prisma.$transaction(async (tx) => {
       // Find or create customer
@@ -192,6 +193,7 @@ export class LeadsService {
 
     return {
       leadReference: createdLead.leadReference,
+      assignmentDurationMs: Math.round(performance.now() - startTime),
       message:
         'Thank you for your enquiry. A dedicated Aurelia Motors consultant from our showroom will contact you shortly.',
     };
@@ -337,6 +339,7 @@ export class LeadsService {
         createdAt: lead.createdAt.toISOString(),
         isOverdue,
         responseTimeMinutes,
+        consentStatus: lead.consentStatus,
       };
     });
 
@@ -457,6 +460,7 @@ export class LeadsService {
       createdAt: lead.createdAt.toISOString(),
       isOverdue,
       responseTimeMinutes,
+      consentStatus: lead.consentStatus,
       preferredContactMethod: lead.preferredContactMethod as LeadDetail['preferredContactMethod'],
       customerRequirements: lead.customerRequirements,
       externalLeadId: lead.externalLeadId,

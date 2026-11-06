@@ -363,9 +363,10 @@ export class LeadImportService {
           await tx.customerConsent.create({
             data: {
               customerId: customer.id,
-              purpose: 'PORTAL_IMPORT',
+              purpose: 'EXTERNAL_PORTAL_TRANSFER',
               noticeVersion: '2026.1',
-              granted: true,
+              granted: false,
+              verificationStatus: 'UNVERIFIED_THIRD_PARTY_PORTAL',
               source: 'PORTAL_IMPORT',
             },
           });
@@ -378,6 +379,7 @@ export class LeadImportService {
               modelId: matchedModel?.id || null,
               showroomId: matchedShowroom.id,
               source: LeadSource.PORTAL_IMPORT,
+              consentStatus: 'EXTERNAL_PORTAL_TRANSFER',
               status: LeadStatus.NEW,
               preferredContactMethod: PreferredContactMethod.PHONE,
               customerRequirements: row.message?.trim() || null,

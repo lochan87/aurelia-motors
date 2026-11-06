@@ -8,11 +8,17 @@ import {
   MessageSquare,
   Users,
   X,
+  BadgePercent,
+  CarFront,
+  DollarSign,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import type { StaffRole } from '@aurelia/shared';
 
+import { StaffNotificationsPopover } from './staff-notifications-popover';
 import { api } from '../../lib/api-client';
 import { useAuth } from '../../lib/use-auth';
 import { cn } from '../../lib/utils';
@@ -229,9 +235,12 @@ export function StaffLayout({ children }: { children?: ReactNode }) {
               <span>Leads & CRM</span>
             </NavLink>
 
-            {user.role === 'ADMIN' && (
+            {/* Trade-Ins Valuation */}
+            {(user.role === 'ADMIN' ||
+              user.role === 'USED_CAR_STAFF' ||
+              user.role === 'SALES_CONSULTANT') && (
               <NavLink
-                to="/staff/team"
+                to="/staff/trade-ins"
                 onClick={() => setMobileMenuOpen(false)}
                 className={({ isActive }) =>
                   cn(
@@ -242,9 +251,102 @@ export function StaffLayout({ children }: { children?: ReactNode }) {
                   )
                 }
               >
-                <Users className="h-4 w-4 shrink-0" />
-                <span>Staff Management</span>
+                <CarFront className="h-4 w-4 shrink-0" />
+                <span>Trade-In Valuations</span>
               </NavLink>
+            )}
+
+            {/* Used Car Price Approvals */}
+            {(user.role === 'ADMIN' || user.role === 'USED_CAR_STAFF') && (
+              <NavLink
+                to="/staff/used-car-pricing"
+                onClick={() => setMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium tracking-wide transition-colors',
+                    isActive
+                      ? 'bg-brass-400 font-semibold text-ink-950 shadow-sm'
+                      : 'text-ivory-50/70 hover:bg-white/5 hover:text-ivory-50',
+                  )
+                }
+              >
+                <DollarSign className="h-4 w-4 shrink-0" />
+                <span>Used Car Pricing</span>
+              </NavLink>
+            )}
+
+            {user.role === 'ADMIN' && (
+              <>
+                <div className="my-2 border-t border-ivory-50/10 pt-2">
+                  <div className="px-3.5 pb-1 text-[10px] font-bold tracking-wider text-ivory-50/40 uppercase">
+                    Dealership Administration
+                  </div>
+                </div>
+
+                <NavLink
+                  to="/staff/inventory"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium tracking-wide transition-colors',
+                      isActive
+                        ? 'bg-brass-400 font-semibold text-ink-950 shadow-sm'
+                        : 'text-ivory-50/70 hover:bg-white/5 hover:text-ivory-50',
+                    )
+                  }
+                >
+                  <Layers className="h-4 w-4 shrink-0" />
+                  <span>Catalogue & Stock</span>
+                </NavLink>
+
+                <NavLink
+                  to="/staff/pricing"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium tracking-wide transition-colors',
+                      isActive
+                        ? 'bg-brass-400 font-semibold text-ink-950 shadow-sm'
+                        : 'text-ivory-50/70 hover:bg-white/5 hover:text-ivory-50',
+                    )
+                  }
+                >
+                  <BadgePercent className="h-4 w-4 shrink-0" />
+                  <span>Price Books & Tariffs</span>
+                </NavLink>
+
+                <NavLink
+                  to="/staff/content"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium tracking-wide transition-colors',
+                      isActive
+                        ? 'bg-brass-400 font-semibold text-ink-950 shadow-sm'
+                        : 'text-ivory-50/70 hover:bg-white/5 hover:text-ivory-50',
+                    )
+                  }
+                >
+                  <Sparkles className="h-4 w-4 shrink-0" />
+                  <span>Banners & Offers</span>
+                </NavLink>
+
+                <NavLink
+                  to="/staff/team"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium tracking-wide transition-colors',
+                      isActive
+                        ? 'bg-brass-400 font-semibold text-ink-950 shadow-sm'
+                        : 'text-ivory-50/70 hover:bg-white/5 hover:text-ivory-50',
+                    )
+                  }
+                >
+                  <Users className="h-4 w-4 shrink-0" />
+                  <span>Staff Roles</span>
+                </NavLink>
+              </>
             )}
 
             <div className="my-3 border-t border-ivory-50/10 pt-3">
@@ -287,7 +389,22 @@ export function StaffLayout({ children }: { children?: ReactNode }) {
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-x-hidden p-6 lg:p-10">
-        <div className="mx-auto max-w-7xl">{children ?? <Outlet />}</div>
+        <div className="mx-auto max-w-7xl">
+          {/* Top Operational Bar */}
+          <div className="mb-6 flex items-center justify-between border-b border-stone-200/70 pb-4">
+            <div className="flex items-center gap-2 text-xs text-stone-500">
+              <span className="font-semibold text-stone-800">Aurelia Motors Lucknow</span>
+              <span>·</span>
+              <span>Internal Operations Platform</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <StaffNotificationsPopover />
+            </div>
+          </div>
+
+          {children ?? <Outlet />}
+        </div>
       </main>
 
       {/* Change Password Modal */}

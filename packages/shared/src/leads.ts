@@ -35,6 +35,7 @@ export interface CreateEnquiryInput {
 
 export interface CreateEnquiryResponse {
   leadReference: string;
+  assignmentDurationMs?: number;
   message: string;
 }
 
@@ -57,6 +58,7 @@ export interface LeadSummary {
   createdAt: string;
   isOverdue: boolean;
   responseTimeMinutes: number | null;
+  consentStatus?: string | null;
 }
 
 export interface LeadActivityItem {
