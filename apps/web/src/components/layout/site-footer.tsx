@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { BrandMark } from '../ui/brand-mark';
@@ -71,7 +71,13 @@ export function SiteFooter() {
               >
                 Privacy notice
               </Link>
-              <span className="text-sm text-ivory-50/60">Contact details to follow</span>
+              <Link
+                to="/staff/login"
+                className="inline-flex items-center gap-1.5 text-sm text-ivory-50/65 transition-colors hover:text-brass-300"
+              >
+                <Lock className="h-3.5 w-3.5 text-brass-400" />
+                <span>Staff console</span>
+              </Link>
             </div>
             <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-ivory-50/15 px-3 py-1.5 text-[0.55rem] font-semibold tracking-[0.18em] text-ivory-50/60 uppercase">
               <span className="h-1.5 w-1.5 rounded-full bg-brass-400" aria-hidden="true" />

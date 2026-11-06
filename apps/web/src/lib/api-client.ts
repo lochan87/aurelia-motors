@@ -3,8 +3,13 @@ import type {
   CancelBookingInput,
   CancelBookingResult,
   CatalogueFilterQuery,
+  ChangePasswordInput,
   CreateServiceBookingInput,
+  CreateStaffInput,
   CreateTestDriveBookingInput,
+  DashboardMetricOverview,
+  LoginInput,
+  LoginResponse,
   ModelDetail,
   ModelSummary,
   OnRoadPriceBreakdown,
@@ -13,9 +18,11 @@ import type {
   ServiceBookingConfirmation,
   ServiceTypeSummary,
   ShowroomSummary,
+  StaffUserSummary,
   TestDriveAvailabilityResponse,
   TestDriveBookingConfirmation,
   UnifiedBookingDetails,
+  UpdateStaffInput,
   UsedVehicleDetail,
   UsedVehicleFilterQuery,
   UsedVehicleSummary,
@@ -24,6 +31,16 @@ import type {
 
 const rawApiUrl = import.meta.env.VITE_API_URL?.trim();
 const API_BASE = rawApiUrl ? `${rawApiUrl.replace(/\/$/, '')}/api` : '/api';
+
+let currentCsrfToken: string | null = null;
+
+export function setCsrfToken(token: string | null): void {
+  currentCsrfToken = token;
+}
+
+export function getCsrfToken(): string | null {
+  return currentCsrfToken;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -50,6 +67,7 @@ async function fetchJson<T>(endpoint: string, searchParams?: Record<string, unkn
   }
 
   const response = await fetch(url.toString(), {
+    credentials: 'include',
     headers: {
       Accept: 'application/json',
     },
@@ -68,12 +86,48 @@ async function postJson<T, B = unknown>(endpoint: string, bodyData: B): Promise<
     ? new URL(`${API_BASE}${endpoint}`)
     : new URL(`${API_BASE}${endpoint}`, window.location.origin);
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+
+  if (currentCsrfToken) {
+    headers['X-CSRF-Token'] = currentCsrfToken;
+  }
+
   const response = await fetch(url.toString(), {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
+    credentials: 'include',
+    headers,
+    body: JSON.stringify(bodyData),
+  });
+
+  const body = (await response.json()) as ApiResponse<T>;
+  if (!body.success) {
+    throw new ApiError(body.error.code, body.error.message, body.error.details);
+  }
+
+  return body.data;
+}
+
+async function patchJson<T, B = unknown>(endpoint: string, bodyData: B): Promise<T> {
+  const url = API_BASE.startsWith('http')
+    ? new URL(`${API_BASE}${endpoint}`)
+    : new URL(`${API_BASE}${endpoint}`, window.location.origin);
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+
+  if (currentCsrfToken) {
+    headers['X-CSRF-Token'] = currentCsrfToken;
+  }
+
+  const response = await fetch(url.toString(), {
+    method: 'PATCH',
+    credentials: 'include',
+    headers,
     body: JSON.stringify(bodyData),
   });
 
@@ -86,9 +140,11 @@ async function postJson<T, B = unknown>(endpoint: string, bodyData: B): Promise<
 }
 
 export const api = {
+  // Showrooms
   getShowrooms: () => fetchJson<ShowroomSummary[]>('/showrooms'),
   getShowroom: (code: string) => fetchJson<ShowroomSummary>(`/showrooms/${code}`),
 
+  // Catalogue
   getModels: (query?: CatalogueFilterQuery) =>
     fetchJson<ModelSummary[]>('/catalogue/models', query as Record<string, unknown>),
   getModel: (slug: string) => fetchJson<ModelDetail>(`/catalogue/models/${slug}`),
@@ -97,6 +153,7 @@ export const api = {
     query?: { showroomCode?: string; showroomId?: string },
   ) => fetchJson<OnRoadPriceBreakdown>(`/catalogue/variants/${variantSlug}/pricing`, query),
 
+  // Used Vehicles
   getUsedVehicles: (query?: UsedVehicleFilterQuery) =>
     fetchJson<PaginatedResult<UsedVehicleSummary>>(
       '/used-vehicles',
@@ -123,4 +180,68 @@ export const api = {
     fetchJson<UnifiedBookingDetails>(`/bookings/confirmation/${reference}`, { token }),
   cancelBooking: (reference: string, data: CancelBookingInput) =>
     postJson<CancelBookingResult, CancelBookingInput>(`/bookings/${reference}/cancel`, data),
+
+  // Staff Authentication & Sessions
+  login: async (credentials: LoginInput): Promise<LoginResponse> => {
+    const result = await postJson<LoginResponse>('/auth/login', credentials);
+    if (result.csrfToken) {
+      setCsrfToken(result.csrfToken);
+    }
+    return result;
+  },
+  logout: async (): Promise<{ message: string }> => {
+    const result = await postJson<{ message: string }>('/auth/logout', {});
+    setCsrfToken(null);
+    return result;
+  },
+  getMe: async (): Promise<{ user: StaffUserSummary; csrfToken: string }> => {
+    const result = await fetchJson<{ user: StaffUserSummary; csrfToken: string }>('/auth/me');
+    if (result.csrfToken) {
+      setCsrfToken(result.csrfToken);
+    }
+    return result;
+  },
+  changePassword: (data: ChangePasswordInput) =>
+    postJson<{ message: string }>('/auth/change-password', data),
+
+  // Admin Staff Management
+  getStaffList: () => fetchJson<StaffUserSummary[]>('/admin/staff'),
+  getStaffMember: (id: string) => fetchJson<StaffUserSummary>(`/admin/staff/${id}`),
+  createStaffMember: (data: CreateStaffInput) => postJson<StaffUserSummary>('/admin/staff', data),
+  updateStaffMember: (id: string, data: UpdateStaffInput) =>
+    patchJson<StaffUserSummary>(`/admin/staff/${id}`, data),
+  disableStaffMember: (id: string) => postJson<StaffUserSummary>(`/admin/staff/${id}/disable`, {}),
+
+  // Staff Dashboard & Scoped Appointments
+  getDashboardOverview: () => fetchJson<DashboardMetricOverview>('/staff/dashboard'),
+  getStaffAppointments: () =>
+    fetchJson<{
+      testDrives: Array<{
+        id: string;
+        reference: string;
+        type: 'TEST_DRIVE';
+        title: string;
+        customerName: string;
+        customerPhone: string;
+        customerEmail: string;
+        locationName: string;
+        startTime: string;
+        endTime: string;
+        status: string;
+      }>;
+      services: Array<{
+        id: string;
+        reference: string;
+        type: 'SERVICE';
+        title: string;
+        customerName: string;
+        customerPhone: string;
+        customerEmail: string;
+        locationName: string;
+        startTime: string;
+        endTime: string;
+        status: string;
+        vehiclePlate: string;
+      }>;
+    }>('/staff/appointments'),
 };
