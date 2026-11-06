@@ -5,6 +5,8 @@ import { Link, useParams } from 'react-router-dom';
 
 import { TestDriveModal } from '../components/bookings/test-drive-modal';
 import { EnquiryModal } from '../components/enquiry/enquiry-modal';
+import { EmiCalculator } from '../components/finance/emi-calculator';
+import { TradeInModal } from '../components/trade-in/trade-in-modal';
 import { ColourSelector } from '../components/vehicles/colour-selector';
 import { OnRoadPriceCalculator } from '../components/vehicles/on-road-price-calculator';
 import { ShowroomAvailability } from '../components/vehicles/showroom-availability';
@@ -37,6 +39,7 @@ export function VehicleDetailPage() {
   const [selectedVariantSlug, setSelectedVariantSlug] = useState<string>('');
   const [isTestDriveOpen, setIsTestDriveOpen] = useState(false);
   const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
+  const [isTradeInOpen, setIsTradeInOpen] = useState(false);
 
   // Fallback to first variant if none selected or if model loaded
   const currentVariantSlug = selectedVariantSlug || (model?.variants[0]?.slug ?? '');
@@ -181,6 +184,18 @@ export function VehicleDetailPage() {
           </div>
         )}
 
+        {/* Reducing-Balance EMI & Finance Calculator */}
+        {model && (
+          <div className="mt-16">
+            <EmiCalculator
+              basePricePaise={
+                activeVariant?.startingPricePaise ?? model.startingPricePaise ?? 125_000_000
+              }
+              vehicleName={`${model.name} ${activeVariant ? activeVariant.name : ''}`}
+            />
+          </div>
+        )}
+
         {/* Technical Specifications */}
         {activeVariant && activeVariant.specifications.length > 0 && (
           <div className="mt-16">
@@ -221,6 +236,13 @@ export function VehicleDetailPage() {
                 <MessageSquare className="h-3.5 w-3.5" />
                 Enquire Now
               </button>
+              <button
+                type="button"
+                onClick={() => setIsTradeInOpen(true)}
+                className={buttonStyles({ variant: 'outline-dark', size: 'md' })}
+              >
+                Value Your Trade-In
+              </button>
               <Link to="/#visit" className={buttonStyles({ variant: 'outline-dark', size: 'md' })}>
                 <MapPin className="h-3.5 w-3.5" />
                 Showrooms
@@ -251,6 +273,9 @@ export function VehicleDetailPage() {
           preselectedVariantId={activeVariant?.id}
           vehicleTitle={`${model.name} ${activeVariant ? `· ${activeVariant.name}` : ''}`}
         />
+
+        {/* Trade-In Valuation Modal */}
+        <TradeInModal isOpen={isTradeInOpen} onClose={() => setIsTradeInOpen(false)} />
       </Container>
     </div>
   );

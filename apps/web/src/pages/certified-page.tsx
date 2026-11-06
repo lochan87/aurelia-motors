@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import type { UsedVehicleFilterQuery } from '@aurelia/shared';
 
+import { TradeInModal } from '../components/trade-in/trade-in-modal';
 import { UsedVehicleCard } from '../components/certified/used-vehicle-card';
 import { UsedVehicleFilters } from '../components/certified/used-vehicle-filters';
 import { Container } from '../components/ui/container';
@@ -15,6 +16,7 @@ export function CertifiedPage() {
     page: 1,
     pageSize: 9,
   });
+  const [isTradeInOpen, setIsTradeInOpen] = useState(false);
 
   const {
     data: result,
@@ -50,6 +52,29 @@ export function CertifiedPage() {
           title="Verified used vehicles in Lucknow"
           description="Every vehicle undergoes our multi-point technical assessment with a published inspection report, verified documents, and transparent fixed pricing."
         />
+
+        {/* Trade-In Exchange Callout Banner */}
+        <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/60 p-6 sm:flex-row sm:items-center">
+          <div>
+            <span className="text-xs font-semibold tracking-wider text-amber-800 uppercase">
+              Exchange & Upgrade Carnival
+            </span>
+            <h4 className="mt-1 font-serif text-lg font-bold text-stone-900">
+              Looking to sell or trade in your current vehicle?
+            </h4>
+            <p className="mt-0.5 text-xs text-stone-600">
+              Receive an instant indicative valuation band and certified doorstep technical
+              evaluation in Lucknow.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsTradeInOpen(true)}
+            className="rounded-lg bg-stone-900 px-5 py-2.5 text-xs font-semibold whitespace-nowrap text-white shadow-sm hover:bg-stone-800"
+          >
+            Calculate Trade-In Value
+          </button>
+        </div>
 
         {/* Filter Bar */}
         <div className="mt-12">
@@ -155,6 +180,8 @@ export function CertifiedPage() {
             </div>
           )}
         </div>
+        {/* Trade-In Modal */}
+        <TradeInModal isOpen={isTradeInOpen} onClose={() => setIsTradeInOpen(false)} />
       </Container>
     </div>
   );
