@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: aurelia-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aurelia
+      POSTGRES_PASSWORD: local_dev_only
+      POSTGRES_DB: aurelia_dev
+    ports:
+      - '55432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U aurelia -d aurelia_dev']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: aurelia-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      API_HOST: 0.0.0.0
+      API_PORT: 4000
+      DATABASE_URL: postgresql://aurelia:local_dev_only@postgres:5432/aurelia_dev?schema=public
+      CORS_ORIGINS: http://localhost,http://localhost:80,http://localhost:5173,http://127.0.0.1
+      CSRF_SECRET: aurelia-dealership-csrf-secret-key-lucknow-2026
+      AURELIA_DEMO_PASSWORD: Aurelia2026!
+      AURELIA_DEFAULT_STAFF_PASSWORD: Aurelia2026!
+      LEAD_RESPONSE_SLA_MINUTES: 30
+    ports:
+      - '4000:4000'
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: aurelia-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - '80:80'
+      - '5173:80'
+
+volumes:
+  postgres_data:

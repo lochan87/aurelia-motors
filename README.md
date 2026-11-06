@@ -4,14 +4,60 @@ A foundation for a production-quality car dealership platform in Lucknow, Uttar 
 temporary brand is **Aurelia Motors**; it will be replaced when the legal entity and manufacturer
 partnerships are confirmed.
 
-This repository contains the verified foundation, **Milestone 2 — Vehicle Catalogue,
-Inventory, and On-Road Pricing**, **Milestone 3 — End-to-End Test-Drive and Service Booking System**, **Milestone 4 — Secure Staff Authentication, Role-Based Access Control, and Dealership Operations Dashboard**, **Milestone 5 — Customer Enquiries, Lead CRM, Automatic Lead Assignment, Portal CSV Imports, and Response-Time Tracking**, and **Milestone 6 — Admin CMS, Price Management, Offers, EMI Calculator, Trade-In Requests, and AI-Assisted Lead Operations**.
-It delivers a fully database-backed vehicle catalogue, transparent itemized on-road pricing calculations,
-showroom-scoped inventory tracking, certified pre-owned listings with inspection audits,
-capacity-enforced customer booking workflows, a secure internal staff operations portal with Argon2id authentication,
-strict location-based access control, operational metrics, an omnichannel customer enquiry capture pipeline,
-deterministic workload-balanced lead routing, third-party portal CSV import and deduplication, 30-minute first-human-response SLA tracking,
-dealership content & price governance CMS, used car price approvals with separation of duties, reducing-balance EMI calculation, online trade-in valuations, and grounded AI lead intelligence.
+This repository contains the completed, fully verified implementation of all 7 project milestones:
+
+- **Milestone 1 — Project Foundation & Architecture**
+- **Milestone 2 — Vehicle Catalogue, Inventory, and On-Road Pricing**
+- **Milestone 3 — End-to-End Test-Drive and Service Booking System**
+- **Milestone 4 — Secure Staff Authentication, Role-Based Access Control, and Dealership Operations Dashboard**
+- **Milestone 5 — Customer Enquiries, Lead CRM, Automatic Lead Assignment, Portal CSV Imports, and Response-Time Tracking**
+- **Milestone 6 — Admin CMS, Price Management, Offers, EMI Calculator, Trade-In Requests, and AI-Assisted Lead Operations**
+- **Milestone 7 — Final Quality Assurance, Security Audit, Integration Testing, Deployment Preparation, and Submission Packaging**
+
+It delivers a fully database-backed vehicle catalogue, transparent itemized on-road pricing calculations, showroom-scoped inventory tracking, certified pre-owned listings with 150-point inspection audits, capacity-enforced customer booking workflows, a secure internal staff operations portal with Argon2id authentication, strict location-based access control, operational metrics, an omnichannel customer enquiry capture pipeline, deterministic workload-balanced lead routing, third-party portal CSV import and deduplication, 30-minute first-human-response SLA tracking, dealership content & price governance CMS, used car price approvals with separation of duties, reducing-balance EMI calculation, online trade-in valuations, and grounded AI lead intelligence.
+
+## Quickstart for Reviewers
+
+### Option A: Docker Compose (Recommended 1-Click Evaluation)
+
+Requirements: Docker & Docker Compose installed.
+
+```bash
+# 1. Clone or extract repository
+cd aurelia-motors
+
+# 2. Launch database, API, and Web frontend containers
+docker compose up --build
+```
+
+- Public Web Application: [http://localhost:5173](http://localhost:5173) or [http://localhost](http://localhost)
+- Backend REST API: [http://localhost:4000/api](http://localhost:4000/api)
+- API Health Status: [http://localhost:4000/api/health](http://localhost:4000/api/health)
+- Staff Operations Portal: [http://localhost:5173/staff/login](http://localhost:5173/staff/login) (with 1-click test login quick-fill)
+
+### Option B: Native Local Setup (Node.js & PostgreSQL)
+
+Requirements: Node.js >= 22 and PostgreSQL 16+ running locally.
+
+```bash
+# 1. Install workspace dependencies
+npm install
+
+# 2. Configure environment (pre-configured for local testing)
+cp .env.example .env
+
+# 3. Apply Prisma database migrations and seed full dealership dataset
+npm run db:deploy
+npm run db:seed
+
+# 4. Run test suite to verify installation
+npm test
+
+# 5. Start development servers
+npm run dev
+```
+
+The web application starts at `http://localhost:5173` and the API runs at `http://localhost:4000`.
 
 ## What is implemented
 
@@ -148,21 +194,27 @@ The `/staff/login` page includes a **Reviewer Test Accounts** helper section all
 
 ## Verification Commands
 
-To verify the codebase:
+To verify the codebase across formatting, linting, types, tests, and production builds:
 
 ```powershell
 # Format check
 npm run format:check
 
-# Lint
+# Lint (ESLint 9)
 npm run lint
 
 # Strict TypeScript typecheck across all workspaces
 npm run typecheck
 
-# Run automated tests (80 passing tests)
+# Run full test suite (126 passing tests across 15 test suites)
 npm test
 
-# Production build
+# Production build (API + Web Vite production assets)
 npm run build
 ```
+
+## Documentation & Submission Deliverables
+
+- **Technical Design Document**: Available in markdown (`submission/Aurelia_Motors_Technical_Design_Document.md`), PDF (`submission/Aurelia_Motors_Technical_Design_Document.pdf`), and Microsoft Word (`submission/Aurelia_Motors_Technical_Design_Document.docx`).
+- **Deployment Guide**: Comprehensive environment topology, security configuration, reverse-proxy headers, and database instructions in [`deployment.md`](./deployment.md).
+- **Architecture & Schema**: Complete database entity-relationship models and architectural design in [`docs/database-architecture.md`](./docs/database-architecture.md) and [`docs/architecture.md`](./docs/architecture.md).

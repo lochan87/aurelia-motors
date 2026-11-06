@@ -1,8 +1,27 @@
-# Deployment guide
+## Deployment guide
 
-This document describes a portable deployment for the Aurelia Motors platform. The project does not
-commit to a hosting vendor yet. The same topology works on a VM, a container platform, or separate
-static and application hosts.
+This document describes portable deployment for the Aurelia Motors platform via Docker Compose or native hosting.
+
+## Container Deployment (Docker Compose)
+
+The repository provides a production-structured `docker-compose.yml` with healthchecks, non-root users, volume persistence, and an Nginx reverse proxy.
+
+```bash
+# Build and run containers in background
+docker compose up -d --build
+
+# View container logs
+docker compose logs -f
+
+# Verify API health
+curl http://localhost:4000/api/health
+```
+
+Services started:
+
+- `postgres`: PostgreSQL 18.1 alpine on port `55432:5432` with healthy status probe.
+- `api`: Node.js 22 alpine running Express API with automatic migration deployment on port `4000:4000`.
+- `web`: Nginx alpine serving optimized Vite React 19 production assets on port `80` (and `5173`) with API reverse proxy.
 
 ## Topology
 
