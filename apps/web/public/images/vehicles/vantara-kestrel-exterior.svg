@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title>Illustrated placeholder of the fictional Vantara Kestrel SUV, exterior profile</title>
+  <desc>An original illustration used as a placeholder. It does not depict a real vehicle or inventory unit.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8f5ee"/>
+      <stop offset="1" stop-color="#ded4c0"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#233a30"/>
+      <stop offset="1" stop-color="#070a09"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <circle cx="950" cy="170" r="118" fill="#c5a26a" opacity="0.18"/>
+  <path d="M0 646 Q320 610 620 636 T1200 626 L1200 800 L0 800Z" fill="#cbbda2" opacity="0.55"/>
+  <path d="M205 545 L285 402 Q330 358 460 350 L690 346 Q800 350 860 428 L920 500 L1020 522 Q1060 532 1060 574 L1048 606 L188 606 Q178 564 205 545 Z" fill="url(#body)"/>
+  <path d="M330 430 Q390 392 480 386 L640 382 L640 472 L305 472 Z" fill="#f1ece0" opacity="0.8"/>
+  <path d="M670 386 L750 392 Q805 408 840 452 L840 472 L670 472 Z" fill="#f1ece0" opacity="0.6"/>
+  <rect x="290" y="518" width="740" height="14" rx="7" fill="#c5a26a" opacity="0.55"/>
+  <circle cx="382" cy="606" r="72" fill="#0c1210"/>
+  <circle cx="382" cy="606" r="34" fill="#cbbda2"/>
+  <circle cx="888" cy="606" r="72" fill="#0c1210"/>
+  <circle cx="888" cy="606" r="34" fill="#cbbda2"/>
+  <text x="72" y="110" fill="#070a09" font-family="Georgia, serif" font-size="46" letter-spacing="4">VANTARA KESTREL</text>
+  <text x="74" y="146" fill="#565a54" font-family="Arial, sans-serif" font-size="18" letter-spacing="5">SEVEN-SEAT SUV</text>
+  <text x="74" y="742" fill="#4b4f49" font-family="Arial, sans-serif" font-size="16" letter-spacing="4">ILLUSTRATIVE PLACEHOLDER - NOT A PHOTOGRAPH</text>
+</svg>

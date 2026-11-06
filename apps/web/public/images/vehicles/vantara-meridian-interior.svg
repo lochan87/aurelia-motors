@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title>Illustrated placeholder of the fictional Vantara Meridian sedan, cabin view</title>
+  <desc>An original interior illustration used as a placeholder. It does not depict a real vehicle.</desc>
+  <defs>
+    <linearGradient id="cabin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#10231c"/>
+      <stop offset="1" stop-color="#070a09"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#cabin)"/>
+  <path d="M0 520 Q220 470 430 500 L430 800 L0 800Z" fill="#183328"/>
+  <path d="M1200 520 Q980 470 770 500 L770 800 L1200 800Z" fill="#183328"/>
+  <rect x="320" y="430" width="560" height="132" rx="18" fill="#0c1210" stroke="#c5a26a" stroke-opacity="0.45" stroke-width="2"/>
+  <rect x="370" y="462" width="200" height="66" rx="8" fill="#1e2b3c"/>
+  <rect x="600" y="462" width="236" height="66" rx="8" fill="#1e2b3c"/>
+  <circle cx="330" cy="560" r="118" fill="none" stroke="#cbbda2" stroke-width="22"/>
+  <circle cx="330" cy="560" r="54" fill="#10231c" stroke="#c5a26a" stroke-width="4"/>
+  <rect x="500" y="620" width="220" height="34" rx="17" fill="#c5a26a" opacity="0.55"/>
+  <text x="72" y="110" fill="#f8f5ee" font-family="Georgia, serif" font-size="46" letter-spacing="4">VANTARA MERIDIAN</text>
+  <text x="74" y="146" fill="#d8bd8d" font-family="Arial, sans-serif" font-size="18" letter-spacing="5">CABIN IMPRESSION</text>
+  <text x="74" y="742" fill="#9ea3a6" font-family="Arial, sans-serif" font-size="16" letter-spacing="4">ILLUSTRATIVE PLACEHOLDER - NOT A PHOTOGRAPH</text>
+</svg>

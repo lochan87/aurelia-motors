@@ -2,34 +2,29 @@
 
 ## 1. Current state
 
-The foundation includes one domain table and one committed Prisma migration:
+The database includes the foundation and Milestone 2 domain models with 3 applied Prisma migrations:
 
-| Object               | Purpose                                                                                   |
-| -------------------- | ----------------------------------------------------------------------------------------- |
-| `showrooms`          | Physical dealership location and the anchor for future inventory, appointments, and staff |
-| `_prisma_migrations` | Prisma migration bookkeeping (managed by Prisma)                                          |
+| Migration                                            | Purpose                                                                             |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `20261106050109_init`                                | Foundation: `showrooms` table and migration tracking                                |
+| `20261106053641_vehicle_catalogue_inventory_pricing` | Catalogue, variant specifications, colours, inventory, price books, and used cars   |
+| `20261106054000_price_and_range_constraints`         | Check constraints for non-negative money in paise, positive years, and rating enums |
 
-Migration: `apps/api/prisma/migrations/20261106050109_init/migration.sql`
+### Active Domain Tables
 
-```prisma
-model Showroom {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  name      String
-  city      String   @default("Lucknow")
-  state     String   @default("Uttar Pradesh")
-  timezone  String   @default("Asia/Kolkata")
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([city, isActive])
-  @@map("showrooms")
-}
-```
-
-No inventory, pricing, customer, staff, booking, or content rows exist. The service does not insert
-fake records. The health check performs `SELECT 1`; it does not depend on seed data.
+- `showrooms`: Physical locations (Central Lucknow, Gomti Nagar, Sushant Golf City).
+- `vehicle_models`: Fictional manufacturer models (Aria, Kestrel, Lumen, Meridian, Solace).
+- `vehicle_variants`: Powertrains and trim variants with fuel types and transmissions.
+- `vehicle_colours`: Exterior paint choices with hex codes and finish types.
+- `vehicle_images`: Primary and secondary SVG illustrations with alt text and dimensions.
+- `vehicle_specifications`: Grouped key-value attributes (Engine, Performance, Dimensions, Safety, Comfort, Technology).
+- `new_vehicle_inventory`: Concrete inventory units tied to showrooms with stock statuses (`AVAILABLE`, `RESERVED`, `SOLD`, `IN_TRANSIT`).
+- `price_books`: Versioned price books with publication status and date boundaries.
+- `price_entries`: Variant price associations with ex-showroom paise.
+- `price_components`: Itemized line components with calculation rules (fixed paise vs basis points).
+- `used_vehicles`: Certified pre-owned vehicle records with masked registration numbers.
+- `used_vehicle_inspections`: Versioned inspection audit files with overall scores.
+- `used_inspection_items`: Line-by-line inspection audit items with rating (`PASS`, `ATTENTION`, `FAIL`) and notes.
 
 ## 2. Database conventions
 

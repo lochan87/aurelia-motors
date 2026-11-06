@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title>Illustrated placeholder of the fictional Vantara Aria electric crossover, exterior profile</title>
+  <desc>An original illustration used as a placeholder. It does not depict a real vehicle or inventory unit.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8f5ee"/>
+      <stop offset="1" stop-color="#ded4c0"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f6f6b"/>
+      <stop offset="1" stop-color="#0c1210"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <circle cx="950" cy="170" r="118" fill="#c5a26a" opacity="0.18"/>
+  <path d="M0 646 Q320 610 620 636 T1200 626 L1200 800 L0 800Z" fill="#cbbda2" opacity="0.55"/>
+  <path d="M235 548 L315 428 Q360 388 470 380 L665 376 Q770 380 830 444 L895 510 L1010 530 Q1050 540 1050 576 L1038 604 L218 604 Q208 566 235 548 Z" fill="url(#body)"/>
+  <path d="M355 440 Q410 404 488 398 L645 394 L645 478 L328 478 Z" fill="#f1ece0" opacity="0.78"/>
+  <path d="M675 398 L745 404 Q798 418 828 460 L828 478 L675 478 Z" fill="#f1ece0" opacity="0.6"/>
+  <rect x="305" y="525" width="720" height="12" rx="6" fill="#c5a26a" opacity="0.65"/>
+  <circle cx="392" cy="604" r="66" fill="#0c1210"/>
+  <circle cx="392" cy="604" r="31" fill="#cbbda2"/>
+  <circle cx="878" cy="604" r="66" fill="#0c1210"/>
+  <circle cx="878" cy="604" r="31" fill="#cbbda2"/>
+  <path d="M1010 560 L1060 560 L1060 600 L1010 600 Z" fill="#d8bd8d" opacity="0.7"/>
+  <text x="72" y="110" fill="#070a09" font-family="Georgia, serif" font-size="46" letter-spacing="4">VANTARA ARIA</text>
+  <text x="74" y="146" fill="#565a54" font-family="Arial, sans-serif" font-size="18" letter-spacing="5">ELECTRIC CROSSOVER</text>
+  <text x="74" y="742" fill="#4b4f49" font-family="Arial, sans-serif" font-size="16" letter-spacing="4">ILLUSTRATIVE PLACEHOLDER - NOT A PHOTOGRAPH</text>
+</svg>

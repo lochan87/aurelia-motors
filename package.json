@@ -24,6 +24,7 @@
     "db:generate": "prisma generate --schema apps/api/prisma/schema.prisma",
     "db:migrate": "prisma migrate dev --schema apps/api/prisma/schema.prisma",
     "db:deploy": "prisma migrate deploy --schema apps/api/prisma/schema.prisma",
+    "db:seed": "prisma db seed --schema apps/api/prisma/schema.prisma",
     "db:studio": "prisma studio --schema apps/api/prisma/schema.prisma",
     "start:api": "npm run start --workspace @aurelia/api",
     "preview:web": "npm run preview --workspace @aurelia/web",
@@ -32,6 +33,9 @@
   "overrides": {
     "deepmerge-ts": "^8.0.0",
     "minimatch": "^11.0.5"
+  },
+  "prisma": {
+    "seed": "tsx apps/api/prisma/seed.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

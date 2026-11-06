@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title>Illustrated placeholder of the fictional Vantara Solace hatchback, exterior profile</title>
+  <desc>An original illustration used as a placeholder. It does not depict a real vehicle or inventory unit.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8f5ee"/>
+      <stop offset="1" stop-color="#ded4c0"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fa6bd"/>
+      <stop offset="1" stop-color="#1e2b3c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <circle cx="950" cy="170" r="118" fill="#c5a26a" opacity="0.18"/>
+  <path d="M0 646 Q320 610 620 636 T1200 626 L1200 800 L0 800Z" fill="#cbbda2" opacity="0.55"/>
+  <path d="M280 560 L350 450 Q390 412 490 404 L650 400 Q740 404 800 460 L860 520 L990 540 Q1030 550 1030 580 L1020 606 L250 606 Q245 575 280 560 Z" fill="url(#body)"/>
+  <path d="M380 452 Q430 418 500 414 L630 410 L630 486 L360 486 Z" fill="#f1ece0" opacity="0.8"/>
+  <path d="M650 412 L700 416 Q750 424 785 462 L785 486 L650 486 Z" fill="#f1ece0" opacity="0.6"/>
+  <rect x="340" y="542" width="630" height="12" rx="6" fill="#c5a26a" opacity="0.6"/>
+  <circle cx="410" cy="606" r="60" fill="#0c1210"/>
+  <circle cx="410" cy="606" r="28" fill="#cbbda2"/>
+  <circle cx="850" cy="606" r="60" fill="#0c1210"/>
+  <circle cx="850" cy="606" r="28" fill="#cbbda2"/>
+  <text x="72" y="110" fill="#070a09" font-family="Georgia, serif" font-size="46" letter-spacing="4">VANTARA SOLACE</text>
+  <text x="74" y="146" fill="#565a54" font-family="Arial, sans-serif" font-size="18" letter-spacing="5">COMPACT HATCHBACK</text>
+  <text x="74" y="742" fill="#4b4f49" font-family="Arial, sans-serif" font-size="16" letter-spacing="4">ILLUSTRATIVE PLACEHOLDER - NOT A PHOTOGRAPH</text>
+</svg>

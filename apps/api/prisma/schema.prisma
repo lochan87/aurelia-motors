@@ -7,9 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// The only domain table created in the foundation iteration. It proves the
-/// PostgreSQL migration path and gives the next phase a real location anchor.
-/// The full planned schema is documented in docs/database-architecture.md.
+/// Physical dealership location. Inventory, price books, and certified used
+/// listings all belong to a showroom so availability stays location-specific.
 model Showroom {
   id        String   @id @default(cuid())
   code      String   @unique
@@ -21,6 +20,350 @@ model Showroom {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  inventory    NewVehicleInventory[]
+  priceBooks   PriceBook[]
+  usedVehicles UsedVehicle[]
+
   @@index([city, isActive])
   @@map("showrooms")
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue
+// ---------------------------------------------------------------------------
+
+enum FuelType {
+  PETROL
+  DIESEL
+  ELECTRIC
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+}
+
+enum BodyType {
+  HATCHBACK
+  SEDAN
+  SUV
+  CROSSOVER
+}
+
+enum SpecificationGroup {
+  ENGINE
+  PERFORMANCE
+  DIMENSIONS
+  SAFETY
+  COMFORT
+  TECHNOLOGY
+}
+
+model VehicleModel {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  make        String
+  name        String
+  bodyType    BodyType
+  summary     String
+  description String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  variants     VehicleVariant[]
+  colours      VehicleColour[]
+  images       VehicleImage[]
+  usedVehicles UsedVehicle[]
+
+  @@index([make, isActive])
+  @@index([bodyType, isActive])
+  @@map("vehicle_models")
+}
+
+model VehicleVariant {
+  id               String       @id @default(cuid())
+  slug             String       @unique
+  modelId          String
+  name             String
+  fuelType         FuelType
+  transmission     Transmission
+  engineCapacityCc Int?
+  powerBhp         Int?
+  torqueNm         Int?
+  seatingCapacity  Int          @default(5)
+  isActive         Boolean      @default(true)
+  sortOrder        Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  model          VehicleModel           @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  specifications VehicleSpecification[]
+  priceEntries   PriceEntry[]
+  inventory      NewVehicleInventory[]
+  usedVehicles   UsedVehicle[]
+
+  @@unique([modelId, name])
+  @@index([modelId, isActive, sortOrder])
+  @@index([fuelType, isActive])
+  @@map("vehicle_variants")
+}
+
+model VehicleColour {
+  id        String   @id @default(cuid())
+  modelId   String
+  name      String
+  hexCode   String
+  finish    String
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  model     VehicleModel          @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  inventory NewVehicleInventory[]
+
+  @@unique([modelId, name])
+  @@index([modelId, isActive, sortOrder])
+  @@map("vehicle_colours")
+}
+
+model VehicleImage {
+  id        String   @id @default(cuid())
+  modelId   String
+  url       String
+  altText   String
+  caption   String?
+  credit    String?
+  width     Int
+  height    Int
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  model VehicleModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@unique([modelId, sortOrder])
+  @@index([modelId, isPrimary])
+  @@map("vehicle_images")
+}
+
+model VehicleSpecification {
+  id        String             @id @default(cuid())
+  variantId String
+  group     SpecificationGroup
+  label     String
+  value     String
+  sortOrder Int                @default(0)
+
+  variant VehicleVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, group, label])
+  @@index([variantId, group, sortOrder])
+  @@map("vehicle_specifications")
+}
+
+// ---------------------------------------------------------------------------
+// New-car inventory
+// ---------------------------------------------------------------------------
+
+enum StockStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  IN_TRANSIT
+}
+
+model NewVehicleInventory {
+  id              String      @id @default(cuid())
+  stockNumber     String      @unique
+  showroomId      String
+  variantId       String
+  colourId        String?
+  status          StockStatus @default(AVAILABLE)
+  manufactureYear Int
+  odometerKm      Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  showroom Showroom       @relation(fields: [showroomId], references: [id], onDelete: Restrict)
+  variant  VehicleVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  colour   VehicleColour? @relation(fields: [colourId], references: [id], onDelete: SetNull)
+
+  @@index([showroomId, status])
+  @@index([variantId, status])
+  @@index([colourId])
+  @@map("new_vehicle_inventory")
+}
+
+// ---------------------------------------------------------------------------
+// Versioned on-road pricing
+// ---------------------------------------------------------------------------
+
+enum PriceBookStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PriceKind {
+  SAMPLE_ESTIMATE
+  PUBLISHED
+}
+
+enum PriceComponentCategory {
+  ROAD_TAX
+  INSURANCE
+  REGISTRATION
+  ACCESSORIES
+  OTHER
+}
+
+enum PriceCalculation {
+  FIXED
+  PERCENT_OF_EXSHOWROOM
+}
+
+model PriceBook {
+  id            String          @id @default(cuid())
+  code          String          @unique
+  name          String
+  showroomId    String?
+  status        PriceBookStatus @default(DRAFT)
+  isSample      Boolean         @default(true)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  publishedAt   DateTime?
+  notes         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  showroom Showroom?    @relation(fields: [showroomId], references: [id], onDelete: SetNull)
+  entries  PriceEntry[]
+
+  @@index([showroomId, status, effectiveFrom])
+  @@index([status, effectiveFrom])
+  @@map("price_books")
+}
+
+model PriceEntry {
+  id              String    @id @default(cuid())
+  priceBookId     String
+  variantId       String
+  exShowroomPaise Int
+  priceKind       PriceKind @default(SAMPLE_ESTIMATE)
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  priceBook  PriceBook        @relation(fields: [priceBookId], references: [id], onDelete: Cascade)
+  variant    VehicleVariant   @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  components PriceComponent[]
+
+  @@unique([priceBookId, variantId])
+  @@index([variantId])
+  @@map("price_entries")
+}
+
+model PriceComponent {
+  id              String                 @id @default(cuid())
+  priceEntryId    String
+  code            String
+  label           String
+  category        PriceComponentCategory
+  calculation     PriceCalculation
+  amountPaise     Int?
+  rateBasisPoints Int?
+  isOptional      Boolean                @default(false)
+  sortOrder       Int                    @default(0)
+
+  priceEntry PriceEntry @relation(fields: [priceEntryId], references: [id], onDelete: Cascade)
+
+  @@unique([priceEntryId, code])
+  @@index([priceEntryId, sortOrder])
+  @@map("price_components")
+}
+
+// ---------------------------------------------------------------------------
+// Certified pre-owned
+// ---------------------------------------------------------------------------
+
+enum InspectionRating {
+  PASS
+  ATTENTION
+  FAIL
+}
+
+model UsedVehicle {
+  id                       String       @id @default(cuid())
+  slug                     String       @unique
+  modelId                  String?
+  variantId                String?
+  showroomId               String
+  make                     String
+  modelName                String
+  variantName              String
+  registrationYear         Int
+  registrationMonth        Int?
+  mileageKm                Int
+  fuelType                 FuelType
+  transmission             Transmission
+  ownershipCount           Int          @default(1)
+  colourName               String
+  pricePaise               Int
+  priceKind                PriceKind    @default(SAMPLE_ESTIMATE)
+  stockStatus              StockStatus  @default(AVAILABLE)
+  certified                Boolean      @default(true)
+  registrationNumberMasked String
+  description              String
+  highlights               String[]
+  createdAt                DateTime     @default(now())
+  updatedAt                DateTime     @updatedAt
+
+  model       VehicleModel?           @relation(fields: [modelId], references: [id], onDelete: SetNull)
+  variant     VehicleVariant?         @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  showroom    Showroom                @relation(fields: [showroomId], references: [id], onDelete: Restrict)
+  inspections UsedVehicleInspection[]
+
+  @@index([showroomId, stockStatus])
+  @@index([registrationYear, mileageKm])
+  @@index([fuelType, transmission])
+  @@index([pricePaise])
+  @@index([modelId])
+  @@map("used_vehicles")
+}
+
+model UsedVehicleInspection {
+  id              String   @id @default(cuid())
+  usedVehicleId   String
+  version         Int      @default(1)
+  inspectedAt     DateTime
+  inspectorName   String
+  overallScore    Int
+  summary         String
+  reportReference String   @unique
+  isCurrent       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  usedVehicle UsedVehicle          @relation(fields: [usedVehicleId], references: [id], onDelete: Cascade)
+  items       UsedInspectionItem[]
+
+  @@unique([usedVehicleId, version])
+  @@index([usedVehicleId, isCurrent])
+  @@map("used_vehicle_inspections")
+}
+
+model UsedInspectionItem {
+  id           String           @id @default(cuid())
+  inspectionId String
+  category     String
+  label        String
+  rating       InspectionRating
+  notes        String?
+  sortOrder    Int              @default(0)
+
+  inspection UsedVehicleInspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  @@unique([inspectionId, label])
+  @@index([inspectionId, sortOrder])
+  @@map("used_inspection_items")
 }

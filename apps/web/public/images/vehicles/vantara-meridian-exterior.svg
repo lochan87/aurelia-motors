@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title>Illustrated placeholder of the fictional Vantara Meridian sedan, exterior profile</title>
+  <desc>An original illustration used as a placeholder. It does not depict a real vehicle or inventory unit.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8f5ee"/>
+      <stop offset="1" stop-color="#ded4c0"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e2b3c"/>
+      <stop offset="1" stop-color="#070a09"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <circle cx="950" cy="170" r="118" fill="#c5a26a" opacity="0.18"/>
+  <path d="M0 646 Q320 610 620 636 T1200 626 L1200 800 L0 800Z" fill="#cbbda2" opacity="0.55"/>
+  <path d="M220 555 L300 458 Q345 420 470 410 L680 402 Q790 404 850 458 L920 515 L1020 535 Q1055 545 1055 578 L1044 604 L200 604 Q190 570 220 555 Z" fill="url(#body)"/>
+  <path d="M340 458 Q395 424 480 418 L640 414 L640 485 L320 485 Z" fill="#f1ece0" opacity="0.78"/>
+  <path d="M680 416 L750 420 Q805 430 838 466 L838 485 L680 485 Z" fill="#f1ece0" opacity="0.6"/>
+  <rect x="300" y="535" width="720" height="12" rx="6" fill="#c5a26a" opacity="0.6"/>
+  <circle cx="380" cy="604" r="62" fill="#0c1210"/>
+  <circle cx="380" cy="604" r="29" fill="#cbbda2"/>
+  <circle cx="888" cy="604" r="62" fill="#0c1210"/>
+  <circle cx="888" cy="604" r="29" fill="#cbbda2"/>
+  <text x="72" y="110" fill="#070a09" font-family="Georgia, serif" font-size="46" letter-spacing="4">VANTARA MERIDIAN</text>
+  <text x="74" y="146" fill="#565a54" font-family="Arial, sans-serif" font-size="18" letter-spacing="5">EXECUTIVE SEDAN</text>
+  <text x="74" y="742" fill="#4b4f49" font-family="Arial, sans-serif" font-size="16" letter-spacing="4">ILLUSTRATIVE PLACEHOLDER - NOT A PHOTOGRAPH</text>
+</svg>
