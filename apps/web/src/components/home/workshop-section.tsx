@@ -1,5 +1,7 @@
 import { ClipboardCheck, UserRound, Wrench } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
+import { buttonStyles } from '../ui/button-styles';
 import { Container } from '../ui/container';
 import { SectionHeader } from '../ui/section-header';
 
@@ -51,6 +53,23 @@ export function WorkshopSection() {
               </article>
             );
           })}
+        </div>
+
+        <div className="mt-14 flex flex-col items-center justify-between gap-6 border-t border-ivory-50/15 pt-8 sm:flex-row">
+          <div>
+            <h4 className="font-display text-xl text-ivory-50">
+              Gomti Nagar & Sushant Golf City Workshops
+            </h4>
+            <p className="mt-1 text-xs text-ivory-50/60">
+              Check real-time bay availability, upfront estimates, and book with immediate
+              confirmation.
+            </p>
+          </div>
+
+          <Link to="/service" className={buttonStyles({ variant: 'primary', size: 'md' })}>
+            <Wrench className="h-3.5 w-3.5" />
+            Book Workshop Service
+          </Link>
         </div>
       </Container>
     </section>

@@ -7,9 +7,9 @@ import { Container } from '../ui/container';
 const exploreLinks = [
   { label: 'New vehicles', href: '/vehicles' },
   { label: 'Certified pre-owned', href: '/certified' },
+  { label: 'Book test drive', href: '/test-drive' },
+  { label: 'Book workshop service', href: '/service' },
   { label: 'Showrooms', href: '/#showrooms' },
-  { label: 'The standard', href: '/#standard' },
-  { label: 'Workshop', href: '/#workshop' },
 ];
 
 export function SiteFooter() {

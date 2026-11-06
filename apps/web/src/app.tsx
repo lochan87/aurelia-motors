@@ -25,6 +25,17 @@ const CertifiedDetailPage = lazy(() =>
 const PrivacyPage = lazy(() =>
   import('./pages/privacy-page').then((module) => ({ default: module.PrivacyPage })),
 );
+const TestDrivePage = lazy(() =>
+  import('./pages/test-drive-page').then((module) => ({ default: module.TestDrivePage })),
+);
+const ServiceBookingPage = lazy(() =>
+  import('./pages/service-booking-page').then((module) => ({ default: module.ServiceBookingPage })),
+);
+const BookingConfirmationPage = lazy(() =>
+  import('./pages/booking-confirmation-page').then((module) => ({
+    default: module.BookingConfirmationPage,
+  })),
+);
 const NotFoundPage = lazy(() =>
   import('./pages/not-found-page').then((module) => ({ default: module.NotFoundPage })),
 );
@@ -38,6 +49,9 @@ export function App() {
             <Route index element={<HomePage />} />
             <Route path="vehicles" element={<VehiclesPage />} />
             <Route path="vehicles/:slug" element={<VehicleDetailPage />} />
+            <Route path="test-drive" element={<TestDrivePage />} />
+            <Route path="service" element={<ServiceBookingPage />} />
+            <Route path="bookings/confirmation/:reference" element={<BookingConfirmationPage />} />
             <Route path="certified" element={<CertifiedPage />} />
             <Route path="certified/:slug" element={<CertifiedDetailPage />} />
             <Route path="privacy" element={<PrivacyPage />} />

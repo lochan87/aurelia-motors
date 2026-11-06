@@ -9,9 +9,9 @@ import { Container } from '../ui/container';
 const navigation = [
   { label: 'New vehicles', href: '/vehicles' },
   { label: 'Certified', href: '/certified' },
+  { label: 'Test drive', href: '/test-drive' },
+  { label: 'Workshop service', href: '/service' },
   { label: 'Showrooms', href: '/#showrooms' },
-  { label: 'The standard', href: '/#standard' },
-  { label: 'Workshop', href: '/#workshop' },
   { label: 'Visit', href: '/#visit' },
 ];
 
