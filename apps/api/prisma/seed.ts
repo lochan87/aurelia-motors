@@ -931,6 +931,298 @@ const inspectionItems: Array<{
   },
 ];
 
+interface DemoFleetSeed {
+  showroomCode: string;
+  variantSlug: string;
+  registrationNumber: string;
+  vin: string;
+}
+
+const demoFleetSeeds: DemoFleetSeed[] = [
+  // Central Lucknow
+  {
+    showroomCode: 'LKO-CENTRAL',
+    variantSlug: 'vantara-lumen-petrol-automatic',
+    registrationNumber: 'UP-32-DM-0101',
+    vin: 'VIN-DM-LUM-0101',
+  },
+  {
+    showroomCode: 'LKO-CENTRAL',
+    variantSlug: 'vantara-meridian-diesel-automatic',
+    registrationNumber: 'UP-32-DM-0102',
+    vin: 'VIN-DM-MER-0102',
+  },
+  {
+    showroomCode: 'LKO-CENTRAL',
+    variantSlug: 'vantara-aria-ev-long-range',
+    registrationNumber: 'UP-32-DM-0103',
+    vin: 'VIN-DM-ARI-0103',
+  },
+  {
+    showroomCode: 'LKO-CENTRAL',
+    variantSlug: 'vantara-kestrel-diesel-automatic',
+    registrationNumber: 'UP-32-DM-0104',
+    vin: 'VIN-DM-KES-0104',
+  },
+  {
+    showroomCode: 'LKO-CENTRAL',
+    variantSlug: 'vantara-solace-petrol-automatic',
+    registrationNumber: 'UP-32-DM-0105',
+    vin: 'VIN-DM-SOL-0105',
+  },
+
+  // Gomti Nagar
+  {
+    showroomCode: 'LKO-GOMTI',
+    variantSlug: 'vantara-lumen-petrol-mt',
+    registrationNumber: 'UP-32-DM-0201',
+    vin: 'VIN-DM-LUM-0201',
+  },
+  {
+    showroomCode: 'LKO-GOMTI',
+    variantSlug: 'vantara-meridian-petrol-automatic',
+    registrationNumber: 'UP-32-DM-0202',
+    vin: 'VIN-DM-MER-0202',
+  },
+  {
+    showroomCode: 'LKO-GOMTI',
+    variantSlug: 'vantara-aria-ev-standard',
+    registrationNumber: 'UP-32-DM-0203',
+    vin: 'VIN-DM-ARI-0203',
+  },
+  {
+    showroomCode: 'LKO-GOMTI',
+    variantSlug: 'vantara-kestrel-petrol-automatic',
+    registrationNumber: 'UP-32-DM-0204',
+    vin: 'VIN-DM-KES-0204',
+  },
+
+  // Sushant Golf City
+  {
+    showroomCode: 'LKO-SGC',
+    variantSlug: 'vantara-lumen-diesel-mt',
+    registrationNumber: 'UP-32-DM-0301',
+    vin: 'VIN-DM-LUM-0301',
+  },
+  {
+    showroomCode: 'LKO-SGC',
+    variantSlug: 'vantara-meridian-petrol-mt',
+    registrationNumber: 'UP-32-DM-0302',
+    vin: 'VIN-DM-MER-0302',
+  },
+  {
+    showroomCode: 'LKO-SGC',
+    variantSlug: 'vantara-aria-ev-long-range-awd',
+    registrationNumber: 'UP-32-DM-0303',
+    vin: 'VIN-DM-ARI-0303',
+  },
+  {
+    showroomCode: 'LKO-SGC',
+    variantSlug: 'vantara-solace-turbo-petrol-mt',
+    registrationNumber: 'UP-32-DM-0304',
+    vin: 'VIN-DM-SOL-0304',
+  },
+];
+
+async function seedDemoFleet(
+  showrooms: Map<string, string>,
+  variants: Map<string, { id: string }>,
+) {
+  let count = 0;
+  for (const seed of demoFleetSeeds) {
+    const showroomId = showrooms.get(seed.showroomCode);
+    const variant = variants.get(seed.variantSlug);
+    if (!showroomId || !variant) continue;
+
+    await prisma.demoVehicle.upsert({
+      where: {
+        showroomId_registrationNumber: {
+          showroomId,
+          registrationNumber: seed.registrationNumber,
+        },
+      },
+      update: {
+        variantId: variant.id,
+        vin: seed.vin,
+        isActive: true,
+      },
+      create: {
+        showroomId,
+        variantId: variant.id,
+        registrationNumber: seed.registrationNumber,
+        vin: seed.vin,
+        isActive: true,
+      },
+    });
+    count++;
+  }
+  return count;
+}
+
+const workshopSeeds = [
+  {
+    code: 'WS-GOMTI',
+    name: 'Gomti Nagar Service Workshop',
+    address: 'Plot 14, Vibhuti Khand, Gomti Nagar, Lucknow, UP 226010',
+    phone: '+91 522 2720011',
+    showroomCode: 'LKO-GOMTI',
+    baysCount: 6,
+    dailyCapacity: 24,
+    slotCapacity: 3,
+  },
+  {
+    code: 'WS-SGC',
+    name: 'Sushant Golf City Service Workshop',
+    address: 'Sector B, Amar Shaheed Path, Sushant Golf City, Lucknow, UP 226030',
+    phone: '+91 522 2970022',
+    showroomCode: 'LKO-SGC',
+    baysCount: 8,
+    dailyCapacity: 32,
+    slotCapacity: 4,
+  },
+];
+
+async function seedWorkshops(showrooms: Map<string, string>) {
+  let count = 0;
+  for (const seed of workshopSeeds) {
+    const showroomId = showrooms.get(seed.showroomCode);
+    const workshop = await prisma.workshop.upsert({
+      where: { code: seed.code },
+      update: {
+        name: seed.name,
+        address: seed.address,
+        city: 'Lucknow',
+        state: 'Uttar Pradesh',
+        timezone: 'Asia/Kolkata',
+        phone: seed.phone,
+        showroomId: showroomId ?? null,
+        baysCount: seed.baysCount,
+        dailyCapacity: seed.dailyCapacity,
+        slotCapacity: seed.slotCapacity,
+        isActive: true,
+      },
+      create: {
+        code: seed.code,
+        name: seed.name,
+        address: seed.address,
+        city: 'Lucknow',
+        state: 'Uttar Pradesh',
+        timezone: 'Asia/Kolkata',
+        phone: seed.phone,
+        showroomId: showroomId ?? null,
+        baysCount: seed.baysCount,
+        dailyCapacity: seed.dailyCapacity,
+        slotCapacity: seed.slotCapacity,
+        isActive: true,
+      },
+    });
+
+    for (let day = 0; day <= 6; day++) {
+      const isSunday = day === 0;
+      await prisma.workshopOperatingHours.upsert({
+        where: {
+          workshopId_dayOfWeek: {
+            workshopId: workshop.id,
+            dayOfWeek: day,
+          },
+        },
+        update: {
+          opensAt: '08:30',
+          closesAt: '18:30',
+          slotDurationMinutes: 60,
+          isOpen: !isSunday,
+        },
+        create: {
+          workshopId: workshop.id,
+          dayOfWeek: day,
+          opensAt: '08:30',
+          closesAt: '18:30',
+          slotDurationMinutes: 60,
+          isOpen: !isSunday,
+        },
+      });
+    }
+    count++;
+  }
+  return count;
+}
+
+const serviceTypeSeeds = [
+  {
+    code: 'PERIODIC_MAINTENANCE',
+    name: 'Periodic Maintenance & Oil Service',
+    description:
+      'Comprehensive scheduled maintenance including synthetic engine oil change, oil & air filter replacement, fluid top-ups, and 60-point electronic health scan.',
+    durationMinutes: 120,
+    estimatedPricePaise: 450000,
+    sortOrder: 1,
+  },
+  {
+    code: 'EXPRESS_CARE',
+    name: 'Express Care & Lube Service',
+    description:
+      'Rapid 60-minute pitstop service: engine oil, washer fluid top-up, tyre pressure calibration, wiper check, and exterior pressure wash.',
+    durationMinutes: 60,
+    estimatedPricePaise: 220000,
+    sortOrder: 2,
+  },
+  {
+    code: 'BRAKES_SUSPENSION',
+    name: 'Brakes & Suspension Inspection',
+    description:
+      'Brake pad thickness inspection, rotor skimming check, caliper lubrication, suspension damper check, and wheel alignment assessment.',
+    durationMinutes: 90,
+    estimatedPricePaise: 380000,
+    sortOrder: 3,
+  },
+  {
+    code: 'BATTERY_ELECTRICAL',
+    name: 'Electrical & Battery Diagnostic',
+    description:
+      'Complete battery state-of-charge & health analysis, starter motor & alternator load test, fuse box inspection, and ECU fault code scan.',
+    durationMinutes: 60,
+    estimatedPricePaise: 180000,
+    sortOrder: 4,
+  },
+  {
+    code: 'GENERAL_HEALTH_CHECK',
+    name: 'Comprehensive Vehicle Safety Audit',
+    description:
+      'Thorough 45-point seasonal health evaluation: HVAC cooling test, brake wear, lighting, belt condition, underbody inspection, and road test report.',
+    durationMinutes: 60,
+    estimatedPricePaise: 120000,
+    sortOrder: 5,
+  },
+];
+
+async function seedServiceTypes() {
+  let count = 0;
+  for (const seed of serviceTypeSeeds) {
+    await prisma.serviceType.upsert({
+      where: { code: seed.code },
+      update: {
+        name: seed.name,
+        description: seed.description,
+        durationMinutes: seed.durationMinutes,
+        estimatedPricePaise: seed.estimatedPricePaise,
+        sortOrder: seed.sortOrder,
+        isActive: true,
+      },
+      create: {
+        code: seed.code,
+        name: seed.name,
+        description: seed.description,
+        durationMinutes: seed.durationMinutes,
+        estimatedPricePaise: seed.estimatedPricePaise,
+        sortOrder: seed.sortOrder,
+        isActive: true,
+      },
+    });
+    count++;
+  }
+  return count;
+}
+
 async function seedShowrooms() {
   const ids = new Map<string, string>();
 
@@ -1391,6 +1683,9 @@ async function main() {
   await seedPriceBooks(variants);
   const inventoryUnits = await seedInventory(showrooms, variants);
   await seedUsedCars(showrooms, models, variants);
+  const demoVehiclesCount = await seedDemoFleet(showrooms, variants);
+  const workshopsCount = await seedWorkshops(showrooms);
+  const serviceTypesCount = await seedServiceTypes();
 
   const [showroomCount, modelCount, variantCount, colourCount, imageCount, specCount] =
     await Promise.all([
@@ -1437,6 +1732,9 @@ async function main() {
     usedVehicles: usedVehicleCount,
     inspections: inspectionCount,
     inspectionItems: inspectionItemCount,
+    demoVehicles: demoVehiclesCount,
+    workshops: workshopsCount,
+    serviceTypes: serviceTypesCount,
   });
 }
 

@@ -20,9 +20,12 @@ model Showroom {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  inventory    NewVehicleInventory[]
-  priceBooks   PriceBook[]
-  usedVehicles UsedVehicle[]
+  inventory              NewVehicleInventory[]
+  priceBooks             PriceBook[]
+  usedVehicles           UsedVehicle[]
+  demoVehicles           DemoVehicle[]
+  testDriveAppointments TestDriveAppointment[]
+  workshops              Workshop[]
 
   @@index([city, isActive])
   @@map("showrooms")
@@ -97,11 +100,13 @@ model VehicleVariant {
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
-  model          VehicleModel           @relation(fields: [modelId], references: [id], onDelete: Cascade)
-  specifications VehicleSpecification[]
-  priceEntries   PriceEntry[]
-  inventory      NewVehicleInventory[]
-  usedVehicles   UsedVehicle[]
+  model                  VehicleModel           @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  specifications         VehicleSpecification[]
+  priceEntries           PriceEntry[]
+  inventory              NewVehicleInventory[]
+  usedVehicles           UsedVehicle[]
+  demoVehicles           DemoVehicle[]
+  testDriveAppointments TestDriveAppointment[]
 
   @@unique([modelId, name])
   @@index([modelId, isActive, sortOrder])
@@ -366,4 +371,202 @@ model UsedInspectionItem {
   @@unique([inspectionId, label])
   @@index([inspectionId, sortOrder])
   @@map("used_inspection_items")
+}
+
+// ---------------------------------------------------------------------------
+// Customers and Consents
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id        String   @id @default(cuid())
+  fullName  String
+  phone     String
+  email     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  consents              CustomerConsent[]
+  testDriveAppointments TestDriveAppointment[]
+  serviceAppointments   ServiceAppointment[]
+
+  @@index([phone])
+  @@index([email])
+  @@map("customers")
+}
+
+model CustomerConsent {
+  id            String   @id @default(cuid())
+  customerId    String
+  purpose       String
+  noticeVersion String   @default("2026.1")
+  granted       Boolean  @default(true)
+  source        String   @default("WEBSITE")
+  ipHash        String?
+  grantedAt     DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId, purpose])
+  @@map("customer_consents")
+}
+
+// ---------------------------------------------------------------------------
+// Demo Fleet & Test Drives
+// ---------------------------------------------------------------------------
+
+model DemoVehicle {
+  id                 String   @id @default(cuid())
+  showroomId         String
+  variantId          String
+  registrationNumber String
+  vin                String?  @unique
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  showroom     Showroom               @relation(fields: [showroomId], references: [id], onDelete: Restrict)
+  variant      VehicleVariant         @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  appointments TestDriveAppointment[]
+
+  @@unique([showroomId, registrationNumber])
+  @@index([showroomId, variantId, isActive])
+  @@map("demo_vehicles")
+}
+
+enum TestDriveStatus {
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model TestDriveAppointment {
+  id                  String          @id @default(cuid())
+  bookingReference    String          @unique
+  idempotencyKey      String          @unique
+  showroomId          String
+  variantId           String
+  demoVehicleId       String
+  customerId          String
+  startTime           DateTime
+  endTime             DateTime
+  status              TestDriveStatus @default(CONFIRMED)
+  driverLicenseNumber String?
+  notes               String?
+  cancellationReason  String?
+  cancelledAt         DateTime?
+  confirmationToken   String          @unique
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  showroom    Showroom       @relation(fields: [showroomId], references: [id], onDelete: Restrict)
+  variant     VehicleVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  demoVehicle DemoVehicle    @relation(fields: [demoVehicleId], references: [id], onDelete: Restrict)
+  customer    Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  @@index([demoVehicleId, startTime, endTime, status])
+  @@index([showroomId, startTime])
+  @@index([customerId])
+  @@index([bookingReference])
+  @@map("test_drive_appointments")
+}
+
+// ---------------------------------------------------------------------------
+// Service Workshops & Appointments
+// ---------------------------------------------------------------------------
+
+model Workshop {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  name          String
+  address       String
+  city          String   @default("Lucknow")
+  state         String   @default("Uttar Pradesh")
+  timezone      String   @default("Asia/Kolkata")
+  phone         String
+  showroomId    String?
+  baysCount     Int      @default(6)
+  dailyCapacity Int      @default(24)
+  slotCapacity  Int      @default(3)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  showroom       Showroom?                @relation(fields: [showroomId], references: [id], onDelete: SetNull)
+  operatingHours WorkshopOperatingHours[]
+  appointments   ServiceAppointment[]
+
+  @@index([city, isActive])
+  @@map("workshops")
+}
+
+model WorkshopOperatingHours {
+  id                  String   @id @default(cuid())
+  workshopId          String
+  dayOfWeek           Int      // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  opensAt             String   // e.g. "08:30"
+  closesAt            String   // e.g. "18:30"
+  slotDurationMinutes Int      @default(60)
+  isOpen              Boolean  @default(true)
+
+  workshop Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+
+  @@unique([workshopId, dayOfWeek])
+  @@map("workshop_operating_hours")
+}
+
+model ServiceType {
+  id                  String   @id @default(cuid())
+  code                String   @unique
+  name                String
+  description         String
+  durationMinutes     Int
+  estimatedPricePaise Int?
+  isActive            Boolean  @default(true)
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+
+  appointments ServiceAppointment[]
+
+  @@index([isActive, sortOrder])
+  @@map("service_types")
+}
+
+enum ServiceStatus {
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model ServiceAppointment {
+  id                  String        @id @default(cuid())
+  bookingReference    String        @unique
+  idempotencyKey      String        @unique
+  workshopId          String
+  serviceTypeId       String
+  customerId          String
+  vehicleRegistration String
+  vehicleModel        String
+  vehicleYear         Int?
+  vehicleMileageKm    Int?
+  startTime           DateTime
+  endTime             DateTime
+  status              ServiceStatus @default(CONFIRMED)
+  notes               String?
+  cancellationReason  String?
+  cancelledAt         DateTime?
+  confirmationToken   String        @unique
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  workshop    Workshop    @relation(fields: [workshopId], references: [id], onDelete: Restrict)
+  serviceType ServiceType @relation(fields: [serviceTypeId], references: [id], onDelete: Restrict)
+  customer    Customer    @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  @@index([workshopId, startTime, endTime, status])
+  @@index([vehicleRegistration])
+  @@index([customerId])
+  @@index([bookingReference])
+  @@map("service_appointments")
 }

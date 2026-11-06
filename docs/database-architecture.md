@@ -2,13 +2,14 @@
 
 ## 1. Current state
 
-The database includes the foundation and Milestone 2 domain models with 3 applied Prisma migrations:
+The database includes the foundation, Milestone 2 catalogue models, and Milestone 3 booking models with 4 applied Prisma migrations:
 
 | Migration                                            | Purpose                                                                             |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `20261106050109_init`                                | Foundation: `showrooms` table and migration tracking                                |
 | `20261106053641_vehicle_catalogue_inventory_pricing` | Catalogue, variant specifications, colours, inventory, price books, and used cars   |
 | `20261106054000_price_and_range_constraints`         | Check constraints for non-negative money in paise, positive years, and rating enums |
+| `20261106081807_test_drive_and_service_bookings`     | Customers, consents, demo vehicles, workshops, service types, and appointments      |
 
 ### Active Domain Tables
 
@@ -25,6 +26,14 @@ The database includes the foundation and Milestone 2 domain models with 3 applie
 - `used_vehicles`: Certified pre-owned vehicle records with masked registration numbers.
 - `used_vehicle_inspections`: Versioned inspection audit files with overall scores.
 - `used_inspection_items`: Line-by-line inspection audit items with rating (`PASS`, `ATTENTION`, `FAIL`) and notes.
+- `customers`: Customer contact records (`fullName`, `phone`, `email`).
+- `customer_consents`: DPDP Act 2023 consent audits (`purpose`, `noticeVersion`, `granted`, `ipHash`).
+- `demo_vehicles`: Registered test-drive demo fleet stationed across showrooms.
+- `test_drive_appointments`: Confirmed customer drive bookings with demo vehicle locks, 45m windows, references, and tokens.
+- `workshops`: Authorized service centers (Gomti Nagar & Sushant Golf City) with hourly slot capacities.
+- `workshop_operating_hours`: Weekly schedule rules (08:30–18:30 Mon–Sat; Sunday closed).
+- `service_types`: Standard packages (Periodic Maintenance, Express Care, etc.) with estimated prices and durations.
+- `service_appointments`: Capacity-enforced service bookings with vehicle plates, references, and tokens.
 
 ## 2. Database conventions
 
