@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
@@ -34,14 +35,15 @@ export function createApp(options: CreateAppOptions = {}) {
 
         callback(null, false);
       },
-      credentials: false,
+      credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-CSRF-Token'],
       exposedHeaders: ['X-Request-Id'],
       maxAge: 600,
     }),
   );
 
+  app.use(cookieParser());
   app.use(express.json({ limit: '1mb', type: ['application/json', 'application/*+json'] }));
   app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
