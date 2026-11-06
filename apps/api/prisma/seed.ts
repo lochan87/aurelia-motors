@@ -1823,6 +1823,110 @@ async function seedStaffUsers(showrooms: Map<string, string>) {
   return count;
 }
 
+async function seedPromotionsAndBanners() {
+  const banners = [
+    {
+      headline: 'The All-Electric Vantara E-Pulse — Arriving in Lucknow',
+      subheadline:
+        'Experience whisper-quiet torque, 460 km real-world range, and 50 kW fast charging across our Lucknow showrooms.',
+      badgeText: 'Exclusive Preview',
+      imageUrl:
+        'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1600&q=80',
+      ctaLabel: 'Book Priority Test-Drive',
+      ctaUrl: '/test-drive',
+      displayOrder: 1,
+      isPublished: true,
+    },
+    {
+      headline: 'Aurelia Exchange & Upgrade Carnival',
+      subheadline:
+        'Upgrade to a brand-new Vantara with up to ₹50,000 exchange bonus and transparent on-the-spot valuation.',
+      badgeText: 'Limited Period',
+      imageUrl:
+        'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1600&q=80',
+      ctaLabel: 'Calculate Trade-In',
+      ctaUrl: '/certified',
+      displayOrder: 2,
+      isPublished: true,
+    },
+    {
+      headline: 'Aurelia Certified Pre-Owned Assurance',
+      subheadline:
+        '140-point technical inspection, certified accident-free documentation, and 12-month comprehensive warranty.',
+      badgeText: 'Certified Quality',
+      imageUrl:
+        'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1600&q=80',
+      ctaLabel: 'Browse Certified Stock',
+      ctaUrl: '/certified',
+      displayOrder: 3,
+      isPublished: true,
+    },
+  ];
+
+  for (const b of banners) {
+    const existing = await prisma.homepageBanner.findFirst({
+      where: { headline: b.headline },
+    });
+    if (!existing) {
+      await prisma.homepageBanner.create({ data: b });
+    }
+  }
+
+  const offers = [
+    {
+      title: 'Corporate & Healthcare Professional Benefit',
+      description:
+        'Special corporate rebate of ₹25,000 along with complimentary 2-year scheduled maintenance on Lumen and Solis variants.',
+      badgeText: 'Corporate Special',
+      imageUrl:
+        'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80',
+      ctaLabel: 'Enquire for Corporate Fleet',
+      ctaUrl: '/contact',
+      startDate: new Date('2026-01-01T00:00:00Z'),
+      endDate: new Date('2026-12-31T23:59:59Z'),
+      isPublished: true,
+      displayOrder: 1,
+    },
+    {
+      title: 'Subsidised Dealership Finance Scheme',
+      description:
+        'Preferential 7.99% p.a. reducing rate finance partnership with HDFC and SBI, zero foreclosure charges after 12 months.',
+      badgeText: '7.99% Finance',
+      imageUrl:
+        'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80',
+      ctaLabel: 'Explore EMI Calculator',
+      ctaUrl: '/models',
+      startDate: new Date('2026-01-01T00:00:00Z'),
+      endDate: new Date('2026-12-31T23:59:59Z'),
+      isPublished: true,
+      displayOrder: 2,
+    },
+    {
+      title: 'Seasonal 40-Point Workshop Health Clinic',
+      description:
+        'Complimentary monsoon underbody check, battery load test, brake pad inspection, and AC sanitisation at both workshop centres.',
+      badgeText: 'Service Clinic',
+      imageUrl:
+        'https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=800&q=80',
+      ctaLabel: 'Book Service Slot',
+      ctaUrl: '/service',
+      startDate: new Date('2026-01-01T00:00:00Z'),
+      endDate: new Date('2026-12-31T23:59:59Z'),
+      isPublished: true,
+      displayOrder: 3,
+    },
+  ];
+
+  for (const o of offers) {
+    const existing = await prisma.promotionOffer.findFirst({
+      where: { title: o.title },
+    });
+    if (!existing) {
+      await prisma.promotionOffer.create({ data: o });
+    }
+  }
+}
+
 async function main() {
   const showrooms = await seedShowrooms();
   const { models, variants } = await seedCatalogue();
@@ -1833,6 +1937,7 @@ async function main() {
   const workshopsCount = await seedWorkshops(showrooms);
   const serviceTypesCount = await seedServiceTypes();
   const staffCount = await seedStaffUsers(showrooms);
+  await seedPromotionsAndBanners();
 
   const [showroomCount, modelCount, variantCount, colourCount, imageCount, specCount] =
     await Promise.all([
