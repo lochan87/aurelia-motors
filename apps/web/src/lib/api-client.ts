@@ -494,6 +494,21 @@ export const api = {
     postJson<Record<string, unknown>>(`/admin/cms/price-books/${id}/publish`, {}),
   adminArchivePriceBook: (id: string) =>
     postJson<Record<string, unknown>>(`/admin/cms/price-books/${id}/archive`, {}),
+  adminGetUsedVehicles: (params?: { showroomId?: string; stockStatus?: string }) =>
+    fetchJson<{ items: Record<string, unknown>[]; total: number }>(
+      '/admin/cms/used-vehicles',
+      params,
+    ),
+  adminCreateUsedVehicle: (data: Record<string, unknown>) =>
+    postJson<Record<string, unknown>>('/admin/cms/used-vehicles', data),
+  adminUpdateUsedVehicle: (id: string, data: Record<string, unknown>) =>
+    patchJson<Record<string, unknown>>(`/admin/cms/used-vehicles/${id}`, data),
+  adminCreateModelColour: (modelId: string, data: Record<string, unknown>) =>
+    postJson<Record<string, unknown>>(`/admin/cms/models/${modelId}/colours`, data),
+  adminDeleteModelColour: (id: string) =>
+    deleteJson<Record<string, unknown>>(`/admin/cms/colours/${id}`),
+  adminUpsertVariantSpecification: (variantId: string, data: Record<string, unknown>) =>
+    putJson<Record<string, unknown>>(`/admin/cms/variants/${variantId}/specifications`, data),
   adminGetBanners: () =>
     fetchJson<{ items: HomepageBannerDto[]; total: number }>('/admin/content/banners'),
   adminCreateBanner: (data: Record<string, unknown>) =>

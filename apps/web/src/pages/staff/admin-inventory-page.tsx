@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { api } from '../../lib/api-client';
 import type { ShowroomSummary } from '@aurelia/shared';
+import { formatInrFromPaise } from '@aurelia/shared';
 
 interface AdminVariantItem {
   id: string;
@@ -38,14 +39,32 @@ interface AdminInventoryItem {
   showroom?: { name: string };
 }
 
+interface AdminUsedCarItem {
+  id: string;
+  slug: string;
+  make: string;
+  modelName: string;
+  variantName: string;
+  registrationYear: number;
+  mileageKm: number;
+  fuelType: string;
+  transmission: string;
+  colourName: string;
+  pricePaise: number;
+  stockStatus: string;
+  registrationNumberMasked: string;
+  showroom?: { name: string };
+}
+
 export function AdminInventoryPage() {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'MODELS' | 'STOCK'>('MODELS');
+  const [activeTab, setActiveTab] = useState<'MODELS' | 'STOCK' | 'USED_CARS'>('MODELS');
 
   // Modals state
   const [isCreateModelOpen, setIsCreateModelOpen] = useState(false);
   const [isCreateVariantOpen, setIsCreateVariantOpen] = useState(false);
   const [isAddStockOpen, setIsAddStockOpen] = useState(false);
+  const [isAddUsedCarOpen, setIsAddUsedCarOpen] = useState(false);
   const [selectedModelIdForVariant, setSelectedModelIdForVariant] = useState<string>('');
 
   // Form states
@@ -75,6 +94,22 @@ export function AdminInventoryPage() {
     manufactureYear: 2026,
   });
 
+  const [usedCarForm, setUsedCarForm] = useState({
+    showroomId: '',
+    make: 'Aurelia',
+    modelName: '',
+    variantName: '',
+    registrationYear: 2022,
+    mileageKm: 32000,
+    fuelType: 'PETROL',
+    transmission: 'MANUAL',
+    colourName: 'Pearl White',
+    priceRupees: 650000,
+    registrationNumberMasked: 'UP 32 ** 4412',
+    description:
+      'Single owner, pristine showroom maintained condition with complete service records.',
+  });
+
   const [formError, setFormError] = useState<string | null>(null);
 
   // Queries
@@ -87,6 +122,12 @@ export function AdminInventoryPage() {
     queryKey: ['admin-inventory'],
     queryFn: () => api.adminGetInventory(),
     enabled: activeTab === 'STOCK',
+  });
+
+  const { data: usedCarsData, isLoading: isUsedCarsLoading } = useQuery({
+    queryKey: ['admin-used-cars'],
+    queryFn: () => api.adminGetUsedVehicles(),
+    enabled: activeTab === 'USED_CARS',
   });
 
   const { data: showrooms } = useQuery({
@@ -137,8 +178,35 @@ export function AdminInventoryPage() {
       setFormError(err instanceof Error ? err.message : 'Failed to add stock unit'),
   });
 
+  const createUsedCarMutation = useMutation({
+    mutationFn: (data: typeof usedCarForm) =>
+      api.adminCreateUsedVehicle({
+        showroomId: data.showroomId,
+        make: data.make,
+        modelName: data.modelName,
+        variantName: data.variantName,
+        registrationYear: Number(data.registrationYear),
+        mileageKm: Number(data.mileageKm),
+        fuelType: data.fuelType,
+        transmission: data.transmission,
+        colourName: data.colourName,
+        pricePaise: Math.round(Number(data.priceRupees) * 100),
+        registrationNumberMasked: data.registrationNumberMasked,
+        description: data.description,
+        certified: true,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-used-cars'] });
+      setIsAddUsedCarOpen(false);
+      setFormError(null);
+    },
+    onError: (err: unknown) =>
+      setFormError(err instanceof Error ? err.message : 'Failed to add pre-owned vehicle'),
+  });
+
   const models = (modelsData?.items as unknown as AdminModelItem[]) || [];
   const inventory = (inventoryData?.items as unknown as AdminInventoryItem[]) || [];
+  const usedCars = (usedCarsData?.items as unknown as AdminUsedCarItem[]) || [];
 
   return (
     <div className="space-y-6">
@@ -157,7 +225,7 @@ export function AdminInventoryPage() {
         </div>
 
         <div className="flex gap-2">
-          {activeTab === 'MODELS' ? (
+          {activeTab === 'MODELS' && (
             <button
               type="button"
               onClick={() => {
@@ -169,7 +237,8 @@ export function AdminInventoryPage() {
               <Plus className="h-4 w-4" />
               Add Vehicle Model
             </button>
-          ) : (
+          )}
+          {activeTab === 'STOCK' && (
             <button
               type="button"
               onClick={() => {
@@ -180,6 +249,19 @@ export function AdminInventoryPage() {
             >
               <Plus className="h-4 w-4" />
               Add Stock Unit
+            </button>
+          )}
+          {activeTab === 'USED_CARS' && (
+            <button
+              type="button"
+              onClick={() => {
+                setFormError(null);
+                setIsAddUsedCarOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-stone-900 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-stone-800"
+            >
+              <Plus className="h-4 w-4" />
+              Add Pre-Owned Stock
             </button>
           )}
         </div>
@@ -207,7 +289,18 @@ export function AdminInventoryPage() {
               : 'border-transparent text-stone-500 hover:text-stone-700'
           }`}
         >
-          Physical Showroom Inventory Stock
+          Physical Showroom Inventory Stock ({inventory.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('USED_CARS')}
+          className={`border-b-2 px-6 py-3 text-xs font-bold transition ${
+            activeTab === 'USED_CARS'
+              ? 'border-stone-900 text-stone-900'
+              : 'border-transparent text-stone-500 hover:text-stone-700'
+          }`}
+        >
+          Certified Pre-Owned Inventory ({usedCars.length})
         </button>
       </div>
 
@@ -284,47 +377,107 @@ export function AdminInventoryPage() {
             ))}
           </div>
         )
-      ) : isInventoryLoading ? (
-        <div className="p-12 text-center text-xs text-stone-500">Loading showroom stock...</div>
+      ) : activeTab === 'STOCK' ? (
+        isInventoryLoading ? (
+          <div className="p-12 text-center text-xs text-stone-500">Loading showroom stock...</div>
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+            <table className="min-w-full divide-y divide-stone-200 text-left text-xs">
+              <thead className="bg-stone-50 font-semibold tracking-wider text-stone-600 uppercase">
+                <tr>
+                  <th className="px-6 py-3.5">Stock Number</th>
+                  <th className="px-6 py-3.5">Vehicle</th>
+                  <th className="px-6 py-3.5">Showroom</th>
+                  <th className="px-6 py-3.5">Manufacture Year</th>
+                  <th className="px-6 py-3.5">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100 font-normal text-stone-800">
+                {inventory.map((unit: AdminInventoryItem) => (
+                  <tr key={unit.id} className="hover:bg-stone-50/50">
+                    <td className="px-6 py-4 font-mono font-bold text-stone-900">
+                      {unit.stockNumber}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-semibold text-stone-900">
+                        {unit.variant?.model?.name} {unit.variant?.name}
+                      </div>
+                      <div className="text-[10px] text-stone-500">
+                        {unit.colour?.name || 'Standard Shade'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">{unit.showroom?.name}</td>
+                    <td className="px-6 py-4 font-mono">{unit.manufactureYear}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase ${
+                          unit.status === 'AVAILABLE'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : unit.status === 'RESERVED'
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-stone-200 text-stone-700'
+                        }`}
+                      >
+                        {unit.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      ) : isUsedCarsLoading ? (
+        <div className="p-12 text-center text-xs text-stone-500">
+          Loading certified pre-owned inventory...
+        </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
           <table className="min-w-full divide-y divide-stone-200 text-left text-xs">
             <thead className="bg-stone-50 font-semibold tracking-wider text-stone-600 uppercase">
               <tr>
-                <th className="px-6 py-3.5">Stock Number</th>
-                <th className="px-6 py-3.5">Vehicle</th>
+                <th className="px-6 py-3.5">Registration Plate</th>
+                <th className="px-6 py-3.5">Vehicle Model & Variant</th>
                 <th className="px-6 py-3.5">Showroom</th>
-                <th className="px-6 py-3.5">Manufacture Year</th>
+                <th className="px-6 py-3.5">Year / Odometer</th>
+                <th className="px-6 py-3.5">Fuel / Trans</th>
+                <th className="px-6 py-3.5">Price</th>
                 <th className="px-6 py-3.5">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 font-normal text-stone-800">
-              {inventory.map((unit: AdminInventoryItem) => (
+              {usedCars.map((unit: AdminUsedCarItem) => (
                 <tr key={unit.id} className="hover:bg-stone-50/50">
                   <td className="px-6 py-4 font-mono font-bold text-stone-900">
-                    {unit.stockNumber}
+                    {unit.registrationNumberMasked}
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-semibold text-stone-900">
-                      {unit.variant?.model?.name} {unit.variant?.name}
+                      {unit.make} {unit.modelName} {unit.variantName}
                     </div>
-                    <div className="text-[10px] text-stone-500">
-                      {unit.colour?.name || 'Standard Shade'}
-                    </div>
+                    <div className="text-[10px] text-stone-500">{unit.colourName}</div>
                   </td>
                   <td className="px-6 py-4">{unit.showroom?.name}</td>
-                  <td className="px-6 py-4 font-mono">{unit.manufactureYear}</td>
+                  <td className="px-6 py-4 font-mono">
+                    {unit.registrationYear} · {unit.mileageKm.toLocaleString('en-IN')} km
+                  </td>
+                  <td className="px-6 py-4 text-stone-600">
+                    {unit.fuelType} · {unit.transmission}
+                  </td>
+                  <td className="px-6 py-4 font-semibold text-stone-900">
+                    {formatInrFromPaise(unit.pricePaise)}
+                  </td>
                   <td className="px-6 py-4">
                     <span
                       className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase ${
-                        unit.status === 'AVAILABLE'
+                        unit.stockStatus === 'AVAILABLE'
                           ? 'bg-emerald-100 text-emerald-800'
-                          : unit.status === 'RESERVED'
+                          : unit.stockStatus === 'RESERVED'
                             ? 'bg-amber-100 text-amber-800'
                             : 'bg-stone-200 text-stone-700'
                       }`}
                     >
-                      {unit.status}
+                      {unit.stockStatus}
                     </span>
                   </td>
                 </tr>
@@ -652,6 +805,196 @@ export function AdminInventoryPage() {
                   className="rounded-lg bg-stone-900 px-5 py-2 font-semibold text-white shadow-sm hover:bg-stone-800"
                 >
                   {createStockMutation.isPending ? 'Saving...' : 'Add Stock Unit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create Pre-Owned Vehicle Modal */}
+      {isAddUsedCarOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+            <h3 className="font-serif text-xl font-bold text-stone-900">Add Pre-Owned Stock</h3>
+            {formError && (
+              <div className="mt-3 rounded-lg bg-rose-50 p-2.5 text-xs text-rose-700">
+                {formError}
+              </div>
+            )}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createUsedCarMutation.mutate(usedCarForm);
+              }}
+              className="mt-4 space-y-4 text-xs"
+            >
+              <div>
+                <label className="font-medium text-stone-700">Showroom Location *</label>
+                <select
+                  required
+                  value={usedCarForm.showroomId}
+                  onChange={(e) => setUsedCarForm({ ...usedCarForm, showroomId: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-stone-300 p-2"
+                >
+                  <option value="">Select Showroom</option>
+                  {showrooms?.map((s: ShowroomSummary) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-medium text-stone-700">Make / Brand *</label>
+                  <input
+                    type="text"
+                    required
+                    value={usedCarForm.make}
+                    onChange={(e) => setUsedCarForm({ ...usedCarForm, make: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2"
+                  />
+                </div>
+                <div>
+                  <label className="font-medium text-stone-700">Model Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Aurelia Solis"
+                    value={usedCarForm.modelName}
+                    onChange={(e) => setUsedCarForm({ ...usedCarForm, modelName: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-medium text-stone-700">Variant Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Elegance AT"
+                    value={usedCarForm.variantName}
+                    onChange={(e) =>
+                      setUsedCarForm({ ...usedCarForm, variantName: e.target.value })
+                    }
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2"
+                  />
+                </div>
+                <div>
+                  <label className="font-medium text-stone-700">Masked Reg Number *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. UP 32 ** 9123"
+                    value={usedCarForm.registrationNumberMasked}
+                    onChange={(e) =>
+                      setUsedCarForm({ ...usedCarForm, registrationNumberMasked: e.target.value })
+                    }
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="font-medium text-stone-700">Year *</label>
+                  <input
+                    type="number"
+                    required
+                    min={2005}
+                    max={2026}
+                    value={usedCarForm.registrationYear}
+                    onChange={(e) =>
+                      setUsedCarForm({ ...usedCarForm, registrationYear: Number(e.target.value) })
+                    }
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="font-medium text-stone-700">Mileage (Km) *</label>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    value={usedCarForm.mileageKm}
+                    onChange={(e) =>
+                      setUsedCarForm({ ...usedCarForm, mileageKm: Number(e.target.value) })
+                    }
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="font-medium text-stone-700">Price (INR) *</label>
+                  <input
+                    type="number"
+                    required
+                    min={50000}
+                    step={1000}
+                    value={usedCarForm.priceRupees}
+                    onChange={(e) =>
+                      setUsedCarForm({ ...usedCarForm, priceRupees: Number(e.target.value) })
+                    }
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="font-medium text-stone-700">Fuel *</label>
+                  <select
+                    value={usedCarForm.fuelType}
+                    onChange={(e) => setUsedCarForm({ ...usedCarForm, fuelType: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2"
+                  >
+                    <option value="PETROL">Petrol</option>
+                    <option value="DIESEL">Diesel</option>
+                    <option value="ELECTRIC">Electric</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-medium text-stone-700">Transmission *</label>
+                  <select
+                    value={usedCarForm.transmission}
+                    onChange={(e) =>
+                      setUsedCarForm({ ...usedCarForm, transmission: e.target.value })
+                    }
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2"
+                  >
+                    <option value="MANUAL">Manual</option>
+                    <option value="AUTOMATIC">Automatic</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-medium text-stone-700">Colour *</label>
+                  <input
+                    type="text"
+                    required
+                    value={usedCarForm.colourName}
+                    onChange={(e) => setUsedCarForm({ ...usedCarForm, colourName: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-stone-300 p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddUsedCarOpen(false)}
+                  className="rounded-lg border border-stone-300 px-4 py-2 font-semibold text-stone-700 hover:bg-stone-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={createUsedCarMutation.isPending}
+                  className="rounded-lg bg-stone-900 px-5 py-2 font-semibold text-white shadow-sm hover:bg-stone-800"
+                >
+                  {createUsedCarMutation.isPending ? 'Saving...' : 'Add Pre-Owned Stock'}
                 </button>
               </div>
             </form>

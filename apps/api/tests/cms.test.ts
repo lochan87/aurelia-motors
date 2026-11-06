@@ -6,6 +6,7 @@ import {
   PriceComponentCategory,
   PriceCalculation,
   Transmission,
+  SpecificationGroup,
 } from '@prisma/client';
 
 import { createApp } from '../src/app.js';
@@ -276,5 +277,91 @@ describe('Admin CMS, Inventory & Pricing Management API', () => {
 
     expect(publishRes2.status).toBe(409);
     expect(publishRes2.body.error.code).toBe('DATE_OVERLAP');
+  });
+
+  it('creates model colours and variant specifications via Admin CMS', async () => {
+    // 1. Create Model Colour
+    const colourRes = await request(app)
+      .post(`/api/admin/cms/models/${createdModelId}/colours`)
+      .set('Cookie', adminCookie)
+      .set('X-CSRF-Token', adminCsrf)
+      .send({
+        name: 'Celestial Azure',
+        hexCode: '#0047AB',
+        finish: 'METALLIC',
+        sortOrder: 1,
+      });
+
+    expect(colourRes.status).toBe(201);
+    expect(colourRes.body.name).toBe('Celestial Azure');
+    expect(colourRes.body.hexCode).toBe('#0047AB');
+
+    // 2. Upsert Variant Specification
+    const specRes = await request(app)
+      .put(`/api/admin/cms/variants/${createdVariantId}/specifications`)
+      .set('Cookie', adminCookie)
+      .set('X-CSRF-Token', adminCsrf)
+      .send({
+        group: SpecificationGroup.PERFORMANCE,
+        label: 'Acceleration 0-100 km/h',
+        value: '4.2 seconds',
+        sortOrder: 1,
+      });
+
+    expect(specRes.status).toBe(200);
+    expect(specRes.body.label).toBe('Acceleration 0-100 km/h');
+    expect(specRes.body.value).toBe('4.2 seconds');
+  });
+
+  it('creates, lists, and updates certified pre-owned vehicles via Admin CMS', async () => {
+    // 1. Create Pre-Owned Vehicle
+    const createRes = await request(app)
+      .post('/api/admin/cms/used-vehicles')
+      .set('Cookie', adminCookie)
+      .set('X-CSRF-Token', adminCsrf)
+      .send({
+        showroomId,
+        make: 'Aurelia',
+        modelName: 'Solis EV',
+        variantName: 'Elegance Long Range',
+        registrationYear: 2023,
+        registrationMonth: 5,
+        mileageKm: 21500,
+        fuelType: FuelType.ELECTRIC,
+        transmission: Transmission.AUTOMATIC,
+        ownershipCount: 1,
+        colourName: 'Monaco Blue',
+        pricePaise: 185_000_000, // 18.5 Lakhs
+        registrationNumberMasked: 'UP 32 ** 8821',
+        description:
+          'Executive owned certified electric sedan with complete service history and battery health certificate.',
+        highlights: ['Battery Health 98%', 'Single Owner', 'Under Manufacturer Warranty'],
+      });
+
+    expect(createRes.status).toBe(201);
+    expect(createRes.body.make).toBe('Aurelia');
+    expect(createRes.body.pricePaise).toBe(185_000_000);
+    const usedVehicleId = createRes.body.id;
+
+    // 2. List Pre-Owned Vehicles via Admin CMS
+    const listRes = await request(app)
+      .get('/api/admin/cms/used-vehicles')
+      .set('Cookie', adminCookie);
+
+    expect(listRes.status).toBe(200);
+    expect(listRes.body.items.length).toBeGreaterThanOrEqual(1);
+
+    // 3. Update Pre-Owned Vehicle (e.g. price adjustment)
+    const updateRes = await request(app)
+      .patch(`/api/admin/cms/used-vehicles/${usedVehicleId}`)
+      .set('Cookie', adminCookie)
+      .set('X-CSRF-Token', adminCsrf)
+      .send({
+        pricePaise: 182_500_000, // Reduced to 18.25 Lakhs
+        description: 'Updated price incentive for festive month.',
+      });
+
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.pricePaise).toBe(182_500_000);
   });
 });

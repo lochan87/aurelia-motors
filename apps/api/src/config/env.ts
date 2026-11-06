@@ -23,6 +23,11 @@ const environmentSchema = z.object({
       (value) => value.startsWith('postgresql://') || value.startsWith('postgres://'),
       'DATABASE_URL must be a PostgreSQL connection string',
     ),
+  CSRF_SECRET: z.string().trim().min(16).default('aurelia-dealership-csrf-secret-key-lucknow-2026'),
+  AURELIA_DEMO_PASSWORD: z.string().default('Aurelia2026!'),
+  AURELIA_DEFAULT_STAFF_PASSWORD: z.string().default('Aurelia2026!'),
+  LEAD_RESPONSE_SLA_MINUTES: z.coerce.number().int().positive().default(30),
+  AI_API_KEY: z.string().trim().optional(),
 });
 
 const parsedEnvironment = environmentSchema.safeParse(process.env);

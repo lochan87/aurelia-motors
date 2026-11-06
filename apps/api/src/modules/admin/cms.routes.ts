@@ -7,6 +7,7 @@ import {
   Transmission,
   PriceComponentCategory,
   PriceCalculation,
+  SpecificationGroup,
 } from '@prisma/client';
 import { authenticateStaff, requireRole } from '../../middleware/auth.js';
 import { validateBody } from '../../middleware/validate.js';
@@ -92,6 +93,52 @@ const upsertPriceEntrySchema = z.object({
       sortOrder: z.number().int().optional(),
     }),
   ),
+});
+
+const createModelColourSchema = z.object({
+  name: z.string().min(2),
+  hexCode: z.string().min(4),
+  finish: z.string().optional(),
+  sortOrder: z.number().int().optional(),
+});
+
+const upsertVariantSpecificationSchema = z.object({
+  group: z.nativeEnum(SpecificationGroup),
+  label: z.string().min(2),
+  value: z.string().min(1),
+  sortOrder: z.number().int().optional(),
+});
+
+const createUsedVehicleSchema = z.object({
+  showroomId: z.string().min(1),
+  modelId: z.string().nullable().optional(),
+  variantId: z.string().nullable().optional(),
+  make: z.string().min(2),
+  modelName: z.string().min(2),
+  variantName: z.string().min(2),
+  registrationYear: z.number().int().min(2000).max(2027),
+  registrationMonth: z.number().int().min(1).max(12).nullable().optional(),
+  mileageKm: z.number().int().nonnegative(),
+  fuelType: z.nativeEnum(FuelType),
+  transmission: z.nativeEnum(Transmission),
+  ownershipCount: z.number().int().min(1).optional(),
+  colourName: z.string().min(2),
+  pricePaise: z.number().int().positive(),
+  stockStatus: z.nativeEnum(StockStatus).optional(),
+  certified: z.boolean().optional(),
+  registrationNumberMasked: z.string().min(4),
+  description: z.string().min(10),
+  highlights: z.array(z.string()).optional(),
+  slug: z.string().optional(),
+});
+
+const updateUsedVehicleSchema = z.object({
+  pricePaise: z.number().int().positive().optional(),
+  stockStatus: z.nativeEnum(StockStatus).optional(),
+  showroomId: z.string().min(1).optional(),
+  mileageKm: z.number().int().nonnegative().optional(),
+  description: z.string().min(10).optional(),
+  highlights: z.array(z.string()).optional(),
 });
 
 export function createAdminCmsRouter(cmsService: CmsService = new CmsService()): Router {
@@ -286,6 +333,100 @@ export function createAdminCmsRouter(cmsService: CmsService = new CmsService()):
       next(err);
     }
   });
+
+  // -------------------------------------------------------------------------
+  // Model Colours & Variant Specifications
+  // -------------------------------------------------------------------------
+  router.post(
+    '/cms/models/:modelId/colours',
+    validateBody(createModelColourSchema),
+    async (req, res, next) => {
+      try {
+        const colour = await cmsService.createModelColour(req.params.modelId as string, req.body);
+        res.status(201).json(colour);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  router.delete('/cms/colours/:id', async (req, res, next) => {
+    try {
+      const deleted = await cmsService.deleteModelColour(req.params.id as string);
+      res.json(deleted);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  router.put(
+    '/cms/variants/:variantId/specifications',
+    validateBody(upsertVariantSpecificationSchema),
+    async (req, res, next) => {
+      try {
+        const spec = await cmsService.upsertVariantSpecification(
+          req.params.variantId as string,
+          req.body,
+        );
+        res.json(spec);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Certified Pre-Owned / Used Vehicles
+  // -------------------------------------------------------------------------
+  router.get('/cms/used-vehicles', async (req, res, next) => {
+    try {
+      const showroomId =
+        typeof req.query.showroomId === 'string' ? req.query.showroomId : undefined;
+      const stockStatus =
+        typeof req.query.stockStatus === 'string'
+          ? (req.query.stockStatus as StockStatus)
+          : undefined;
+      const items = await cmsService.listUsedVehicles({ showroomId, stockStatus });
+      res.json({ items, total: items.length });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  router.get('/cms/used-vehicles/:id', async (req, res, next) => {
+    try {
+      const item = await cmsService.getUsedVehicleById(req.params.id as string);
+      res.json(item);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  router.post(
+    '/cms/used-vehicles',
+    validateBody(createUsedVehicleSchema),
+    async (req, res, next) => {
+      try {
+        const item = await cmsService.createUsedVehicle(req.body);
+        res.status(201).json(item);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  router.patch(
+    '/cms/used-vehicles/:id',
+    validateBody(updateUsedVehicleSchema),
+    async (req, res, next) => {
+      try {
+        const item = await cmsService.updateUsedVehicle(req.params.id as string, req.body);
+        res.json(item);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
 
   return router;
 }

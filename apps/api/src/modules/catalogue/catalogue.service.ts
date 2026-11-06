@@ -306,7 +306,7 @@ export async function getVariantPricing(
   }
 
   const now = new Date();
-  const priceBook = await prisma.priceBook.findFirst({
+  let priceBook = await prisma.priceBook.findFirst({
     where: {
       status: PriceBookStatus.PUBLISHED,
       showroomId: showroom.id,
@@ -315,6 +315,19 @@ export async function getVariantPricing(
     },
     orderBy: { effectiveFrom: 'desc' },
   });
+
+  // Fallback to dealership-wide published price book if no showroom-specific book is active
+  if (!priceBook) {
+    priceBook = await prisma.priceBook.findFirst({
+      where: {
+        status: PriceBookStatus.PUBLISHED,
+        showroomId: null,
+        effectiveFrom: { lte: now },
+        OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }],
+      },
+      orderBy: { effectiveFrom: 'desc' },
+    });
+  }
 
   if (!priceBook) {
     throw new AppError(

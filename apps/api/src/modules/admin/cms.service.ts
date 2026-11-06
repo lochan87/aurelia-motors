@@ -4,6 +4,7 @@ import type {
   PriceCalculation,
   PriceComponentCategory,
   PrismaClient,
+  SpecificationGroup,
   Transmission,
 } from '@prisma/client';
 import { PriceBookStatus, PriceKind, StockStatus } from '@prisma/client';
@@ -75,6 +76,38 @@ export interface UpsertPriceEntryInput {
     isOptional?: boolean;
     sortOrder?: number;
   }>;
+}
+
+export interface CreateUsedVehicleInput {
+  showroomId: string;
+  modelId?: string | null;
+  variantId?: string | null;
+  make: string;
+  modelName: string;
+  variantName: string;
+  registrationYear: number;
+  registrationMonth?: number | null;
+  mileageKm: number;
+  fuelType: FuelType;
+  transmission: Transmission;
+  ownershipCount?: number;
+  colourName: string;
+  pricePaise: number;
+  stockStatus?: StockStatus;
+  certified?: boolean;
+  registrationNumberMasked: string;
+  description: string;
+  highlights?: string[];
+  slug?: string;
+}
+
+export interface UpdateUsedVehicleInput {
+  pricePaise?: number;
+  stockStatus?: StockStatus;
+  showroomId?: string;
+  mileageKm?: number;
+  description?: string;
+  highlights?: string[];
 }
 
 export class CmsService {
@@ -491,6 +524,178 @@ export class CmsService {
         status: PriceBookStatus.ARCHIVED,
       },
       include: { showroom: true },
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Model Colours & Variant Specifications
+  // ---------------------------------------------------------------------------
+
+  async createModelColour(
+    modelId: string,
+    input: {
+      name: string;
+      hexCode: string;
+      finish?: string;
+      sortOrder?: number;
+    },
+  ) {
+    await this.getModelById(modelId);
+
+    return this.prisma.vehicleColour.create({
+      data: {
+        modelId,
+        name: input.name,
+        hexCode: input.hexCode,
+        finish: input.finish ?? 'METALLIC',
+        sortOrder: input.sortOrder ?? 0,
+      },
+    });
+  }
+
+  async deleteModelColour(id: string) {
+    return this.prisma.vehicleColour.delete({ where: { id } });
+  }
+
+  async upsertVariantSpecification(
+    variantId: string,
+    input: {
+      group: SpecificationGroup;
+      label: string;
+      value: string;
+      sortOrder?: number;
+    },
+  ) {
+    const variant = await this.prisma.vehicleVariant.findUnique({ where: { id: variantId } });
+    if (!variant) {
+      throw new AppError(404, 'NOT_FOUND', `Variant '${variantId}' not found`);
+    }
+
+    return this.prisma.vehicleSpecification.upsert({
+      where: {
+        variantId_group_label: {
+          variantId,
+          group: input.group,
+          label: input.label,
+        },
+      },
+      update: {
+        value: input.value,
+        sortOrder: input.sortOrder ?? 0,
+      },
+      create: {
+        variantId,
+        group: input.group,
+        label: input.label,
+        value: input.value,
+        sortOrder: input.sortOrder ?? 0,
+      },
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Certified Pre-Owned / Used Vehicles
+  // ---------------------------------------------------------------------------
+
+  async listUsedVehicles(params?: { showroomId?: string; stockStatus?: StockStatus }) {
+    const where: Record<string, unknown> = {};
+    if (params?.showroomId) where.showroomId = params.showroomId;
+    if (params?.stockStatus) where.stockStatus = params.stockStatus;
+
+    return this.prisma.usedVehicle.findMany({
+      where,
+      include: {
+        showroom: true,
+        model: true,
+        variant: true,
+        inspections: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getUsedVehicleById(id: string) {
+    const vehicle = await this.prisma.usedVehicle.findUnique({
+      where: { id },
+      include: {
+        showroom: true,
+        model: true,
+        variant: true,
+        inspections: {
+          include: { items: true },
+        },
+      },
+    });
+    if (!vehicle) {
+      throw new AppError(404, 'NOT_FOUND', `Used vehicle '${id}' not found`);
+    }
+    return vehicle;
+  }
+
+  async createUsedVehicle(input: CreateUsedVehicleInput) {
+    const baseSlug = (
+      input.slug ?? `${input.modelName}-${input.variantName}-${input.registrationYear}`
+    )
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    let slug = baseSlug;
+    let count = 1;
+    while (await this.prisma.usedVehicle.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${count++}`;
+    }
+
+    return this.prisma.usedVehicle.create({
+      data: {
+        slug,
+        showroomId: input.showroomId,
+        modelId: input.modelId || null,
+        variantId: input.variantId || null,
+        make: input.make,
+        modelName: input.modelName,
+        variantName: input.variantName,
+        registrationYear: input.registrationYear,
+        registrationMonth: input.registrationMonth || null,
+        mileageKm: input.mileageKm,
+        fuelType: input.fuelType,
+        transmission: input.transmission,
+        ownershipCount: input.ownershipCount ?? 1,
+        colourName: input.colourName,
+        pricePaise: input.pricePaise,
+        priceKind: PriceKind.PUBLISHED,
+        stockStatus: input.stockStatus ?? StockStatus.AVAILABLE,
+        certified: input.certified ?? true,
+        registrationNumberMasked: input.registrationNumberMasked,
+        description: input.description,
+        highlights: input.highlights ?? [],
+      },
+      include: {
+        showroom: true,
+        model: true,
+        variant: true,
+      },
+    });
+  }
+
+  async updateUsedVehicle(id: string, input: UpdateUsedVehicleInput) {
+    await this.getUsedVehicleById(id);
+
+    return this.prisma.usedVehicle.update({
+      where: { id },
+      data: {
+        pricePaise: input.pricePaise,
+        stockStatus: input.stockStatus,
+        showroomId: input.showroomId,
+        mileageKm: input.mileageKm,
+        description: input.description,
+        highlights: input.highlights,
+      },
+      include: {
+        showroom: true,
+        model: true,
+        variant: true,
+      },
     });
   }
 }
