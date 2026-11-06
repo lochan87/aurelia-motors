@@ -66,10 +66,7 @@ describe('Lead CRM, Enquiries & Response Tracking API', () => {
     });
     await prisma.customer.deleteMany({
       where: {
-        OR: [
-          { email: { contains: 'test.leads' } },
-          { phone: '9876500111' },
-        ],
+        OR: [{ email: { contains: 'test.leads' } }, { phone: '9876500111' }],
       },
     });
 
@@ -115,10 +112,7 @@ describe('Lead CRM, Enquiries & Response Tracking API', () => {
     });
     await prisma.customer.deleteMany({
       where: {
-        OR: [
-          { email: { contains: 'test.leads' } },
-          { phone: '9876500111' },
-        ],
+        OR: [{ email: { contains: 'test.leads' } }, { phone: '9876500111' }],
       },
     });
   });
