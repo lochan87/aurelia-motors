@@ -1,8 +1,14 @@
+import { MessageSquare } from 'lucide-react';
+import { useState } from 'react';
+import { EnquiryModal } from '../enquiry/enquiry-modal';
+import { buttonStyles } from '../ui/button-styles';
 import { Container } from '../ui/container';
 
 const locations = ['Central Lucknow', 'Gomti Nagar', 'Sushant Golf City'];
 
 export function VisitSection() {
+  const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
+
   return (
     <section id="visit" className="scroll-mt-24 bg-sand-200 py-24 lg:py-32">
       <Container>
@@ -21,10 +27,20 @@ export function VisitSection() {
               be exceptional, and so should the way you buy and care for it.
             </p>
             <p className="mt-6 max-w-xl text-sm leading-7 text-stone-500">
-              Appointment details, direct contacts, and opening hours will be published as each
-              location opens. The digital showroom — model pages, certified stock, test drives, and
-              service booking — follows here next.
+              Appointment details, direct contacts, and opening hours are active across each
+              location. Connect with our dedicated sales consultants for bespoke walkthroughs, test
+              drives, and personalised quotations.
             </p>
+            <div className="mt-8">
+              <button
+                type="button"
+                onClick={() => setIsEnquiryOpen(true)}
+                className={buttonStyles({ variant: 'primary', size: 'md' })}
+              >
+                <MessageSquare className="h-4 w-4" />
+                Make a Showroom Enquiry
+              </button>
+            </div>
           </div>
 
           <div className="self-end">
@@ -49,6 +65,8 @@ export function VisitSection() {
             </p>
           </div>
         </div>
+
+        <EnquiryModal isOpen={isEnquiryOpen} onClose={() => setIsEnquiryOpen(false)} />
       </Container>
     </section>
   );

@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, ArrowLeft, Calendar, Loader2, MapPin } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Calendar, Loader2, MapPin, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { TestDriveModal } from '../components/bookings/test-drive-modal';
+import { EnquiryModal } from '../components/enquiry/enquiry-modal';
 import { ColourSelector } from '../components/vehicles/colour-selector';
 import { OnRoadPriceCalculator } from '../components/vehicles/on-road-price-calculator';
 import { ShowroomAvailability } from '../components/vehicles/showroom-availability';
@@ -35,6 +36,7 @@ export function VehicleDetailPage() {
 
   const [selectedVariantSlug, setSelectedVariantSlug] = useState<string>('');
   const [isTestDriveOpen, setIsTestDriveOpen] = useState(false);
+  const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
 
   // Fallback to first variant if none selected or if model loaded
   const currentVariantSlug = selectedVariantSlug || (model?.variants[0]?.slug ?? '');
@@ -129,7 +131,7 @@ export function VehicleDetailPage() {
               Personal walkthroughs and bespoke on-road consultations available across all three
               locations.
             </p>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap gap-2.5">
               <button
                 type="button"
                 onClick={() => setIsTestDriveOpen(true)}
@@ -137,6 +139,14 @@ export function VehicleDetailPage() {
               >
                 <Calendar className="h-3.5 w-3.5" />
                 Book a Test Drive
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEnquiryOpen(true)}
+                className={buttonStyles({ variant: 'outline-dark', size: 'md' })}
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                Enquire Now
               </button>
             </div>
           </div>
@@ -203,6 +213,14 @@ export function VehicleDetailPage() {
                 <Calendar className="h-3.5 w-3.5" />
                 Book a Test Drive
               </button>
+              <button
+                type="button"
+                onClick={() => setIsEnquiryOpen(true)}
+                className={buttonStyles({ variant: 'outline-dark', size: 'md' })}
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                Enquire Now
+              </button>
               <Link to="/#visit" className={buttonStyles({ variant: 'outline-dark', size: 'md' })}>
                 <MapPin className="h-3.5 w-3.5" />
                 Showrooms
@@ -223,6 +241,15 @@ export function VehicleDetailPage() {
           onClose={() => setIsTestDriveOpen(false)}
           model={model}
           initialVariantId={activeVariant?.id}
+        />
+
+        {/* Enquiry Modal */}
+        <EnquiryModal
+          isOpen={isEnquiryOpen}
+          onClose={() => setIsEnquiryOpen(false)}
+          preselectedModelId={model.id}
+          preselectedVariantId={activeVariant?.id}
+          vehicleTitle={`${model.name} ${activeVariant ? `· ${activeVariant.name}` : ''}`}
         />
       </Container>
     </div>

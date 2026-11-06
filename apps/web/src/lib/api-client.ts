@@ -4,10 +4,18 @@ import type {
   CancelBookingResult,
   CatalogueFilterQuery,
   ChangePasswordInput,
+  CreateEnquiryInput,
+  CreateEnquiryResponse,
   CreateServiceBookingInput,
   CreateStaffInput,
   CreateTestDriveBookingInput,
+  CsvImportPreviewResponse,
   DashboardMetricOverview,
+  ExecuteCsvImportResponse,
+  LeadDetail,
+  LeadFilterQuery,
+  LeadMetrics,
+  LeadSummary,
   LoginInput,
   LoginResponse,
   ModelDetail,
@@ -22,6 +30,10 @@ import type {
   TestDriveAvailabilityResponse,
   TestDriveBookingConfirmation,
   UnifiedBookingDetails,
+  UpdateLeadStatusInput,
+  AddLeadNoteInput,
+  RecordContactActivityInput,
+  ReassignLeadInput,
   UpdateStaffInput,
   UsedVehicleDetail,
   UsedVehicleFilterQuery,
@@ -160,6 +172,63 @@ export const api = {
       query as Record<string, unknown>,
     ),
   getUsedVehicle: (slug: string) => fetchJson<UsedVehicleDetail>(`/used-vehicles/${slug}`),
+
+  // Public Enquiries
+  createEnquiry: (data: CreateEnquiryInput) =>
+    postJson<CreateEnquiryResponse, CreateEnquiryInput>('/enquiries', data),
+
+  // Staff CRM & Leads
+  getLeadMetrics: () => fetchJson<LeadMetrics>('/staff/leads/metrics'),
+  getLeads: (query?: LeadFilterQuery) =>
+    fetchJson<PaginatedResult<LeadSummary>>('/staff/leads', query as Record<string, unknown>),
+  getLead: (id: string) => fetchJson<LeadDetail>(`/staff/leads/${id}`),
+  updateLeadStatus: (id: string, data: UpdateLeadStatusInput) =>
+    patchJson<LeadDetail, UpdateLeadStatusInput>(`/staff/leads/${id}/status`, data),
+  addLeadNote: (id: string, data: AddLeadNoteInput) =>
+    postJson<{ message: string }, AddLeadNoteInput>(`/staff/leads/${id}/notes`, data),
+  recordContactActivity: (id: string, data: RecordContactActivityInput) =>
+    postJson<{ message: string }, RecordContactActivityInput>(
+      `/staff/leads/${id}/activities`,
+      data,
+    ),
+  reassignLead: (id: string, data: ReassignLeadInput) =>
+    patchJson<{ message: string }, ReassignLeadInput>(`/staff/leads/${id}/assignment`, data),
+
+  // Portal CSV Import (Admin only)
+  previewCsvImport: (csvText: string) =>
+    postJson<CsvImportPreviewResponse, { csvText: string }>('/staff/leads/import/preview', {
+      csvText,
+    }),
+  executeCsvImport: (data: {
+    filename: string;
+    source: string;
+    rows: Array<{
+      rowNumber: number;
+      customerName: string;
+      phone: string;
+      email: string;
+      modelName: string;
+      showroomName: string;
+      source: string;
+      message: string;
+      externalId?: string;
+    }>;
+  }) => postJson<ExecuteCsvImportResponse, typeof data>('/staff/leads/import', data),
+  getImportBatches: () =>
+    fetchJson<
+      Array<{
+        id: string;
+        batchReference: string;
+        filename: string;
+        source: string;
+        totalRows: number;
+        importedCount: number;
+        duplicateCount: number;
+        failedCount: number;
+        createdAt: string;
+        importedBy: { id: string; fullName: string };
+      }>
+    >('/staff/leads/imports'),
 
   // Test Drives
   getTestDriveAvailability: (query: { showroomId: string; variantId: string; date: string }) =>

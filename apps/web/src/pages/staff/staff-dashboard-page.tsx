@@ -5,6 +5,8 @@ import {
   CalendarCheck,
   Car,
   CheckCircle2,
+  Clock,
+  MessageSquare,
   Shield,
   Users,
   Wrench,
@@ -54,7 +56,7 @@ export function StaffDashboardPage() {
     );
   }
 
-  const { metrics, role, recentTestDrives, recentServices } = dashboard;
+  const { metrics, role, recentTestDrives, recentServices, recentLeads = [] } = dashboard;
 
   return (
     <div className="space-y-8">
@@ -77,11 +79,18 @@ export function StaffDashboardPage() {
 
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              to="/staff/appointments"
+              to="/staff/leads"
               className="inline-flex items-center gap-2 rounded-xl bg-ink-950 px-4 py-2.5 text-xs font-semibold tracking-wider text-ivory-50 uppercase shadow-sm transition hover:bg-ink-900"
             >
+              <MessageSquare className="h-4 w-4" />
+              <span>Lead Inbox</span>
+            </Link>
+            <Link
+              to="/staff/appointments"
+              className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-semibold tracking-wider text-ink-950 uppercase shadow-sm transition hover:bg-stone-50"
+            >
               <CalendarCheck className="h-4 w-4" />
-              <span>View Appointments</span>
+              <span>Appointments</span>
             </Link>
           </div>
         </div>
@@ -206,6 +215,64 @@ export function StaffDashboardPage() {
             <p className="mt-1 text-xs text-stone-500">Across 3 showrooms & 2 workshops</p>
           </div>
         )}
+
+        {/* Metric: Inbound CRM Leads */}
+        {metrics.totalLeads !== undefined && (
+          <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between text-stone-500">
+              <span className="text-xs font-semibold tracking-wider uppercase">
+                Active Enquiries
+              </span>
+              <MessageSquare className="text-brass-600 h-5 w-5" />
+            </div>
+            <div className="mt-4 font-display text-3xl text-ink-950">{metrics.totalLeads}</div>
+            <p className="mt-1 text-xs text-stone-500">
+              {metrics.newLeads !== undefined
+                ? `${metrics.newLeads} new unaddressed`
+                : 'Inbound customer inquiries'}
+            </p>
+          </div>
+        )}
+
+        {/* Metric: Overdue SLA */}
+        {metrics.overdueLeads !== undefined && (
+          <div
+            className={`rounded-2xl border p-6 shadow-sm ${
+              metrics.overdueLeads > 0 ? 'border-red-200 bg-red-50/40' : 'border-stone-200 bg-white'
+            }`}
+          >
+            <div className="flex items-center justify-between text-stone-500">
+              <span
+                className={`text-xs font-semibold tracking-wider uppercase ${
+                  metrics.overdueLeads > 0 ? 'text-red-700' : 'text-stone-500'
+                }`}
+              >
+                SLA Overdue (&gt;30m)
+              </span>
+              <Clock
+                className={`h-5 w-5 ${
+                  metrics.overdueLeads > 0 ? 'text-red-600' : 'text-stone-400'
+                }`}
+              />
+            </div>
+            <div
+              className={`mt-4 font-display text-3xl ${
+                metrics.overdueLeads > 0 ? 'font-bold text-red-900' : 'text-ink-950'
+              }`}
+            >
+              {metrics.overdueLeads}
+            </div>
+            <p
+              className={`mt-1 text-xs ${
+                metrics.overdueLeads > 0 ? 'text-red-700' : 'text-stone-500'
+              }`}
+            >
+              {metrics.overdueLeads > 0
+                ? 'Urgent attention required'
+                : 'All within 30m response SLA'}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Recent Activity Sections */}
@@ -297,6 +364,62 @@ export function StaffDashboardPage() {
                         minute: '2-digit',
                       })}
                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recent Inbound Leads Table */}
+        {recentLeads.length > 0 && (
+          <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm lg:col-span-2">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+              <div>
+                <h2 className="font-display text-lg text-ink-950">Recent Customer Enquiries</h2>
+                <p className="text-xs text-stone-500">
+                  {role === 'SALES_CONSULTANT'
+                    ? 'At your assigned showroom'
+                    : 'Across dealership channels'}
+                </p>
+              </div>
+              <Link
+                to="/staff/leads"
+                className="text-brass-700 hover:text-brass-800 text-xs font-semibold"
+              >
+                Open CRM inbox →
+              </Link>
+            </div>
+
+            <div className="mt-4 divide-y divide-stone-100 overflow-hidden">
+              {recentLeads.map((l) => (
+                <div key={l.id} className="flex items-center justify-between py-3.5">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-stone-500">
+                        {l.reference}
+                      </span>
+                      <span className="text-sm font-semibold text-ink-950">{l.customerName}</span>
+                    </div>
+                    <div className="mt-0.5 text-xs text-stone-500">
+                      Interest: <strong className="text-stone-700">{l.vehicleInterest}</strong>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 text-right">
+                    {l.isOverdue && (
+                      <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-[0.62rem] font-bold text-red-700 ring-1 ring-red-600/20">
+                        Overdue
+                      </span>
+                    )}
+                    <span className="inline-flex rounded-full bg-stone-100 px-2.5 py-0.5 text-[0.62rem] font-semibold text-stone-700">
+                      {l.status}
+                    </span>
+                    <Link
+                      to={`/staff/leads/${l.id}`}
+                      className="rounded-lg border border-stone-200 bg-white px-2.5 py-1 text-xs font-semibold text-ink-950 hover:bg-stone-50"
+                    >
+                      Respond →
+                    </Link>
                   </div>
                 </div>
               ))}

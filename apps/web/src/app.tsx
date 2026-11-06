@@ -57,6 +57,21 @@ const StaffAppointmentsPage = lazy(() =>
     default: module.StaffAppointmentsPage,
   })),
 );
+const StaffLeadsPage = lazy(() =>
+  import('./pages/staff/staff-leads-page').then((module) => ({
+    default: module.StaffLeadsPage,
+  })),
+);
+const StaffLeadDetailPage = lazy(() =>
+  import('./pages/staff/staff-lead-detail-page').then((module) => ({
+    default: module.StaffLeadDetailPage,
+  })),
+);
+const StaffLeadImportPage = lazy(() =>
+  import('./pages/staff/staff-lead-import-page').then((module) => ({
+    default: module.StaffLeadImportPage,
+  })),
+);
 const AdminStaffPage = lazy(() =>
   import('./pages/staff/admin-staff-page').then((module) => ({
     default: module.AdminStaffPage,
@@ -94,8 +109,11 @@ export function App() {
                 <Route path="staff" element={<StaffDashboardPage />} />
                 <Route path="staff/dashboard" element={<StaffDashboardPage />} />
                 <Route path="staff/appointments" element={<StaffAppointmentsPage />} />
+                <Route path="staff/leads" element={<StaffLeadsPage />} />
+                <Route path="staff/leads/:id" element={<StaffLeadDetailPage />} />
                 {/* Admin Only Clearance */}
                 <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+                  <Route path="staff/leads/import" element={<StaffLeadImportPage />} />
                   <Route path="staff/team" element={<AdminStaffPage />} />
                 </Route>
               </Route>

@@ -7,14 +7,17 @@ import {
   Gauge,
   Loader2,
   MapPin,
+  MessageSquare,
   Sparkles,
   UserCheck,
 } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { formatInr, formatInrFromPaise } from '@aurelia/shared';
 
 import { InspectionReportView } from '../components/certified/inspection-report-view';
+import { EnquiryModal } from '../components/enquiry/enquiry-modal';
 import { Container } from '../components/ui/container';
 import { buttonStyles } from '../components/ui/button-styles';
 import { api } from '../lib/api-client';
@@ -32,6 +35,8 @@ export function CertifiedDetailPage() {
     queryFn: () => api.getUsedVehicle(slug ?? ''),
     enabled: Boolean(slug),
   });
+
+  const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -206,8 +211,8 @@ export function CertifiedDetailPage() {
               </div>
             </div>
 
-            {/* Location Notice */}
-            <div className="mt-8 border-t border-ink-950/10 pt-5">
+            {/* Location Notice & CTA */}
+            <div className="mt-8 space-y-4 border-t border-ink-950/10 pt-5">
               <div className="flex items-center gap-2 text-xs text-stone-700">
                 <MapPin className="h-4 w-4 text-brass-500" />
                 <span>
@@ -215,6 +220,14 @@ export function CertifiedDetailPage() {
                   Lucknow.
                 </span>
               </div>
+              <button
+                type="button"
+                onClick={() => setIsEnquiryOpen(true)}
+                className={buttonStyles({ variant: 'primary', size: 'md', className: 'w-full' })}
+              >
+                <MessageSquare className="h-4 w-4" />
+                Enquire About This Vehicle
+              </button>
             </div>
           </div>
         </div>
@@ -258,7 +271,15 @@ export function CertifiedDetailPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Link to="/#visit" className={buttonStyles({ variant: 'primary', size: 'md' })}>
+              <button
+                type="button"
+                onClick={() => setIsEnquiryOpen(true)}
+                className={buttonStyles({ variant: 'primary', size: 'md' })}
+              >
+                <MessageSquare className="h-4 w-4" />
+                Enquire Online
+              </button>
+              <Link to="/#visit" className={buttonStyles({ variant: 'outline-light', size: 'md' })}>
                 View Showroom Hours
               </Link>
               <Link
@@ -270,6 +291,15 @@ export function CertifiedDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Enquiry Modal */}
+        <EnquiryModal
+          isOpen={isEnquiryOpen}
+          onClose={() => setIsEnquiryOpen(false)}
+          preselectedUsedVehicleId={vehicle.id}
+          defaultShowroomId={vehicle.showroom.id}
+          vehicleTitle={`${vehicle.registrationYear} ${vehicle.make} ${vehicle.modelName} (${vehicle.registrationNumberMasked})`}
+        />
       </Container>
     </div>
   );

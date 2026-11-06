@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquare,
   Users,
   X,
 } from 'lucide-react';
@@ -211,6 +212,22 @@ export function StaffLayout({ children }: { children?: ReactNode }) {
                 <span>Appointments</span>
               </NavLink>
             )}
+
+            <NavLink
+              to="/staff/leads"
+              onClick={() => setMobileMenuOpen(false)}
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium tracking-wide transition-colors',
+                  isActive
+                    ? 'bg-brass-400 font-semibold text-ink-950 shadow-sm'
+                    : 'text-ivory-50/70 hover:bg-white/5 hover:text-ivory-50',
+                )
+              }
+            >
+              <MessageSquare className="h-4 w-4 shrink-0" />
+              <span>Leads & CRM</span>
+            </NavLink>
 
             {user.role === 'ADMIN' && (
               <NavLink
