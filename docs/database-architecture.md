@@ -11,6 +11,7 @@ The database includes the foundation, Milestone 2 catalogue models, Milestone 3 
 | `20261106054000_price_and_range_constraints`         | Check constraints for non-negative money in paise, positive years, and rating enums |
 | `20261106081807_test_drive_and_service_bookings`     | Customers, consents, demo vehicles, workshops, service types, and appointments      |
 | `20261106095647_staff_authentication_and_rbac`       | Staff accounts, Argon2id hashes, sessions, RBAC roles, location assignments, audit  |
+| `20261106115505_lead_crm_and_enquiries`              | Leads, CRM activities, internal notes, status history, portal CSV import batches    |
 
 ### Active Domain Tables
 
@@ -39,6 +40,11 @@ The database includes the foundation, Milestone 2 catalogue models, Milestone 3 
 - `staff_sessions`: Active and revoked sessions (`tokenHash`, `staffUserId`, `expiresAt`, `lastActiveAt`, `ipHash`, `userAgent`).
 - `staff_location_assignments`: Multi-location and primary showroom / workshop mappings for staff.
 - `authentication_audit_events`: Security audit trail (`eventType`, `email`, `staffUserId`, `ipHash`, `userAgent`, `metadata`).
+- `leads`: Inbound customer leads (`leadReference`, `type`, `source`, `status`, `showroomId`, `assignedStaffId`, `firstResponseAt`, `lastContactedAt`).
+- `lead_activities`: Recorded customer touchpoints (`activityType`, `summary`, `details`, `staffUserId`).
+- `lead_notes`: Private internal consultation notes (`content`, `staffUserId`).
+- `lead_status_history`: Complete audit trail of lead status progressions (`fromStatus`, `toStatus`, `reason`, `changedByStaffId`).
+- `lead_import_batches`: Batch records for third-party portal CSV uploads (`batchReference`, `filename`, `source`, `totalRows`, `importedRows`, `duplicateRows`).
 
 ## 2. Staff Authentication & RBAC Schema Details
 

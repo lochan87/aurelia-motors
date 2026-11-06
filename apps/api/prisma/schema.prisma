@@ -27,6 +27,7 @@ model Showroom {
   testDriveAppointments TestDriveAppointment[]
   workshops              Workshop[]
   staffAssignments       StaffLocationAssignment[]
+  leads                  Lead[]
 
   @@index([city, isActive])
   @@map("showrooms")
@@ -79,6 +80,7 @@ model VehicleModel {
   colours      VehicleColour[]
   images       VehicleImage[]
   usedVehicles UsedVehicle[]
+  leads        Lead[]
 
   @@index([make, isActive])
   @@index([bodyType, isActive])
@@ -108,6 +110,7 @@ model VehicleVariant {
   usedVehicles           UsedVehicle[]
   demoVehicles           DemoVehicle[]
   testDriveAppointments TestDriveAppointment[]
+  leads                  Lead[]
 
   @@unique([modelId, name])
   @@index([modelId, isActive, sortOrder])
@@ -329,6 +332,7 @@ model UsedVehicle {
   variant     VehicleVariant?         @relation(fields: [variantId], references: [id], onDelete: SetNull)
   showroom    Showroom                @relation(fields: [showroomId], references: [id], onDelete: Restrict)
   inspections UsedVehicleInspection[]
+  leads       Lead[]
 
   @@index([showroomId, stockStatus])
   @@index([registrationYear, mileageKm])
@@ -389,6 +393,7 @@ model Customer {
   consents              CustomerConsent[]
   testDriveAppointments TestDriveAppointment[]
   serviceAppointments   ServiceAppointment[]
+  leads                 Lead[]
 
   @@index([phone])
   @@index([email])
@@ -598,6 +603,11 @@ model StaffUser {
   sessions            StaffSession[]
   locationAssignments StaffLocationAssignment[]
   auditEvents         AuthenticationAuditEvent[]
+  assignedLeads       Lead[]                     @relation("AssignedLeads")
+  leadActivities      LeadActivity[]
+  leadNotes           LeadNote[]
+  leadStatusChanges   LeadStatusHistory[]
+  leadImports         LeadImportBatch[]
 
   @@index([email, isActive])
   @@index([role, isActive])
@@ -659,4 +669,160 @@ model AuthenticationAuditEvent {
   @@index([eventType, createdAt])
   @@map("authentication_audit_events")
 }
+
+// ---------------------------------------------------------------------------
+// Customer Enquiries & Lead CRM
+// ---------------------------------------------------------------------------
+
+enum LeadSource {
+  WEB_ENQUIRY
+  TEST_DRIVE_REQUEST
+  SERVICE_REQUEST
+  PORTAL_IMPORT
+  PHONE_INQUIRY
+  WALK_IN
+}
+
+enum LeadStatus {
+  NEW
+  ASSIGNED
+  CONTACTED
+  QUALIFIED
+  TEST_DRIVE_SCHEDULED
+  NEGOTIATING
+  WON
+  LOST
+}
+
+enum PreferredContactMethod {
+  PHONE
+  EMAIL
+  WHATSAPP
+}
+
+enum LeadType {
+  NEW_CAR
+  USED_CAR
+  SERVICE
+  GENERAL
+}
+
+model Lead {
+  id                     String                 @id @default(cuid())
+  leadReference          String                 @unique
+  customerId             String
+  type                   LeadType               @default(NEW_CAR)
+  modelId                String?
+  variantId              String?
+  usedVehicleId          String?
+  showroomId             String
+  source                 LeadSource             @default(WEB_ENQUIRY)
+  status                 LeadStatus             @default(NEW)
+  assignedStaffId        String?
+  preferredContactMethod PreferredContactMethod @default(PHONE)
+  customerRequirements   String?
+  externalLeadId         String?
+  importBatchId          String?
+  assignedAt             DateTime?
+  firstResponseAt        DateTime?
+  lastContactedAt        DateTime?
+  closedAt               DateTime?
+  lostReason             String?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  customer      Customer            @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  model         VehicleModel?       @relation(fields: [modelId], references: [id], onDelete: SetNull)
+  variant       VehicleVariant?     @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  usedVehicle   UsedVehicle?        @relation(fields: [usedVehicleId], references: [id], onDelete: SetNull)
+  showroom      Showroom            @relation(fields: [showroomId], references: [id], onDelete: Restrict)
+  assignedStaff StaffUser?          @relation("AssignedLeads", fields: [assignedStaffId], references: [id], onDelete: SetNull)
+  importBatch   LeadImportBatch?    @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  activities    LeadActivity[]
+  notes         LeadNote[]
+  statusHistory LeadStatusHistory[]
+
+  @@index([showroomId, status])
+  @@index([assignedStaffId, status])
+  @@index([status, createdAt])
+  @@index([customerId])
+  @@index([externalLeadId])
+  @@index([importBatchId])
+  @@index([type, status])
+  @@map("leads")
+}
+
+model LeadActivity {
+  id           String   @id @default(cuid())
+  leadId       String
+  staffUserId  String?
+  activityType String   // STATUS_CHANGE, PHONE_CALL, EMAIL_SENT, WHATSAPP_MESSAGE, IN_PERSON_MEETING, ASSIGNMENT, REASSIGNMENT, NOTE_ADDED, IMPORT
+  summary      String
+  details      String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  lead      Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  staffUser StaffUser? @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+
+  @@index([leadId, createdAt])
+  @@index([staffUserId])
+  @@map("lead_activities")
+}
+
+model LeadNote {
+  id          String   @id @default(cuid())
+  leadId      String
+  staffUserId String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lead      Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  staffUser StaffUser @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@index([staffUserId])
+  @@map("lead_notes")
+}
+
+model LeadStatusHistory {
+  id               String      @id @default(cuid())
+  leadId           String
+  fromStatus       LeadStatus?
+  toStatus         LeadStatus
+  changedByStaffId String?
+  reason           String?
+  createdAt        DateTime    @default(now())
+
+  lead      Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  staffUser StaffUser? @relation(fields: [changedByStaffId], references: [id], onDelete: SetNull)
+
+  @@index([leadId, createdAt])
+  @@index([toStatus])
+  @@map("lead_status_history")
+}
+
+model LeadImportBatch {
+  id                String     @id @default(cuid())
+  batchReference    String     @unique
+  filename          String
+  source            LeadSource @default(PORTAL_IMPORT)
+  uploadedByStaffId String
+  totalRows         Int
+  importedRows      Int
+  failedRows        Int
+  duplicateRows     Int
+  status            String     @default("COMPLETED") // COMPLETED, PARTIAL, FAILED
+  errorSummary      Json?
+  createdAt         DateTime   @default(now())
+
+  uploadedBy StaffUser @relation(fields: [uploadedByStaffId], references: [id], onDelete: Restrict)
+  leads      Lead[]
+
+  @@index([uploadedByStaffId])
+  @@index([createdAt])
+  @@map("lead_import_batches")
+}
+
 

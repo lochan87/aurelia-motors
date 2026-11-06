@@ -3,6 +3,7 @@ export * from './auth.js';
 export * from './bookings.js';
 export * from './catalogue.js';
 export * from './format.js';
+export * from './leads.js';
 export * from './pricing.js';
 export * from './services.js';
 export * from './showrooms.js';

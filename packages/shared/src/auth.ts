@@ -68,6 +68,11 @@ export interface DashboardMetricOverview {
     servicesTotal?: number;
     todaysServicesCount?: number;
     activeStaffCount?: number;
+    totalLeads?: number;
+    newLeads?: number;
+    assignedLeads?: number;
+    overdueLeads?: number;
+    averageResponseTimeMinutes?: number | null;
   };
   recentTestDrives: Array<{
     id: string;
@@ -86,5 +91,14 @@ export interface DashboardMetricOverview {
     time: string;
     workshopName: string;
     status: string;
+  }>;
+  recentLeads?: Array<{
+    id: string;
+    reference: string;
+    customerName: string;
+    vehicleInterest: string;
+    status: string;
+    time: string;
+    isOverdue: boolean;
   }>;
 }
