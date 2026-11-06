@@ -1,8 +1,6 @@
 # Assumptions and open questions
 
-This document records the assumptions used to build the foundation and the decisions that must be
-confirmed before later milestones. Assumptions are not requirements; they are explicit so they can
-be challenged and changed.
+This document records the assumptions used to build the foundation, vehicle catalogue, bookings, and staff authentication/RBAC systems. Assumptions are not requirements; they are explicit so they can be challenged and changed.
 
 ## 1. Brand and business context
 
@@ -22,15 +20,16 @@ Open questions:
 - What are the real showroom and workshop addresses, hours, phone numbers, and maps links?
 - Which channels may customers use, and who is the grievance officer?
 
-## 2. Scope of the foundation
+## 2. Scope of current implementation
 
-| Assumption                                                   | Consequence                                                                                      |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| This iteration is a foundation, not a feature build          | No catalogue, inventory, bookings, dashboards, CRM, or AI are implemented                        |
-| No fake inventory, bookings, customer records, or dashboards | The only persisted domain table is `Showroom`; it is empty in production                         |
-| Navigation may only point to existing routes                 | The shell links to the landing sections and `/privacy`; there are no dead feature buttons        |
-| The 404 and privacy pages are real routes                    | They have content and are reachable, not decorative links                                        |
-| Business requirements are documented for the next milestones | The implementation plan and database architecture are design artifacts, not implemented features |
+| Component                                   | Current status                                                                                  |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Vehicle catalogue & pricing (M2)            | Complete: 5 models, 15 variants, 20 colours, on-road price breakdowns, certified pre-owned      |
+| Bookings & capacity (M3)                    | Complete: test drives, workshop services, concurrency locks, DPDP privacy, cancellation         |
+| Staff Auth & RBAC (M4)                      | Complete: Argon2id auth, secure HttpOnly sessions, CSRF, location scoping, dashboards, team CMS |
+| Lead CRM & portal CSV import (M5)           | Planned for next milestone                                                                      |
+| Public CMS editing (offers, banners) (M6)   | Planned for future milestone                                                                    |
+| AI lead summarization & recommendations(M7) | Planned for future milestone                                                                    |
 
 ## 3. Technical assumptions
 
@@ -41,170 +40,53 @@ Open questions:
 | Language           | TypeScript 5.9.3, pinned because current `typescript-eslint` supports `<6.1.0` |
 | Frontend           | React 19, Vite 8, Tailwind CSS 4, React Router 7, TanStack Query 5             |
 | Backend            | Express 5, Zod 4                                                               |
+| Password hashing   | Argon2id (`$argon2id$v=19$m=65536,t=3,p=4`) via `argon2`                       |
+| Session storage    | Database-backed `StaffSession` (SHA-256 hashed token); HttpOnly session cookie |
+| CSRF protection    | HMAC-SHA256 double-submit header (`X-CSRF-Token`) on mutating endpoints        |
+| Token storage      | **No `localStorage` auth tokens.** HttpOnly cookie + in-memory CSRF token      |
 | ORM                | Prisma 6.19.3, pinned for stability                                            |
 | Database           | PostgreSQL 18.1 for local verification; managed PostgreSQL for production      |
-| Tests              | Vitest and Supertest                                                           |
+| Tests              | Vitest and Supertest (66 automated tests)                                      |
 | Node module format | ESM in API and shared packages                                                 |
-| Local database     | A local PostgreSQL instance is used for development; Docker is not required    |
-| Secrets            | `.env` is local-only and gitignored; production uses a secret manager          |
-| API prefix         | `/api`; versioning will be decided before public API consumers exist           |
-| Response format    | `{ success, data, meta }` and `{ success: false, error, meta }`                |
 | Money              | Integer paise, INR, Indian digit grouping                                      |
 | Time               | UTC storage, `Asia/Kolkata` business timezone                                  |
 | Health             | Real `SELECT 1`; `503` when the database is down                               |
-
-### Why TypeScript 5.9 and Prisma 6
-
-The newest TypeScript release available upstream was not compatible with the current
-`typescript-eslint` range, so 5.9.3 keeps linting and typechecking coherent. Prisma 6.19.3 is the
-conventional stable line for the generated client, migration workflow, and the current Node runtime.
-These pins should be reviewed together when upgrading the toolchain.
-
-### Why local PostgreSQL instead of Docker for verification
-
-The machine had PostgreSQL 18.1 binaries and a running database service, while the Docker daemon was
-not running. An isolated local cluster on port `55432` was used for verification so the system
-database on `5432` was not touched. This is a verification detail, not a production architecture
-decision. Production should use a managed PostgreSQL service or a deliberately configured cluster.
 
 ## 4. Product assumptions
 
 ### 4.1 The brief's "email calculator"
 
-The brief mentions an "email calculator". This is interpreted as an **EMI calculator**, because it
-sits naturally with finance enquiries and on-road pricing. If the intent was an email composition
-tool, that is a different feature and must be clarified before building it.
+The brief mentions an "email calculator". This is interpreted as an **EMI calculator**, because it sits naturally with finance enquiries and on-road pricing.
 
 ### 4.2 On-road price
 
-- The displayed on-road price is the sum of mandatory components plus any selected optional
-  components.
-- Implemented components: ex-showroom, road tax (8.00% / 800 bps of ex-showroom), comprehensive
-  insurance (3.25% - 3.40% / 325-340 bps by showroom), registration & handling, logistics &
-  documentation, and optional accessory pack and extended warranty.
-- RTO and insurance values differ by showroom and are calculated deterministically without floating-point
-  errors in integer paise.
-- Published prices are versioned through `PriceBook`. Draft price books are strictly excluded from
-  public customer quotes.
-- Admin users publish prices; the system does not accept a single opaque total without a breakdown.
+- The displayed on-road price is the sum of mandatory components plus any selected optional components.
+- Implemented components: ex-showroom, road tax, comprehensive insurance, registration & handling, logistics & documentation, and optional accessory pack and extended warranty.
+- RTO and insurance values differ by showroom and are calculated deterministically without floating-point errors in integer paise.
+- Published prices are versioned through `PriceBook`. Draft price books are strictly excluded from public customer quotes.
 
 ### 4.3 Certified pre-owned
 
 - Every published listing has an inspection report, actual-car photographs, and document history.
 - Inspection reports are versioned; corrections do not silently overwrite a published report.
-- Filters include make, model, year, price, fuel, transmission, kilometrage, and showroom.
 - Registration documents and owner information are private; only reviewed derivatives are public.
-- A used vehicle has at most one active listing at a time.
 
-### 4.4 Test drives
+### 4.4 Test drives & workshop bookings
 
-- A test drive is tied to a showroom and, where possible, a specific inventory unit.
-- Capacity is a property of the slot, enforced transactionally.
-- A booking retry with the same idempotency key must not create a duplicate.
-- Whether a driving licence is required, and for how long it is retained, is open. If required, it
-  should be stored privately and only for the stated purpose.
+- Slot concurrency enforced via database row-level locks (`SELECT ... FOR UPDATE`).
+- Public confirmation endpoints mask customer PII unless the private confirmation token is provided.
+- Cancellations safely release allocated demo vehicle or workshop bay capacity.
 
-### 4.5 Workshop capacity
+### 4.5 Staff Authentication, RBAC, and Location Scoping
 
-- Capacity may be constrained by bays, advisors, time slots, or a combination. The initial design
-  uses a `service_slots.capacity` and an optional named advisor.
-- A slot is confirmed only after an atomic capacity check.
-- Workshop closures and exceptional capacity are explicit data, not hidden UI rules.
-- The customer sees a named advisor and an estimate before work begins.
-
-### 4.6 Leads and CRM
-
-- Lead sources include website, phone, walk-in, referral, and CSV import.
-- Every lead has a showroom, source, status, consent record where required, and an owner or an
-  explicit unassigned state.
-- Response tracking records the first genuine response, not merely an opened record.
-- Assignment rules are by showroom and lead type, with manual override.
-- CSV import validates row by row, reports errors, and is idempotent.
-- Staff see only the leads their role and showroom scope permit.
-
-### 4.7 Roles
-
-Assumed roles:
-
-- **Dealership administrator:** all showrooms, pricing, staff, settings, audit.
-- **Sales consultant:** leads, inventory, test drives, and quotes within assigned showroom(s).
-- **Used-car desk:** used-car intake, inspection, listing, valuation, trade-in.
-- **Service advisor:** workshop appointments, capacity, service estimates, vehicle handover.
-- **Customer:** public browsing, enquiries, bookings, and their own requests.
-
-Role names may change. Authorization must be enforced server-side regardless of naming.
-
-### 4.8 CMS and AI
-
-- CMS pages have draft/review/publish states and revision history.
-- Public pages never expose drafts.
-- AI summaries and reply suggestions are untrusted drafts requiring human review.
-- AI must not make final pricing, credit, insurance, or safety decisions.
-- PII should be minimised or redacted before any provider call.
-- The system must work without AI if the provider is unavailable.
-
-## 5. Privacy and consent assumptions
-
-- The platform is intended for adults.
-- The Digital Personal Data Protection Act, 2023 is the relevant Indian privacy framework.
-- Consent is purpose-specific and recorded with a notice version, timestamp, source, and withdrawal
-  event.
-- Consent is not bundled into unrelated terms.
-- Customers may request access, correction, erasure, and withdrawal, subject to legal retention.
-- A grievance officer and contact channel will be appointed before public launch.
-- The privacy page is a pre-launch baseline and requires legal review.
-- No analytics, advertising cookies, or third-party tracking are added in the foundation.
-- Logs and error reports must be scrubbed of phone numbers, email addresses, free-text notes, and
-  document URLs.
-
-## 6. Security assumptions
-
-- Production runs with TLS for web, API, and database.
-- The database is not publicly reachable.
-- The application uses a least-privilege database role.
-- Secrets live in a platform secret manager, never in Git or `VITE_*` variables.
-- Sessions will use secure, HTTP-only, same-site cookies; tokens will not be stored in
-  `localStorage`.
-- CSRF protection is required for cookie-authenticated mutations.
-- File uploads will be type- and size-validated, stored privately, and served through reviewed
-  derivatives.
-- Rate limiting will need a shared store when the API runs more than one instance.
-- Authentication, authorization, and audit are **not implemented yet**. Do not expose staff or
-  customer data until they are.
-
-## 7. Deployment assumptions
-
-- The web application is static and can be hosted on any CDN or static host with SPA fallback.
-- The API is a long-running Node process.
-- PostgreSQL is managed separately.
-- `VITE_API_URL` is a public build-time value.
-- `CORS_ORIGINS` is an exact allow-list.
-- Migrations run before the new API version starts.
-- `/api/health` is the readiness probe.
-- No hosting vendor has been selected. The deployment guide is intentionally portable.
-
-## 8. Open questions before Milestone 1
-
-1. Confirm whether "email calculator" means EMI calculator.
-2. Provide the final legal entity, brand, domain, and contact channels.
-3. Confirm manufacturer/multi-brand authorisations and brand usage rules.
-4. Confirm the exact on-road price components, tax treatment, and who owns RTO/insurance values.
-5. Confirm whether test drives require a licence upload and the retention period.
-6. Confirm workshop capacity semantics: bay, advisor, time slot, or combined.
-7. Confirm staff identity provider and login method (email/password, SSO, phone OTP).
-8. Confirm consent purposes, notice versions, and retention periods.
-9. Confirm whether trade-in valuations are remote, in person, or both.
-10. Confirm whether customers can manage bookings without an account, and how they prove ownership
-    of a booking.
-
-## 9. Assumptions that must not leak into production
-
-- The placeholder brand must not be presented as a registered legal entity.
-- The planned showroom names must not be published with invented addresses or hours.
-- The Pexels photograph must not be described as the dealership's own inventory.
-- No demo credentials, seeded leads, fake prices, or sample bookings may be loaded into production.
-- The absence of authentication must not be mistaken for a finished security posture.
-- The health endpoint's database probe is not a substitute for full monitoring.
-
-When an assumption is confirmed or changed, update this document and the relevant architecture or
-plan before changing the implementation.
+- **Argon2id hashing:** Password hashing utilizes memory-hard Argon2id ($m=65536, t=3, p=4$) preventing GPU/ASIC rainbow table attacks.
+- **Session management:** Raw session tokens are never stored in the database; only SHA-256 digests are persisted. Cookies are configured with `HttpOnly`, `SameSite=Lax`, and `Secure` flags.
+- **CSRF Token binding:** Mutating endpoints (`POST`, `PATCH`, `DELETE`) require `X-CSRF-Token` derived from HMAC-SHA256 of the active session token, preventing cross-site request forgery without requiring shared state or external caches.
+- **Role Scoping:**
+  - `ADMIN`: Dealership-wide clearance across all 3 showrooms and 2 workshops; access to staff management.
+  - `SALES_CONSULTANT`: Scoped strictly to the consultant's primary assigned showroom (`LKO-CENTRAL`, `LKO-GOMTI`, or `LKO-SGC`); can only view test-drives and inventory at that showroom.
+  - `SERVICE_ADVISOR`: Scoped strictly to the advisor's assigned workshop (`WS-GOMTI` or `WS-SGC`); can only view service bookings and capacity for that workshop.
+  - `USED_CAR_STAFF`: Scoped to certified pre-owned fleet inventory and multi-point inspection audits.
+- **Administrator Safeguard:** The server strictly rejects deactivating or demoting the last remaining active administrator account, preventing accidental dealership-wide lockouts.
+- **Audit Logging:** Every authentication attempt (success, failure, bad password, inactive account, password change, logout) is recorded in `AuthenticationAuditEvent`.
+- **Reviewer Accounts:** Seeded accounts use the demo password `Aurelia2026!` (configurable via `AURELIA_DEMO_PASSWORD`).

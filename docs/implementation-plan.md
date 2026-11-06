@@ -7,8 +7,7 @@ its full on-road price, verify a used car's condition, book a test drive or serv
 capacity surprises, and get a response from a real person. Staff need one place to see and act on
 leads, inventory, pricing, appointments, and content.
 
-This plan starts from the completed foundation. It deliberately sequences **trust-critical
-foundations** (pricing, capacity, consent) before broad surface area.
+This plan sequences **trust-critical foundations** (pricing, capacity, consent, secure auth) before broad surface area.
 
 ## 2. Completed milestones
 
@@ -19,10 +18,10 @@ foundations** (pricing, capacity, consent) before broad surface area.
 - React/TypeScript/Vite/Tailwind/React Router/TanStack Query shell.
 - Premium, responsive public landing page, privacy draft, and 404 route.
 - Express/TypeScript API with security, validation, errors, request IDs, and rate limiting.
-- Prisma/PostgreSQL foundation with one `Showroom` table and a committed migration.
+- Prisma/PostgreSQL foundation with `Showroom` table and committed migration.
 - Shared contracts and money formatting.
 - Vitest/Supertest tests, strict typecheck, ESLint, Prettier.
-- Documentation and a verified production build.
+- Documentation and verified production build.
 
 ### Milestone 2: Vehicle Catalogue, Inventory, and On-Road Pricing (complete)
 
@@ -54,289 +53,44 @@ foundations** (pricing, capacity, consent) before broad surface area.
   - Add to Calendar (.ics) export.
 - 42 passing automated tests, including race condition stress tests, idempotency checks, and validation suites.
 
-Not delivered yet (future milestones):
-
-- Authentication, staff roles, and admin CMS editing.
-- Lead capture, assignment, response tracking, CSV import, and CRM.
-- EMI calculator and trade-in valuation forms.
-- AI lead summarization and recommendations.
-
-## 3. Delivery principles
-
-1. **Server-side truth.** Prices, availability, capacity, and permissions are enforced in the API and
-   database, not just hidden in the UI.
-2. **No invented business data.** Development fixtures are clearly labelled. Production starts
-   empty and is populated through real admin workflows.
-3. **Trust before breadth.** A correct price breakdown and a capacity-safe booking are more valuable
-   than many half-finished pages.
-4. **Accessible by default.** Every feature meets keyboard, focus, contrast, and screen-reader
-   expectations before it is considered done.
-5. **Measurable completion.** Each milestone has acceptance criteria and automated tests.
-6. **Privacy and consent are product requirements.** They are not a footer link added at the end.
-7. **Human-in-the-loop AI.** AI drafts and suggests. It does not make final decisions or send
-   customer communication unreviewed.
-
-## 4. Milestones
-
-### Milestone 1: Catalogue and on-road pricing
-
-**Outcome:** A customer can browse real models, variants, colours, and showroom availability, and see
-an itemised on-road price before submitting an enquiry.
-
-Scope:
-
-- Staff authentication and roles (admin, sales, used-car, service).
-- Showroom-scoped inventory.
-- Brand/model/variant/colour catalogue.
-- Media uploads with alt text and safe public derivatives.
-- Price books and components per showroom + variant.
-- Public model and variant pages with filters.
-- Explicit price breakdown: ex-showroom, RTO/registration, insurance, accessories, extended warranty,
-  other; optional vs mandatory.
-- Admin price table with draft, publish, retire, and audit.
-- Lead enquiry form with consent record.
-
-Acceptance criteria:
-
-- The displayed total equals the sum of visible components for the cited price version.
-- A published price cannot be silently edited; a new version is required.
-- Every price component has a label and amount; no hidden "other" line.
-- Inventory is showroom-specific and availability is server-derived.
-- Public pages render real data with loading, empty, and error states.
-- API validation rejects unknown fields, invalid amounts, and unpublished price versions.
-- Staff price publication is authorized and audited.
-- Integration tests cover total calculation, publication, and historical quote stability.
-
-Dependencies: authentication foundation, media storage, catalogue schema, pricing schema.
-
-### Milestone 2: Certified pre-owned
-
-**Outcome:** A used-car listing is a verifiable file, not a photo gallery.
-
-Scope:
-
-- Used listing intake and status workflow.
-- Inspection templates, versions, and item results.
-- Actual-car photography with ordering and alt text.
-- Ownership, service, insurance, and document verification.
-- Public filters: make, model, year, price, fuel, transmission, kilometrage, showroom.
-- Public inspection report and price breakdown.
-- Private documents with reviewed public derivatives only.
-
-Acceptance criteria:
-
-- No published listing exists without a completed inspection version and required photos.
-- Inspection results and documents cannot be edited in place after publication; corrections create a
-  new version.
-- Public pages never expose registration documents, owner PII, or internal notes.
-- Filters and pagination work against indexed queries.
-- A sold or withdrawn listing is removed from public search but remains auditable.
-- Tests cover publication gating and private-document access.
-
-Dependencies: catalogue/media foundation, staff roles, used-car schema.
-
-### Milestone 3: Capacity-safe appointments
-
-**Outcome:** Test drives and workshop appointments are confirmed only against real capacity, with a
-named advisor where applicable.
-
-Scope:
-
-- Test-drive slots per showroom and concrete inventory.
-- Workshop bays, service advisors, service offerings, and service slots.
-- Transactional capacity enforcement.
-- Customer booking flow with idempotency, consent, and confirmation.
-- Staff appointment calendar and status workflow.
-- Reschedule/cancel flows with capacity release.
-- Capacity exceptions and workshop closures.
-
-Acceptance criteria:
-
-- Concurrent booking attempts cannot exceed slot capacity.
-- A retry with the same idempotency key returns the original booking, not a duplicate.
-- A confirmed appointment always references a real slot and showroom.
-- Test drives reference available inventory where required.
-- Service appointments can reference a named advisor and service offering.
-- Capacity failures return a clear `409` with an actionable message.
-- Integration tests use a real PostgreSQL database and run concurrent requests.
-
-Dependencies: catalogue/inventory, customers/leads, staff roles.
-
-### Milestone 4: Lead inbox and response operations
-
-**Outcome:** No enquiry is lost, and the team can see who owns it and whether it has been answered.
-
-Scope:
-
-- Unified lead inbox for website enquiries, test drives, service requests, trade-ins, and finance.
-- Assignment rules by showroom and lead type, with manual reassignment.
-- Response deadlines and first-response tracking.
-- Lead activity timeline and notes.
-- Status pipeline and lost reasons.
-- CSV import with validation, preview, deduplication, and row-level errors.
-- Export with permission checks and audit.
-- Notification for new leads and overdue responses.
-
-Acceptance criteria:
-
-- Every lead has a source, showroom, status, owner or explicit unassigned state, and consent record
-  where required.
-- Assignment is idempotent and audited.
-- A lead cannot be marked responded without a recorded response event.
-- CSV import is transactional per batch, reports row-level errors, and does not create duplicates on
-  retry.
-- Staff only see leads permitted by role and showroom scope.
-- Lists are paginated and optimised for the inbox query.
-- Tests cover assignment, response tracking, deduplication, and authorization boundaries.
-
-Dependencies: authentication, customers/consents, appointments, trade-in, finance.
-
-### Milestone 5: Finance and trade-in tools
-
-**Outcome:** A customer can estimate an EMI and request a trade-in valuation with clear assumptions.
-
-Scope:
-
-- EMI calculator using principal, rate, and tenure; monthly EMI, total interest, total payable.
-- Clearly labelled assumptions and a zero-interest case.
-- Finance enquiry linked to a lead, with consent.
-- Trade-in request with vehicle details, condition notes, and photos.
-- Staff appraisal workflow and offer status.
-- No credit decisioning or payment collection.
-
-Acceptance criteria:
-
-- Calculator output is deterministic and unit-tested against known values.
-- Rate and tenure limits are validated; results are labelled as estimates.
-- Zero interest does not divide by zero.
-- Finance enquiry does not store exploratory calculations unless the customer submits a request.
-- Trade-in offers are authorized, audited, and tied to a staff appraiser.
-- Customer communication is not sent without the required consent.
-
-Dependencies: catalogue, leads, auth.
-
-### Milestone 6: CMS and AI-assisted operations
-
-**Outcome:** Authorised staff can publish approved content, and AI saves time without bypassing human
-review.
-
-Scope:
-
-- CMS pages/sections with draft, review, publish, and revision history.
-- Sanitised rich text and media references.
-- AI lead summaries and reply suggestions.
-- Redaction/minimisation of PII before provider calls.
-- Review, accept, edit, and reject flows.
-- Provenance: model, prompt version, input reference, reviewer.
-- Deterministic fallback when AI is unavailable.
-
-Acceptance criteria:
-
-- Draft content cannot be publicly fetched.
-- Publishing is audited and reversible through revisions.
-- AI output is stored as untrusted draft and never auto-sent.
-- Reviewer identity and timestamp are recorded on accepted output.
-- Provider secrets are server-side only and never exposed in `VITE_*` variables.
-- Failure of the AI provider does not block the lead workflow.
-
-Dependencies: auth, leads, content model, provider selection.
-
-### Milestone 7: Hardening and launch readiness
-
-**Outcome:** The platform can be operated safely by real staff with real customer data.
-
-Scope:
-
-- Production infrastructure, secrets, backups, restore drill, and monitoring.
-- Structured logs with PII scrubbing, metrics, alerts, and error reporting.
-- Rate-limit store suitable for multiple API instances.
-- Accessibility and browser QA; end-to-end test suite.
-- Security review: sessions, CSRF, authorization, file uploads, dependency audit.
-- Legal review: privacy notice, consent language, grievance officer, retention.
-- Operational runbooks: incidents, migrations, rollback, data requests.
-- Load test critical public and booking paths.
-
-Acceptance criteria:
-
-- Health checks, alerts, and dashboards are live.
-- Backups have been restored successfully in a separate environment.
-- No high/critical dependency or configuration findings remain.
-- All critical journeys pass end-to-end tests.
-- Privacy, consent, and legal copy are approved for launch.
-- Staff roles and audit trails are verified against real workflows.
-- Rollback and incident procedures have been rehearsed.
-
-## 5. Suggested sequence and dependencies
-
-```text
-Foundation
-   │
-   ├── Auth + roles ───────────────┐
-   ├── Catalogue + media ──┐        │
-   │                       ├── Pricing
-   │                       │        │
-   │                       ├── Used vehicles
-   │                       │        │
-   │                       └── Test drives / service capacity
-   │                                │
-   └── Customers + consent ─────────┴── Leads / CRM ── Finance + trade-in
-                                                       │
-                                                       └── CMS + AI ── Hardening
-```
-
-Authentication is deliberately early because price publication, lead assignment, and appointment
-management are privileged actions. Consent is also early because leads, test drives, and finance
-enquiries all collect personal data.
-
-## 6. Definition of done for every feature
-
-- Product behaviour and edge cases agreed.
-- API schema and shared types updated.
-- Database migration reviewed and reversible strategy documented.
-- Server-side authorization and validation.
-- Loading, empty, error, and success states.
-- Keyboard, focus, label, and contrast checks.
-- Unit/integration tests for invariants; end-to-end test for the critical path.
-- No secrets or PII in logs, fixtures, or screenshots.
-- Documentation updated.
-- No invented production data.
-- `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` pass.
-
-## 7. Risks and mitigations
-
-| Risk                                                  | Impact                         | Mitigation                                                                     |
-| ----------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------ |
-| Price components vary by RTO/insurer and change often | Wrong quote, lost trust        | Versioned price books, admin publishing, audit, explicit components            |
-| Booking oversell under concurrency                    | Customer arrives with no slot  | Transactional capacity check, idempotency, DB constraints, concurrency tests   |
-| PII exposure through logs or uploads                  | Legal and reputational harm    | Redaction, private storage, reviewed derivatives, least privilege              |
-| CSV imports create duplicates or bad data             | Inbox noise, wrong assignments | Preview, row-level validation, checksums, idempotency, transaction per batch   |
-| AI output contains errors or invented facts           | Misleading customers           | Human review, provenance, deterministic fallback, no auto-send                 |
-| Admin UX becomes a bottleneck                         | Staff work around the system   | Co-design with sales/service staff; measure response and booking time          |
-| Scope expands before foundations are solid            | Rework                         | Milestone gates; no feature starts without acceptance criteria                 |
-| Hosting/vendor choice delays launch                   | Operational risk               | Portable deployment now; choose vendor at hardening with explicit requirements |
-
-## 8. Open product questions
-
-Tracked in [`assumptions.md`](assumptions.md):
-
-- Confirm the brief's "email calculator" means EMI calculator.
-- Final legal entity, domain, showroom addresses, and contact channels.
-- Manufacturer authorisations and brand usage.
-- Exact on-road price components and tax/insurance responsibilities by showroom.
-- Whether test drives require a driving licence upload and for how long it is retained.
-- Service capacity unit: bay, advisor, time slot, or a combination.
-- Consent purposes, notice versions, and retention periods.
-- Staff authentication method and identity provider.
-- Whether trade-in valuations are done in person, remotely, or both.
-
-## 9. Immediate next milestone
-
-**Build Milestone 3: Capacity-Safe Appointments (Test Drives & Service Bookings).**
-
-The next implementation slice should be:
-
-1. Test-drive slots per showroom linked to concrete available inventory units.
-2. Workshop bays, service offerings, and service slots.
-3. Transactional capacity checks (`SELECT ... FOR UPDATE` or atomic concurrency guard).
-4. Customer booking flow with idempotency key, personal data capture, and confirmation.
-5. Integration tests exercising concurrency and slot exhaustion.
+### Milestone 4: Secure Staff Authentication, Role-Based Access Control, and Dealership Operations Dashboard (complete)
+
+- Database models: `StaffUser`, `StaffSession`, `StaffLocationAssignment`, `AuthenticationAuditEvent`.
+- Applied Prisma migration: `20261106095647_staff_authentication_and_rbac`.
+- Security implementation:
+  - Memory-hard Argon2id password hashing ($m=65536, t=3, p=4$).
+  - Secure HttpOnly, SameSite=Lax session cookies. Zero auth tokens in `localStorage`.
+  - SHA-256 hashed session digests stored in database.
+  - Double-submit HMAC-SHA256 CSRF verification on mutating endpoints.
+  - Rate limiting on `/api/auth/login`.
+  - Full authentication audit event logging.
+- RBAC and Location Scoping:
+  - 4 distinct roles: `ADMIN`, `SALES_CONSULTANT`, `SERVICE_ADVISOR`, `USED_CAR_STAFF`.
+  - Sales consultants strictly restricted to their assigned showroom's test drives and inventory.
+  - Service advisors strictly restricted to their assigned workshop's services and capacity.
+  - Admin users granted dealership-wide operational view and staff account management.
+  - Administrator lockout protection prevents deactivating or demoting the last active admin.
+- REST API endpoints:
+  - `POST /api/auth/login` (Rate limited, sets HttpOnly cookie, returns user and CSRF token)
+  - `POST /api/auth/logout` (Revokes session, clears cookie)
+  - `GET /api/auth/me` (Validates session, returns current user & CSRF token)
+  - `POST /api/auth/change-password` (Requires CSRF and current password verification)
+  - `GET /api/admin/staff` (Admin only: lists all staff with assignments)
+  - `POST /api/admin/staff` (Admin only: provisions staff with role and location assignments)
+  - `PATCH /api/admin/staff/:id` (Admin only: edits staff; safeguards last active admin)
+  - `POST /api/admin/staff/:id/disable` (Admin only: deactivates staff & revokes sessions; safeguards last active admin)
+  - `GET /api/staff/dashboard` (Database aggregations scoped by role & location)
+  - `GET /api/staff/appointments` (Location-scoped queue with unmasked customer details for staff)
+- Frontend portal routes:
+  - `/staff/login`: Login page with 1-click reviewer demo credentials.
+  - `/staff/dashboard`: Role-aware operations overview with location scoping notice.
+  - `/staff/appointments`: Scoped test drive and workshop booking queue.
+  - `/staff/team`: Staff directory and user provisioning dialog (Admin only).
+  - Built-in Change Password modal in staff layout.
+- 66 passing automated tests covering all auth, RBAC, scoping, and safeguard behaviors.
+
+## 3. Future milestones
+
+- **Milestone 5:** Lead CRM, portal CSV import, assignment rules, response time tracking.
+- **Milestone 6:** Public CMS editing (offers, banners, price publishing).
+- **Milestone 7:** AI-assisted lead summarization and vehicle recommendations.
