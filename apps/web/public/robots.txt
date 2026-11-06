@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# The privacy notice is intentionally public. Authenticated staff areas will be
+# disallowed here once those routes exist.

@@ -1,0 +1,101 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/manrope';
+@import '@fontsource-variable/fraunces';
+
+@theme {
+  --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+
+  --color-ink-950: #070a09;
+  --color-ink-900: #0c1210;
+  --color-forest-950: #0b1713;
+  --color-forest-900: #10231c;
+  --color-forest-800: #183328;
+  --color-ivory-50: #f8f5ee;
+  --color-ivory-100: #f1ece0;
+  --color-sand-200: #ded4c0;
+  --color-sand-300: #cbbda2;
+  --color-brass-300: #d8bd8d;
+  --color-brass-400: #c5a26a;
+  --color-brass-500: #6b4a21;
+  --color-stone-500: #565a54;
+  --color-stone-600: #4b4f49;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--color-ivory-50);
+    color: var(--color-ink-950);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.025em;
+  }
+
+  ::selection {
+    background-color: var(--color-brass-400);
+    color: var(--color-ink-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brass-500);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-rise {
+    animation: rise-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-rise-delay-1 {
+    animation: rise-in 800ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+  }
+
+  .animate-rise-delay-2 {
+    animation: rise-in 800ms cubic-bezier(0.22, 1, 0.36, 1) 240ms both;
+  }
+
+  .animate-rise-delay-3 {
+    animation: rise-in 800ms cubic-bezier(0.22, 1, 0.36, 1) 360ms both;
+  }
+}

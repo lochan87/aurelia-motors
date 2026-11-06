@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// The only domain table created in the foundation iteration. It proves the
+/// PostgreSQL migration path and gives the next phase a real location anchor.
+/// The full planned schema is documented in docs/database-architecture.md.
+model Showroom {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  city      String   @default("Lucknow")
+  state     String   @default("Uttar Pradesh")
+  timezone  String   @default("Asia/Kolkata")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([city, isActive])
+  @@map("showrooms")
+}

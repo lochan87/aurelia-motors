@@ -1,0 +1,15 @@
+# Normalize text files to LF in the repository and working tree, including on
+# Windows. Binary assets are explicitly marked so no newline conversion is ever
+# attempted.
+* text=auto eol=lf
+
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+*.pdf binary
