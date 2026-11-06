@@ -4,20 +4,23 @@ A foundation for a production-quality car dealership platform in Lucknow, Uttar 
 temporary brand is **Aurelia Motors**; it will be replaced when the legal entity and manufacturer
 partnerships are confirmed.
 
-This repository contains the verified foundation and **Milestone 2 — Vehicle Catalogue,
-Inventory, and On-Road Pricing**. It delivers a fully database-backed vehicle catalogue, transparent
-itemized on-road pricing calculations, showroom-scoped inventory tracking, certified pre-owned
-listings with full multi-point inspection audits, and responsive frontend browsing.
+This repository contains the verified foundation, **Milestone 2 — Vehicle Catalogue,
+Inventory, and On-Road Pricing**, and **Milestone 3 — End-to-End Test-Drive and Service Booking System**.
+It delivers a fully database-backed vehicle catalogue, transparent itemized on-road pricing calculations,
+showroom-scoped inventory tracking, certified pre-owned listings with inspection audits, and
+capacity-enforced customer booking workflows for both test drives and workshop services.
 
 ## What is implemented
 
 - npm-workspaces monorepo with `apps/web`, `apps/api`, and `packages/shared`.
 - Database schema with Prisma 6 migrations for vehicle models, variants, specifications, colours,
   images, showroom inventory, versioned price books, price entries, itemized price components,
-  certified used vehicles, and immutable inspection reports.
+  certified used vehicles, immutable inspection reports, demo vehicles, test-drive appointments,
+  workshops, workshop operating hours, service packages, service appointments, customers, and DPDP consents.
 - Idempotent sample-data seeding (`npm run db:seed`) generating 3 showrooms, 5 vehicle models,
   15 variants, 20 colour options, 282 specifications, 45 showroom inventory units, 4 price books,
-  264 price components, and 10 certified used-car files with 90 inspection items.
+  264 price components, 10 certified used-car files with 90 inspection items, 13 demo vehicles,
+  2 authorized service workshops, and 5 service types.
 - Public REST API endpoints:
   - `GET /api/showrooms` and `GET /api/showrooms/:code`
   - `GET /api/catalogue/models` (search, bodyType/fuelType/transmission filters, price bounds, sorting)
@@ -25,17 +28,28 @@ listings with full multi-point inspection audits, and responsive frontend browsi
   - `GET /api/catalogue/variants/:slug/pricing` (itemized on-road pricing with mandatory & optional breakdown)
   - `GET /api/used-vehicles` (paginated search, fuel/transmission/year/mileage filters, sorting)
   - `GET /api/used-vehicles/:slug` (complete inspection score, inspector details, and item findings)
+  - `GET /api/test-drives/availability` (showroom + variant slot availability with remaining demo fleet counts)
+  - `POST /api/test-drives` (idempotent, concurrency-safe test-drive reservation with demo vehicle row lock)
+  - `GET /api/services/workshops` (authorized workshops with operating schedules and bay capacities)
+  - `GET /api/services/types` (service packages with standard durations and estimated pricing)
+  - `GET /api/services/availability` (capacity-checked workshop slot availability)
+  - `POST /api/services/bookings` (idempotent, concurrency-safe service booking with bay capacity enforcement)
+  - `GET /api/bookings/confirmation/:reference` (booking verification with token-based access and DPDP PII masking)
+  - `POST /api/bookings/:reference/cancel` (token-authorized cancellation releasing slot capacity)
   - `GET /api/health` (PostgreSQL probe with status envelope)
 - Shared TypeScript contracts and integer-paise pricing calculation helpers (`@aurelia/shared`).
 - Premium frontend pages:
   - New vehicle catalogue at `/vehicles`
   - Model and variant detail page with gallery, variant switcher, colour swatches, and showroom availability at `/vehicles/:slug`
+  - Interactive test-drive booking modal on vehicle detail page and dedicated booking flow at `/test-drive`
+  - Dedicated authorized workshop booking page at `/service`
+  - Public booking confirmation and lookup page at `/bookings/confirmation/:reference` with calendar (.ics) download
   - Interactive On-Road Price Calculator with showroom-specific rates and optional add-on checkboxes
   - Certified pre-owned catalogue at `/certified`
   - Certified vehicle detail page with published inspection audit file at `/certified/:slug`
   - Editorial brand landing page (`/`), privacy notice (`/privacy`), and 404 route (`*`)
 - Original, lightweight SVG vehicle illustrations clearly labelled as illustrative placeholders.
-- 33 automated tests across unit and Supertest integration suites.
+- 42 automated tests across unit and Supertest integration suites (including concurrency race condition tests and idempotency checks).
 - Passing ESLint, Prettier, strict TypeScript, and production build checks.
 
 ## Stack and versions

@@ -38,10 +38,25 @@ foundations** (pricing, capacity, consent) before broad surface area.
 - Original illustrative placeholder SVG vehicle artwork respecting submission size constraints.
 - 33 automated tests across unit and Supertest integration suites.
 
+### Milestone 3: End-to-End Test-Drive and Service Booking System (complete)
+
+- Database models for Customer, CustomerConsent, DemoVehicle, TestDriveAppointment, Workshop, WorkshopOperatingHours,
+  ServiceType, and ServiceAppointment.
+- Applied Prisma migration: `20261106081807_test_drive_and_service_bookings`.
+- Demo fleet stationed across 3 showrooms (Central Lucknow, Gomti Nagar, Sushant Golf City).
+- Workshop configuration with hourly bay slot capacity and operating schedules across Gomti Nagar and Sushant Golf City.
+- Concurrency-safe slot allocation via PostgreSQL row-level locks (`SELECT ... FOR UPDATE`) preventing race conditions and double-bookings.
+- Public customer booking flows:
+  - Test-drive modal on vehicle detail page and dedicated `/test-drive` page with real-time demo vehicle availability.
+  - Dedicated `/service` page with workshop selection, service packages with upfront estimates, and bay capacity indicators.
+  - Public booking confirmation and lookup page at `/bookings/confirmation/:reference` with token-based authorization and DPDP PII masking.
+  - Appointment cancellation with slot capacity release.
+  - Add to Calendar (.ics) export.
+- 42 passing automated tests, including race condition stress tests, idempotency checks, and validation suites.
+
 Not delivered yet (future milestones):
 
 - Authentication, staff roles, and admin CMS editing.
-- Test-drive bookings and service bookings with capacity enforcement.
 - Lead capture, assignment, response tracking, CSV import, and CRM.
 - EMI calculator and trade-in valuation forms.
 - AI lead summarization and recommendations.
