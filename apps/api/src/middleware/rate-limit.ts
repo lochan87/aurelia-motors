@@ -27,3 +27,19 @@ export const authLoginLimiter = rateLimit({
     );
   },
 });
+
+export const enquiryRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 15,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  handler: (request, response) => {
+    sendError(
+      request,
+      response,
+      429,
+      'RATE_LIMITED',
+      'Too many enquiries submitted from this network. Please wait a few minutes before trying again.',
+    );
+  },
+});

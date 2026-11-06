@@ -1733,7 +1733,12 @@ const staffSeeds: StaffSeed[] = [
 ];
 
 async function seedStaffUsers(showrooms: Map<string, string>) {
-  const defaultPassword = process.env.AURELIA_DEMO_PASSWORD || 'Aurelia2026!';
+  const defaultPassword = process.env.AURELIA_DEMO_PASSWORD;
+  if (!defaultPassword) {
+    throw new Error(
+      'AURELIA_DEMO_PASSWORD environment variable must be set to seed demo staff accounts securely',
+    );
+  }
   const hashedPassword = await argon2.hash(defaultPassword);
   let count = 0;
 

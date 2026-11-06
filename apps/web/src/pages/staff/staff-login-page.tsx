@@ -5,7 +5,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { BrandMark } from '../../components/ui/brand-mark';
 import { useAuth } from '../../lib/use-auth';
 
-const DEMO_PASSWORD = 'Aurelia2026!';
+const DEMO_PASSWORD = import.meta.env.VITE_DEMO_PASSWORD || '';
 
 const demoAccounts = [
   {
@@ -70,7 +70,9 @@ export function StaffLoginPage() {
 
   const handleQuickFill = (demoEmail: string) => {
     setEmail(demoEmail);
-    setPassword(DEMO_PASSWORD);
+    if (DEMO_PASSWORD) {
+      setPassword(DEMO_PASSWORD);
+    }
     setError(null);
   };
 

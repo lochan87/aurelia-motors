@@ -383,6 +383,39 @@ describe('Staff Authentication and RBAC API', () => {
         expect(s.locationName).toContain('Gomti');
       }
     });
+
+    it('strictly confines an unassigned sales consultant to empty results (regression test)', async () => {
+      const argon2 = await import('argon2');
+      const unassignedUser = await prisma.staffUser.create({
+        data: {
+          email: 'unassigned.sales@aureliamotors.com',
+          fullName: 'Unassigned Rep',
+          passwordHash: await argon2.hash(demoPassword),
+          role: 'SALES_CONSULTANT',
+          isActive: true,
+        },
+      });
+
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({ email: unassignedUser.email, password: demoPassword });
+
+      const cookie = getCookie(loginRes);
+
+      const dashboard = await request(app).get('/api/staff/dashboard').set('Cookie', cookie);
+
+      expect(dashboard.status).toBe(200);
+      expect(dashboard.body.data.metrics.testDrivesTotal).toBe(0);
+      expect(dashboard.body.data.metrics.inventoryAvailable).toBe(0);
+      expect(dashboard.body.data.recentTestDrives).toHaveLength(0);
+
+      const appointments = await request(app).get('/api/staff/appointments').set('Cookie', cookie);
+
+      expect(appointments.status).toBe(200);
+      expect(appointments.body.data.testDrives).toHaveLength(0);
+
+      await prisma.staffUser.delete({ where: { id: unassignedUser.id } });
+    });
   });
 
   describe('POST /api/auth/logout', () => {

@@ -6,8 +6,6 @@ import { prisma as defaultPrisma } from '../../db/prisma.js';
 import { AppError } from '../../lib/errors.js';
 import { mapStaffUserSummary } from '../auth/auth.service.js';
 
-const DEFAULT_STAFF_PASSWORD = process.env.AURELIA_DEMO_PASSWORD || 'Aurelia2026!';
-
 export class StaffService {
   constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
 
@@ -62,7 +60,17 @@ export class StaffService {
       );
     }
 
-    const password = input.initialPassword || DEFAULT_STAFF_PASSWORD;
+    const password =
+      input.initialPassword ||
+      process.env.AURELIA_DEFAULT_STAFF_PASSWORD ||
+      process.env.AURELIA_DEMO_PASSWORD;
+    if (!password) {
+      throw new AppError(
+        400,
+        'PASSWORD_REQUIRED',
+        'Initial password must be provided or configured in the environment',
+      );
+    }
     const passwordHash = await argon2.hash(password, {
       type: argon2.argon2id,
       memoryCost: 65536,

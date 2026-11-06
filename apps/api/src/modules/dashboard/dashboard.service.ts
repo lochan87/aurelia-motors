@@ -23,6 +23,8 @@ export class DashboardService {
     const endOfToday = new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
     // 1. Role-specific aggregations
     if (role === 'ADMIN') {
       const [
@@ -35,8 +37,13 @@ export class DashboardService {
         servicesTotal,
         todaysServicesCount,
         activeStaffCount,
+        totalLeads,
+        newLeads,
+        assignedLeads,
+        overdueLeads,
         recentTestDrivesRaw,
         recentServicesRaw,
+        recentLeadsRaw,
       ] = await Promise.all([
         this.prisma.newVehicleInventory.count(),
         this.prisma.newVehicleInventory.count({ where: { status: 'AVAILABLE' } }),
@@ -51,6 +58,16 @@ export class DashboardService {
           },
         }),
         this.prisma.staffUser.count({ where: { isActive: true } }),
+        this.prisma.lead.count(),
+        this.prisma.lead.count({ where: { status: 'NEW' } }),
+        this.prisma.lead.count({ where: { status: 'ASSIGNED' } }),
+        this.prisma.lead.count({
+          where: {
+            status: { in: ['NEW', 'ASSIGNED'] },
+            firstResponseAt: null,
+            createdAt: { lt: thirtyMinutesAgo },
+          },
+        }),
         this.prisma.testDriveAppointment.findMany({
           take: 5,
           orderBy: { startTime: 'desc' },
@@ -69,6 +86,16 @@ export class DashboardService {
             customer: true,
           },
         }),
+        this.prisma.lead.findMany({
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            customer: true,
+            model: true,
+            variant: true,
+            usedVehicle: true,
+          },
+        }),
       ]);
 
       return {
@@ -84,6 +111,10 @@ export class DashboardService {
           servicesTotal,
           todaysServicesCount,
           activeStaffCount,
+          totalLeads,
+          newLeads,
+          assignedLeads,
+          overdueLeads,
         },
         recentTestDrives: recentTestDrivesRaw.map((td) => ({
           id: td.id,
@@ -103,18 +134,51 @@ export class DashboardService {
           workshopName: s.workshop.name,
           status: s.status,
         })),
+        recentLeads: recentLeadsRaw.map((l) => ({
+          id: l.id,
+          reference: l.leadReference,
+          customerName: l.customer.fullName,
+          vehicleInterest: l.usedVehicle
+            ? `${l.usedVehicle.make} ${l.usedVehicle.modelName} (Pre-Owned)`
+            : l.model
+              ? `${l.model.name}${l.variant ? ` ${l.variant.name}` : ''}`
+              : 'General Enquiry',
+          status: l.status,
+          time: l.createdAt.toISOString(),
+          isOverdue:
+            l.firstResponseAt == null &&
+            (l.status === 'NEW' || l.status === 'ASSIGNED') &&
+            l.createdAt < thirtyMinutesAgo,
+        })),
       };
     }
 
     if (role === 'SALES_CONSULTANT') {
-      const showroomFilter = showroomIds.length > 0 ? { showroomId: { in: showroomIds } } : {};
+      const showroomFilter = { showroomId: { in: showroomIds } };
 
-      const [testDrivesTotal, inventoryAvailable, recentTestDrivesRaw] = await Promise.all([
+      const [
+        testDrivesTotal,
+        inventoryAvailable,
+        totalLeads,
+        assignedLeads,
+        newLeads,
+        recentTestDrivesRaw,
+        recentLeadsRaw,
+      ] = await Promise.all([
         this.prisma.testDriveAppointment.count({ where: showroomFilter }),
         this.prisma.newVehicleInventory.count({
           where: {
             status: 'AVAILABLE',
-            ...(showroomIds.length > 0 ? { showroomId: { in: showroomIds } } : {}),
+            ...showroomFilter,
+          },
+        }),
+        this.prisma.lead.count({ where: showroomFilter }),
+        this.prisma.lead.count({ where: { ...showroomFilter, assignedStaffId: staffUser.id } }),
+        this.prisma.lead.count({
+          where: {
+            ...showroomFilter,
+            assignedStaffId: staffUser.id,
+            status: { in: ['NEW', 'ASSIGNED'] },
           },
         }),
         this.prisma.testDriveAppointment.findMany({
@@ -127,6 +191,17 @@ export class DashboardService {
             customer: true,
           },
         }),
+        this.prisma.lead.findMany({
+          where: { ...showroomFilter, assignedStaffId: staffUser.id },
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            customer: true,
+            model: true,
+            variant: true,
+            usedVehicle: true,
+          },
+        }),
       ]);
 
       return {
@@ -135,6 +210,9 @@ export class DashboardService {
         metrics: {
           testDrivesTotal,
           inventoryAvailable,
+          totalLeads,
+          assignedLeads,
+          newLeads,
         },
         recentTestDrives: recentTestDrivesRaw.map((td) => ({
           id: td.id,
@@ -146,11 +224,27 @@ export class DashboardService {
           status: td.status,
         })),
         recentServices: [],
+        recentLeads: recentLeadsRaw.map((l) => ({
+          id: l.id,
+          reference: l.leadReference,
+          customerName: l.customer.fullName,
+          vehicleInterest: l.usedVehicle
+            ? `${l.usedVehicle.make} ${l.usedVehicle.modelName}`
+            : l.model
+              ? `${l.model.name}${l.variant ? ` ${l.variant.name}` : ''}`
+              : 'Showroom Enquiry',
+          status: l.status,
+          time: l.createdAt.toISOString(),
+          isOverdue:
+            l.firstResponseAt == null &&
+            (l.status === 'NEW' || l.status === 'ASSIGNED') &&
+            l.createdAt < thirtyMinutesAgo,
+        })),
       };
     }
 
     if (role === 'SERVICE_ADVISOR') {
-      const workshopFilter = workshopIds.length > 0 ? { workshopId: { in: workshopIds } } : {};
+      const workshopFilter = { workshopId: { in: workshopIds } };
 
       const [servicesTotal, todaysServicesCount, recentServicesRaw] = await Promise.all([
         this.prisma.serviceAppointment.count({ where: workshopFilter }),
@@ -189,15 +283,19 @@ export class DashboardService {
           workshopName: s.workshop.name,
           status: s.status,
         })),
+        recentLeads: [],
       };
     }
 
     // USED_CAR_STAFF
-    const [certifiedUsedCount, availableUsedCount, soldUsedCount] = await Promise.all([
-      this.prisma.usedVehicle.count({ where: { certified: true } }),
-      this.prisma.usedVehicle.count({ where: { certified: true, stockStatus: 'AVAILABLE' } }),
-      this.prisma.usedVehicle.count({ where: { certified: true, stockStatus: 'SOLD' } }),
-    ]);
+    const [certifiedUsedCount, availableUsedCount, soldUsedCount, totalLeads, assignedLeads] =
+      await Promise.all([
+        this.prisma.usedVehicle.count({ where: { certified: true } }),
+        this.prisma.usedVehicle.count({ where: { certified: true, stockStatus: 'AVAILABLE' } }),
+        this.prisma.usedVehicle.count({ where: { certified: true, stockStatus: 'SOLD' } }),
+        this.prisma.lead.count({ where: { type: 'USED_CAR' } }),
+        this.prisma.lead.count({ where: { type: 'USED_CAR', assignedStaffId: staffUser.id } }),
+      ]);
 
     return {
       role,
@@ -206,9 +304,12 @@ export class DashboardService {
         certifiedUsedCount,
         inventoryAvailable: availableUsedCount,
         inventorySold: soldUsedCount,
+        totalLeads,
+        assignedLeads,
       },
       recentTestDrives: [],
       recentServices: [],
+      recentLeads: [],
     };
   }
 
@@ -251,10 +352,7 @@ export class DashboardService {
     }> = [];
 
     if (role === 'ADMIN' || role === 'SALES_CONSULTANT') {
-      const filter =
-        role === 'SALES_CONSULTANT' && showroomIds.length > 0
-          ? { showroomId: { in: showroomIds } }
-          : {};
+      const filter = role === 'SALES_CONSULTANT' ? { showroomId: { in: showroomIds } } : {};
 
       const rawTestDrives = await this.prisma.testDriveAppointment.findMany({
         where: filter,
@@ -283,10 +381,7 @@ export class DashboardService {
     }
 
     if (role === 'ADMIN' || role === 'SERVICE_ADVISOR') {
-      const filter =
-        role === 'SERVICE_ADVISOR' && workshopIds.length > 0
-          ? { workshopId: { in: workshopIds } }
-          : {};
+      const filter = role === 'SERVICE_ADVISOR' ? { workshopId: { in: workshopIds } } : {};
 
       const rawServices = await this.prisma.serviceAppointment.findMany({
         where: filter,
