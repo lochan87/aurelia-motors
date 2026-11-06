@@ -79,13 +79,14 @@ tool, that is a different feature and must be clarified before building it.
 
 - The displayed on-road price is the sum of mandatory components plus any selected optional
   components.
-- Expected components: ex-showroom, RTO/registration, insurance, accessories, extended warranty,
-  and other clearly labelled charges.
-- RTO and insurance values can differ by showroom and change over time.
-- Published prices are versioned. Historical quotes must not silently change.
-- Admin users publish prices; the system must not accept a single opaque total without a breakdown.
-- Tax treatment (inclusive/exclusive, GST treatment, dealer vs manufacturer responsibilities) needs
-  finance/legal confirmation before implementation.
+- Implemented components: ex-showroom, road tax (8.00% / 800 bps of ex-showroom), comprehensive
+  insurance (3.25% - 3.40% / 325-340 bps by showroom), registration & handling, logistics &
+  documentation, and optional accessory pack and extended warranty.
+- RTO and insurance values differ by showroom and are calculated deterministically without floating-point
+  errors in integer paise.
+- Published prices are versioned through `PriceBook`. Draft price books are strictly excluded from
+  public customer quotes.
+- Admin users publish prices; the system does not accept a single opaque total without a breakdown.
 
 ### 4.3 Certified pre-owned
 
