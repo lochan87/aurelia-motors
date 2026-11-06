@@ -31,19 +31,19 @@ export function HeroSection() {
             </p>
 
             <div className="animate-rise-delay-3 mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link to="/#showrooms" className={buttonStyles({ variant: 'primary' })}>
-                Explore the showrooms
-                <ArrowDown aria-hidden="true" className="h-4 w-4" />
+              <Link to="/vehicles" className={buttonStyles({ variant: 'primary' })}>
+                Explore new vehicles
+                <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
+              </Link>
+              <Link to="/certified" className={buttonStyles({ variant: 'outline-light' })}>
+                Certified pre-owned
               </Link>
               <Link
-                to="/#standard"
+                to="/#showrooms"
                 className="group inline-flex items-center gap-2 px-2 py-3 text-[0.68rem] font-semibold tracking-[0.18em] text-ivory-50/70 uppercase transition-colors hover:text-brass-300"
               >
-                Read our standard
-                <ArrowUpRight
-                  aria-hidden="true"
-                  className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                />
+                Our showrooms
+                <ArrowDown aria-hidden="true" className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>

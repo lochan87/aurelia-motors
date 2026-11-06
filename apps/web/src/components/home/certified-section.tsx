@@ -1,5 +1,7 @@
-import { Check } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
+import { buttonStyles } from '../ui/button-styles';
 import { Container } from '../ui/container';
 
 const assurances = [
@@ -61,6 +63,16 @@ export function CertifiedSection() {
                 </li>
               ))}
             </ul>
+
+            <div className="mt-8">
+              <Link
+                to="/certified"
+                className={buttonStyles({ variant: 'outline-dark', size: 'md' })}
+              >
+                Browse certified inventory
+                <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
 
           <aside className="relative self-start lg:mt-12">

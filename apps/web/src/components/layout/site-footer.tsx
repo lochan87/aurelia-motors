@@ -5,9 +5,10 @@ import { BrandMark } from '../ui/brand-mark';
 import { Container } from '../ui/container';
 
 const exploreLinks = [
-  { label: 'The standard', href: '/#standard' },
+  { label: 'New vehicles', href: '/vehicles' },
+  { label: 'Certified pre-owned', href: '/certified' },
   { label: 'Showrooms', href: '/#showrooms' },
-  { label: 'Certified pre-owned', href: '/#certified' },
+  { label: 'The standard', href: '/#standard' },
   { label: 'Workshop', href: '/#workshop' },
 ];
 

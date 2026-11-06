@@ -10,9 +10,9 @@ leads, inventory, pricing, appointments, and content.
 This plan starts from the completed foundation. It deliberately sequences **trust-critical
 foundations** (pricing, capacity, consent) before broad surface area.
 
-## 2. Current milestone: foundation (complete)
+## 2. Completed milestones
 
-Delivered:
+### Foundation (complete)
 
 - Git repository initialized.
 - npm-workspaces monorepo with `apps/web`, `apps/api`, `packages/shared`.
@@ -23,12 +23,28 @@ Delivered:
 - Shared contracts and money formatting.
 - Vitest/Supertest tests, strict typecheck, ESLint, Prettier.
 - Documentation and a verified production build.
-- Initial Git commit: `Initialize dealership project foundation`.
 
-Not delivered yet:
+### Milestone 2: Vehicle Catalogue, Inventory, and On-Road Pricing (complete)
 
-- Authentication, catalogue, inventory, pricing tables, used-car listings, bookings, leads, CRM,
-  EMI calculator, trade-in, CMS, AI, payments, integrations.
+- Database models for VehicleModel, VehicleVariant, VehicleColour, VehicleImage, VehicleSpecification,
+  NewVehicleInventory, PriceBook, PriceEntry, PriceComponent, UsedVehicle, UsedVehicleInspection, UsedInspectionItem.
+- Applied Prisma migrations: `20261106053641_vehicle_catalogue_inventory_pricing` and `20261106054000_price_and_range_constraints`.
+- Idempotent sample-data seed script (`apps/api/prisma/seed.ts`) populating showrooms, models, variants, specifications,
+  inventory units, published price books, price components, and certified used cars with inspections.
+- REST API endpoints for Showrooms, Catalogue Models, Variant Pricing breakdown, and Certified Used Vehicles.
+- Mathematical pricing calculation in integer paise ensuring standard on-road totals equal sum of visible components.
+- Responsive frontend pages: `/vehicles` catalogue, `/vehicles/:slug` model and variant detail, `/certified` used-car catalogue,
+  and `/certified/:slug` inspection file report.
+- Original illustrative placeholder SVG vehicle artwork respecting submission size constraints.
+- 33 automated tests across unit and Supertest integration suites.
+
+Not delivered yet (future milestones):
+
+- Authentication, staff roles, and admin CMS editing.
+- Test-drive bookings and service bookings with capacity enforcement.
+- Lead capture, assignment, response tracking, CSV import, and CRM.
+- EMI calculator and trade-in valuation forms.
+- AI lead summarization and recommendations.
 
 ## 3. Delivery principles
 
@@ -300,17 +316,12 @@ Tracked in [`assumptions.md`](assumptions.md):
 
 ## 9. Immediate next milestone
 
-**Build Milestone 1: Catalogue and on-road pricing.**
+**Build Milestone 3: Capacity-Safe Appointments (Test Drives & Service Bookings).**
 
-The first implementation slice should be:
+The next implementation slice should be:
 
-1. Staff authentication and role enforcement.
-2. Showroom-scoped inventory and media.
-3. Catalogue read API and public model/variant pages.
-4. Versioned price books and components.
-5. Enquiry capture with consent.
-6. Admin price publication and audit.
-7. Integration tests for totals, publication, and authorization.
-
-That slice turns the current brand shell into a real, trustworthy showroom without inventing
-inventory or compromising the pricing and capacity foundations that follow.
+1. Test-drive slots per showroom linked to concrete available inventory units.
+2. Workshop bays, service offerings, and service slots.
+3. Transactional capacity checks (`SELECT ... FOR UPDATE` or atomic concurrency guard).
+4. Customer booking flow with idempotency key, personal data capture, and confirmation.
+5. Integration tests exercising concurrency and slot exhaustion.

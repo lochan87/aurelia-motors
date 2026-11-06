@@ -4,31 +4,39 @@ A foundation for a production-quality car dealership platform in Lucknow, Uttar 
 temporary brand is **Aurelia Motors**; it will be replaced when the legal entity and manufacturer
 partnerships are confirmed.
 
-This repository is at the **foundation milestone**. It contains a working web shell, API,
-PostgreSQL migration path, shared contracts, tests, and the engineering guardrails for the product
-that follows. It deliberately does **not** contain inventory, bookings, dashboards, authentication,
-or invented business records yet.
+This repository contains the verified foundation and **Milestone 2 — Vehicle Catalogue,
+Inventory, and On-Road Pricing**. It delivers a fully database-backed vehicle catalogue, transparent
+itemized on-road pricing calculations, showroom-scoped inventory tracking, certified pre-owned
+listings with full multi-point inspection audits, and responsive frontend browsing.
 
 ## What is implemented
 
 - npm-workspaces monorepo with `apps/web`, `apps/api`, and `packages/shared`.
-- Premium responsive storefront shell: editorial hero, standard, showrooms, certified pre-owned,
-  workshop, visit, privacy, and 404 routes.
-- Accessible navigation, mobile menu, skip link, reduced-motion handling, focus states, and
-  colour contrast verified at WCAG AA by Lighthouse.
-- React 19 + TypeScript + Vite + Tailwind CSS 4 + React Router + TanStack Query foundation.
-- Express 5 API with request IDs, security headers, CORS allow-list, rate limiting, Zod validation,
-  consistent response envelopes, centralized errors, and graceful shutdown.
-- `GET /api/health` performs a real PostgreSQL `SELECT 1` and returns `503` with
-  `status: "degraded"` when the database is unavailable.
-- Prisma 6 migration path with a minimal, real `Showroom` table. The rest of the domain model is
-  documented in [`docs/database-architecture.md`](docs/database-architecture.md) and intentionally
-  not implemented yet.
-- Shared TypeScript contracts and INR/paise formatting helpers with unit tests.
-- Supertest integration tests for the health check, response envelope, CORS, malformed JSON, and
-  validation middleware.
-- ESLint, Prettier, strict TypeScript, Vitest, environment validation, and a zero-vulnerability
-  `npm audit` result at the time of the foundation commit.
+- Database schema with Prisma 6 migrations for vehicle models, variants, specifications, colours,
+  images, showroom inventory, versioned price books, price entries, itemized price components,
+  certified used vehicles, and immutable inspection reports.
+- Idempotent sample-data seeding (`npm run db:seed`) generating 3 showrooms, 5 vehicle models,
+  15 variants, 20 colour options, 282 specifications, 45 showroom inventory units, 4 price books,
+  264 price components, and 10 certified used-car files with 90 inspection items.
+- Public REST API endpoints:
+  - `GET /api/showrooms` and `GET /api/showrooms/:code`
+  - `GET /api/catalogue/models` (search, bodyType/fuelType/transmission filters, price bounds, sorting)
+  - `GET /api/catalogue/models/:slug` (variants, colours, specs, and showroom availability)
+  - `GET /api/catalogue/variants/:slug/pricing` (itemized on-road pricing with mandatory & optional breakdown)
+  - `GET /api/used-vehicles` (paginated search, fuel/transmission/year/mileage filters, sorting)
+  - `GET /api/used-vehicles/:slug` (complete inspection score, inspector details, and item findings)
+  - `GET /api/health` (PostgreSQL probe with status envelope)
+- Shared TypeScript contracts and integer-paise pricing calculation helpers (`@aurelia/shared`).
+- Premium frontend pages:
+  - New vehicle catalogue at `/vehicles`
+  - Model and variant detail page with gallery, variant switcher, colour swatches, and showroom availability at `/vehicles/:slug`
+  - Interactive On-Road Price Calculator with showroom-specific rates and optional add-on checkboxes
+  - Certified pre-owned catalogue at `/certified`
+  - Certified vehicle detail page with published inspection audit file at `/certified/:slug`
+  - Editorial brand landing page (`/`), privacy notice (`/privacy`), and 404 route (`*`)
+- Original, lightweight SVG vehicle illustrations clearly labelled as illustrative placeholders.
+- 33 automated tests across unit and Supertest integration suites.
+- Passing ESLint, Prettier, strict TypeScript, and production build checks.
 
 ## Stack and versions
 
@@ -233,20 +241,19 @@ check was exercised against a local PostgreSQL 18.1 instance; see
 Implemented now:
 
 - Public brand shell and navigation between existing routes.
-- API and database foundation.
+- API and database foundation with PostgreSQL migrations.
+- Vehicle catalogue, showroom-scoped inventory, and on-road price tables.
+- Certified pre-owned listings and published inspection reports.
+- Public vehicle browsing, variant switching, showroom availability, and price breakdown.
 - Privacy notice as a pre-launch draft.
-- Documentation of the future product.
 
-Not implemented now:
+Not implemented now (deferred to upcoming milestones):
 
 - Authentication, staff roles, and protected dashboards.
-- Vehicle catalogue, inventory, and on-road price tables.
-- Certified pre-owned listings and inspection reports.
-- Test drives, service bookings, and capacity enforcement.
+- Test drives, service bookings, and transactional capacity enforcement.
 - Lead capture, assignment, response tracking, CSV import, and CRM.
 - EMI calculator, trade-in workflow, CMS, or AI features.
 - Payment, insurance, finance, or manufacturer integrations.
-- Any demo credentials or seeded customer data.
 
 The next product milestone is the catalogue and pricing foundation. See
 [`docs/implementation-plan.md`](docs/implementation-plan.md).

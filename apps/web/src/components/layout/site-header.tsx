@@ -7,9 +7,10 @@ import { BrandMark } from '../ui/brand-mark';
 import { Container } from '../ui/container';
 
 const navigation = [
-  { label: 'The standard', href: '/#standard' },
+  { label: 'New vehicles', href: '/vehicles' },
+  { label: 'Certified', href: '/certified' },
   { label: 'Showrooms', href: '/#showrooms' },
-  { label: 'Certified', href: '/#certified' },
+  { label: 'The standard', href: '/#standard' },
   { label: 'Workshop', href: '/#workshop' },
   { label: 'Visit', href: '/#visit' },
 ];
