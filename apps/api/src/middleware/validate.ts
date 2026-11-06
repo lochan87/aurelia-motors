@@ -47,3 +47,7 @@ export function validateRequest(schemas: RequestSchemas) {
     }
   };
 }
+
+export function validateBody(schema: ZodType) {
+  return validateRequest({ body: schema });
+}

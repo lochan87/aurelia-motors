@@ -28,6 +28,8 @@ model Showroom {
   workshops              Workshop[]
   staffAssignments       StaffLocationAssignment[]
   leads                  Lead[]
+  promotionOffers        PromotionOffer[]
+  tradeInRequests        TradeInRequest[]
 
   @@index([city, isActive])
   @@map("showrooms")
@@ -81,6 +83,7 @@ model VehicleModel {
   images       VehicleImage[]
   usedVehicles UsedVehicle[]
   leads        Lead[]
+  promotionOffers PromotionOffer[]
 
   @@index([make, isActive])
   @@index([bodyType, isActive])
@@ -333,6 +336,7 @@ model UsedVehicle {
   showroom    Showroom                @relation(fields: [showroomId], references: [id], onDelete: Restrict)
   inspections UsedVehicleInspection[]
   leads       Lead[]
+  priceProposals UsedCarPriceProposal[]
 
   @@index([showroomId, stockStatus])
   @@index([registrationYear, mileageKm])
@@ -394,6 +398,7 @@ model Customer {
   testDriveAppointments TestDriveAppointment[]
   serviceAppointments   ServiceAppointment[]
   leads                 Lead[]
+  tradeInRequests       TradeInRequest[]
 
   @@index([phone])
   @@index([email])
@@ -401,14 +406,15 @@ model Customer {
 }
 
 model CustomerConsent {
-  id            String   @id @default(cuid())
-  customerId    String
-  purpose       String
-  noticeVersion String   @default("2026.1")
-  granted       Boolean  @default(true)
-  source        String   @default("WEBSITE")
-  ipHash        String?
-  grantedAt     DateTime @default(now())
+  id                 String   @id @default(cuid())
+  customerId         String
+  purpose            String
+  noticeVersion      String   @default("2026.1")
+  granted            Boolean  @default(true)
+  source             String   @default("WEBSITE")
+  verificationStatus String   @default("EXPLICIT_DIRECT")
+  ipHash             String?
+  grantedAt          DateTime @default(now())
 
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
@@ -608,6 +614,10 @@ model StaffUser {
   leadNotes           LeadNote[]
   leadStatusChanges   LeadStatusHistory[]
   leadImports         LeadImportBatch[]
+  proposedPriceChanges UsedCarPriceProposal[] @relation("ProposedPriceChanges")
+  reviewedPriceChanges UsedCarPriceProposal[] @relation("ReviewedPriceChanges")
+  assignedTradeIns    TradeInRequest[]       @relation("AssignedTradeIns")
+  notifications       StaffNotification[]
 
   @@index([email, isActive])
   @@index([role, isActive])
@@ -718,6 +728,7 @@ model Lead {
   showroomId             String
   source                 LeadSource             @default(WEB_ENQUIRY)
   status                 LeadStatus             @default(NEW)
+  consentStatus          String                 @default("EXPLICIT_DIRECT")
   assignedStaffId        String?
   preferredContactMethod PreferredContactMethod @default(PHONE)
   customerRequirements   String?
@@ -824,5 +835,163 @@ model LeadImportBatch {
   @@index([createdAt])
   @@map("lead_import_batches")
 }
+
+// ---------------------------------------------------------------------------
+// Milestone 6: Admin CMS, Price Approval, Offers, Banners, Trade-Ins, Notifications
+// ---------------------------------------------------------------------------
+
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TradeInStatus {
+  SUBMITTED
+  EVALUATING
+  OFFERED
+  ACCEPTED
+  REJECTED
+  CLOSED
+}
+
+enum VehicleCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+}
+
+enum NotificationType {
+  PRICE_APPROVAL
+  PRICE_REJECTION
+  PRICE_PROPOSAL_SUBMITTED
+  TRADE_IN_ASSIGNED
+  NEW_LEAD
+  SYSTEM
+}
+
+model UsedCarPriceProposal {
+  id                 String         @id @default(cuid())
+  usedVehicleId      String
+  currentPricePaise  Int
+  proposedPricePaise Int
+  reason             String
+  status             ProposalStatus @default(PENDING)
+  proposedByStaffId  String
+  reviewedByStaffId  String?
+  reviewNotes        String?
+  reviewedAt         DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  usedVehicle UsedVehicle @relation(fields: [usedVehicleId], references: [id], onDelete: Cascade)
+  proposedBy  StaffUser   @relation("ProposedPriceChanges", fields: [proposedByStaffId], references: [id], onDelete: Restrict)
+  reviewedBy  StaffUser?  @relation("ReviewedPriceChanges", fields: [reviewedByStaffId], references: [id], onDelete: SetNull)
+
+  @@index([usedVehicleId, status])
+  @@index([status, createdAt])
+  @@index([proposedByStaffId])
+  @@index([reviewedByStaffId])
+  @@map("used_car_price_proposals")
+}
+
+model PromotionOffer {
+  id           String    @id @default(cuid())
+  title        String
+  description  String
+  badgeText    String?
+  imageUrl     String?
+  ctaLabel     String?
+  ctaUrl       String?
+  startDate    DateTime
+  endDate      DateTime
+  modelId      String?
+  showroomId   String?
+  isPublished  Boolean   @default(true)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  vehicleModel VehicleModel? @relation(fields: [modelId], references: [id], onDelete: SetNull)
+  showroom     Showroom?     @relation(fields: [showroomId], references: [id], onDelete: SetNull)
+
+  @@index([isPublished, startDate, endDate])
+  @@index([modelId])
+  @@index([showroomId])
+  @@map("promotion_offers")
+}
+
+model HomepageBanner {
+  id           String    @id @default(cuid())
+  headline     String
+  subheadline  String?
+  badgeText    String?
+  imageUrl     String
+  ctaLabel     String
+  ctaUrl       String
+  startDate    DateTime?
+  endDate      DateTime?
+  isPublished  Boolean   @default(true)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([isPublished, displayOrder])
+  @@map("homepage_banners")
+}
+
+model TradeInRequest {
+  id                        String           @id @default(cuid())
+  reference                 String           @unique
+  customerId                String
+  showroomId                String
+  make                      String
+  model                     String
+  variant                   String?
+  registrationYear          Int
+  mileageKm                 Int
+  ownershipCount            Int              @default(1)
+  condition                 VehicleCondition @default(GOOD)
+  fuelType                  String?
+  transmission              String?
+  estimatedValuationMinPaise Int
+  estimatedValuationMaxPaise Int
+  offeredValuationPaise     Int?
+  status                    TradeInStatus    @default(SUBMITTED)
+  customerNotes             String?
+  staffNotes                String?
+  assignedStaffId           String?
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime         @updatedAt
+
+  customer      Customer   @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  showroom      Showroom   @relation(fields: [showroomId], references: [id], onDelete: Restrict)
+  assignedStaff StaffUser? @relation("AssignedTradeIns", fields: [assignedStaffId], references: [id], onDelete: SetNull)
+
+  @@index([showroomId, status])
+  @@index([assignedStaffId, status])
+  @@index([customerId])
+  @@index([reference])
+  @@map("trade_in_requests")
+}
+
+model StaffNotification {
+  id          String           @id @default(cuid())
+  staffUserId String
+  title       String
+  message     String
+  type        NotificationType @default(SYSTEM)
+  linkUrl     String?
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  readAt      DateTime?
+
+  staffUser StaffUser @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+
+  @@index([staffUserId, isRead, createdAt])
+  @@map("staff_notifications")
+}
+
 
 
