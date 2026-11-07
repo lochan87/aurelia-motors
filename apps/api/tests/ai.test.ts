@@ -81,7 +81,7 @@ describe('AI-Assisted Lead Operations API', () => {
     expect(res.body.intent).toContain('Enquired about purchasing');
     expect(res.body.summary).toContain('Prashant Mishra');
     expect(res.body.recommendedNextStep).toBeDefined();
-    expect(res.body.provider).toContain('Grounded Domain Engine');
+    expect(res.body.provider).toBe('Aurelia Grounded Domain Engine');
   });
 
   it('drafts personalized human-in-the-loop response for multiple channels', async () => {
@@ -129,6 +129,42 @@ describe('AI-Assisted Lead Operations API', () => {
     expect(res.body.recommendations[0]).toHaveProperty('title');
     expect(res.body.recommendations[0]).toHaveProperty('pricePaise');
     expect(res.body.recommendations[0]).toHaveProperty('rationale');
+    expect(res.body.provider).toBe('Aurelia Grounded Domain Engine');
+  });
+
+  it('consistently identifies as Aurelia Grounded Domain Engine even when AI_API_KEY is configured (regression test)', async () => {
+    const originalKey = process.env.AI_API_KEY;
+    try {
+      process.env.AI_API_KEY = 'test-gemini-key-do-not-claim-llm';
+
+      // 1. Summary endpoint
+      const summaryRes = await request(app)
+        .post(`/api/staff/ai/${testLeadId}/summary`)
+        .set('Cookie', adminCookie);
+      expect(summaryRes.status).toBe(200);
+      expect(summaryRes.body.provider).toBe('Aurelia Grounded Domain Engine');
+
+      // 2. Response draft endpoint
+      const draftRes = await request(app)
+        .post(`/api/staff/ai/${testLeadId}/response-draft`)
+        .set('Cookie', adminCookie)
+        .send({ channel: 'WHATSAPP' });
+      expect(draftRes.status).toBe(200);
+      expect(draftRes.body.provider).toBe('Aurelia Grounded Domain Engine');
+
+      // 3. Recommendations endpoint
+      const recsRes = await request(app)
+        .post(`/api/staff/ai/${testLeadId}/recommendations`)
+        .set('Cookie', adminCookie);
+      expect(recsRes.status).toBe(200);
+      expect(recsRes.body.provider).toBe('Aurelia Grounded Domain Engine');
+    } finally {
+      if (originalKey === undefined) {
+        delete process.env.AI_API_KEY;
+      } else {
+        process.env.AI_API_KEY = originalKey;
+      }
+    }
   });
 
   it('enforces location access control: consultant from another showroom cannot access lead (403)', async () => {

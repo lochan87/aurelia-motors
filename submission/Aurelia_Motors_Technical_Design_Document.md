@@ -460,9 +460,9 @@ Aurelia Motors integrates intelligent lead assistance while maintaining strict a
 
 Many systems misleadingly label hardcoded templates as "generative AI" or deploy ungrounded external LLMs that hallucinate non-existent car models and false prices. Aurelia Motors takes an honest, robust approach:
 
-- **Default Architecture**: Powered by the **Aurelia Grounded Domain Engine**, an in-process deterministic intelligence engine combining keyword intent extraction, urgency scoring, contextual multi-channel templating, and live PostgreSQL relational stock matching.
-- **Optional External LLM**: If the dealership configures an `AI_API_KEY` (Google Gemini 1.5 Flash), the system activates external neural synthesis for draft generation while strictly grounding the prompt with real database stock rows and sanitizing customer PII.
-- **Provider Transparency**: The API transparently reports its active intelligence provider (`provider: 'Aurelia Grounded Domain Engine (Deterministic Rule-Based & DB-Matched)'` or `'Gemini 1.5 Flash (Grounded LLM)'`).
+- **Aurelia Grounded Domain Engine**: Powered by an in-process deterministic intelligence engine combining keyword intent extraction, urgency scoring, contextual multi-channel templating, and live PostgreSQL relational stock matching.
+- **Data Privacy & Zero Hallucination**: Operates with zero external LLM dependencies, ensuring that customer personal data never leaves dealership infrastructure (DPDP Act compliance) and eliminate false vehicle specifications or hallucinations.
+- **Provider Transparency**: The API transparently and accurately identifies its provider as `'Aurelia Grounded Domain Engine'` across all AI endpoints, regardless of environment configuration.
 
 ### 14.2 Grounded Lead Operations Features
 
@@ -652,7 +652,7 @@ To maintain architectural clarity and focus on the core requirements of Problem 
 
 1. **Financial Payment Gateway**: Test-drive appointments and workshop service bookings are complimentary in accordance with authorized dealership customer care standards. Online down-payment collection (e.g. Razorpay/Stripe) is outside the scope of Problem 4.
 2. **Third-Party Paid SMS/WhatsApp Gateway**: Outbound messaging is implemented as structured notification templates and webhook boundaries rather than connecting to live paid commercial telecom aggregators.
-3. **AI Integration**: The platform transparently utilizes a deterministic Grounded Domain Engine querying real PostgreSQL stock by default, with optional external Gemini LLM activation, avoiding ungrounded AI hallucinations.
+3. **AI Integration**: The platform utilizes the in-house deterministic Aurelia Grounded Domain Engine querying live PostgreSQL stock and tariffs, eliminating external LLM dependencies, API costs, latency, and customer data leakage.
 
 ---
 
