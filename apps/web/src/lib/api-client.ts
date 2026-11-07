@@ -291,7 +291,8 @@ export const api = {
         duplicateCount: number;
         failedCount: number;
         createdAt: string;
-        importedBy: { id: string; fullName: string };
+        uploadedBy?: { fullName: string; email: string };
+        importedBy?: { id: string; fullName: string };
       }>
     >('/staff/leads/imports'),
 

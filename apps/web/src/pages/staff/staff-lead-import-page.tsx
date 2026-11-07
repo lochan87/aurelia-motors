@@ -443,7 +443,9 @@ export function StaffLeadImportPage() {
                       {b.importedCount}
                     </td>
                     <td className="px-3 py-2.5 text-amber-700">{b.duplicateCount}</td>
-                    <td className="px-3 py-2.5 text-stone-700">{b.importedBy.fullName}</td>
+                    <td className="px-3 py-2.5 text-stone-700">
+                      {b.uploadedBy?.fullName || b.importedBy?.fullName || 'System Admin'}
+                    </td>
                     <td className="px-3 py-2.5 text-[0.68rem] text-stone-400">
                       {new Date(b.createdAt).toLocaleDateString('en-IN', {
                         day: 'numeric',

@@ -1,6 +1,6 @@
 import { AlertCircle, ArrowLeft, Lock, Mail, Shield } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { BrandMark } from '../../components/ui/brand-mark';
 import { useAuth } from '../../lib/use-auth';
@@ -47,8 +47,7 @@ export function StaffLoginPage() {
 
   // If already logged in, navigate straight to returnUrl
   if (isAuthenticated) {
-    navigate(returnUrl, { replace: true });
-    return null;
+    return <Navigate to={returnUrl} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
