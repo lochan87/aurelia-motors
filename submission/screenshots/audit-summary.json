@@ -1,0 +1,326 @@
+{
+  "results": [
+    {
+      "step": "Homepage (Desktop 1440px)",
+      "status": "PASS",
+      "details": "Title: \"Aurelia Motors — Authorised passenger-car dealer, Lucknow\""
+    },
+    {
+      "step": "New Vehicles Catalogue",
+      "status": "PASS",
+      "details": "Rendered 6 model cards"
+    },
+    {
+      "step": "Vehicle Detail Page",
+      "status": "PASS",
+      "details": "Model: Aeris GT"
+    },
+    {
+      "step": "EMI Calculator Widget",
+      "status": "PASS",
+      "details": "Interactive financial calculator verified"
+    },
+    {
+      "step": "Certified Used Cars Catalogue",
+      "status": "PASS",
+      "details": "Rendered 9 certified pre-owned units"
+    },
+    {
+      "step": "Certified Vehicle Detail & Inspection",
+      "status": "PASS",
+      "details": "Multi-point inspection breakdown verified"
+    },
+    {
+      "step": "Test Drive Booking Page",
+      "status": "PASS",
+      "details": "Showrooms, fleet availability, and date-time slots verified"
+    },
+    {
+      "step": "Workshop Service Booking Page",
+      "status": "PASS",
+      "details": "Workshop bay selector and service packages verified"
+    },
+    {
+      "step": "Staff Login Page",
+      "status": "PASS",
+      "details": "Loaded credentials form and quick-fill triggers"
+    },
+    {
+      "step": "Staff Dashboard (Admin Login)",
+      "status": "PASS",
+      "details": "Session cookie set, dashboard KPIs and appointments loaded"
+    },
+    {
+      "step": "Staff Leads CRM Inbox",
+      "status": "PASS",
+      "details": "Loaded real leads with SLA timers, search and filter controls"
+    },
+    {
+      "step": "Portal CSV Import Page",
+      "status": "PASS",
+      "details": "CSV parser, column mapping, and consent provenance ready"
+    },
+    {
+      "step": "Admin Inventory CMS",
+      "status": "PASS",
+      "details": "New vehicles and Certified Pre-Owned inventory tabs verified"
+    },
+    {
+      "step": "Admin Price Books CMS",
+      "status": "PASS",
+      "details": "Price book drafts, itemized components & publish controls verified"
+    },
+    {
+      "step": "Staff Trade-Ins Queue",
+      "status": "PASS",
+      "details": "Customer trade-in appraisal workflow loaded"
+    },
+    {
+      "step": "Staff Logout",
+      "status": "PASS",
+      "details": "Logged out and returned to login screen"
+    },
+    {
+      "step": "Sales Consultant Login",
+      "status": "PASS",
+      "details": "Central Lucknow sales consultant authenticated"
+    },
+    {
+      "step": "RBAC Route Guard (/staff/pricing)",
+      "status": "PASS",
+      "details": "Access restricted for Sales Consultant (URL: http://localhost:5173/staff/pricing)"
+    },
+    {
+      "step": "Deactivated User Security Guard",
+      "status": "PASS",
+      "details": "Login rejected with clear access denial"
+    },
+    {
+      "step": "Tablet Viewport (768px)",
+      "status": "PASS",
+      "details": "Homepage responsive grid rendered cleanly"
+    },
+    {
+      "step": "Tablet Viewport Catalogue",
+      "status": "PASS",
+      "details": "Vehicle catalogue adapted cleanly to 2-column layout"
+    },
+    {
+      "step": "Mobile Viewport (375px)",
+      "status": "PASS",
+      "details": "Mobile navbar, touch targets, and single-column layout active"
+    },
+    {
+      "step": "Mobile Viewport Vehicle Detail",
+      "status": "PASS",
+      "details": "Price summary and action CTA buttons responsive on mobile"
+    }
+  ],
+  "consoleErrors": [
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://localhost:4000/api/catalogue/variants/aeris-gt-lr-awd/pricing?showroomCode=LKO-CENTRAL"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://localhost:4000/api/catalogue/variants/aeris-gt-lr-awd/pricing?showroomCode=LKO-CENTRAL"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/login"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:4000/api/auth/me"
+      }
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://localhost:4000/api/catalogue/variants/aeris-gt-lr-awd/pricing?showroomCode=LKO-CENTRAL"
+      }
+    }
+  ],
+  "failedRequests": []
+}

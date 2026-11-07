@@ -1,0 +1,69 @@
+{
+  "measurements": [
+    {
+      "page": "Homepage",
+      "url": "http://localhost:5173/",
+      "totalLoadMs": 1669,
+      "ttfbMs": 19,
+      "domContentLoadedMs": 647,
+      "loadEventMs": 650
+    },
+    {
+      "page": "New Vehicles Catalogue",
+      "url": "http://localhost:5173/vehicles",
+      "totalLoadMs": 1186,
+      "ttfbMs": 8,
+      "domContentLoadedMs": 107,
+      "loadEventMs": 110
+    },
+    {
+      "page": "Vehicle Detail",
+      "url": "http://localhost:5173/vehicles/vantara-aria",
+      "totalLoadMs": 1373,
+      "ttfbMs": 5,
+      "domContentLoadedMs": 70,
+      "loadEventMs": 72
+    },
+    {
+      "page": "Certified Used Cars",
+      "url": "http://localhost:5173/certified",
+      "totalLoadMs": 1119,
+      "ttfbMs": 9,
+      "domContentLoadedMs": 71,
+      "loadEventMs": 73
+    },
+    {
+      "page": "Certified Detail",
+      "url": "http://localhost:5173/certified/vantara-solis-ev-2023-up32ab1234",
+      "totalLoadMs": 945,
+      "ttfbMs": 8,
+      "domContentLoadedMs": 67,
+      "loadEventMs": 68
+    },
+    {
+      "page": "Test Drive Booking",
+      "url": "http://localhost:5173/test-drive",
+      "totalLoadMs": 961,
+      "ttfbMs": 7,
+      "domContentLoadedMs": 89,
+      "loadEventMs": 90
+    },
+    {
+      "page": "Service Booking",
+      "url": "http://localhost:5173/service",
+      "totalLoadMs": 1142,
+      "ttfbMs": 5,
+      "domContentLoadedMs": 65,
+      "loadEventMs": 67
+    },
+    {
+      "page": "Staff Login",
+      "url": "http://localhost:5173/staff/login",
+      "totalLoadMs": 1121,
+      "ttfbMs": 6,
+      "domContentLoadedMs": 76,
+      "loadEventMs": 78
+    }
+  ],
+  "assignmentDurationMs": 301
+}
