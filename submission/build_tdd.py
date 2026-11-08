@@ -348,7 +348,7 @@ def generate_diagrams():
     
     app_box = patches.FancyBboxPatch((4, 16), 97, 18, boxstyle='round,pad=1', facecolor='#f8fafc', edgecolor='#2563eb', linewidth=1.5)
     ax.add_patch(app_box)
-    ax.text(52.5, 31.5, 'Backend Application Tier (Express 5 / Node.js 24 LTS)', ha='center', va='center', fontsize=10, fontweight='bold', color='#1d4ed8')
+    ax.text(52.5, 31.5, 'Backend Application Tier (Express 5 / Node.js >= 22)', ha='center', va='center', fontsize=10, fontweight='bold', color='#1d4ed8')
     
     mods = [
         ('Auth & RBAC', 'Argon2id Hashes\nHttpOnly Cookies\nCSRF Token Guard', 6),
@@ -773,9 +773,9 @@ def build_docx():
     )
     add_bullet(
         doc,
-        "Backend REST API (Express 5, Node.js 24 LTS, Zod)",
-        "Express 5 provides an HTTP routing pipeline with native async error handling. Node.js >= 24.0.0 LTS (and node:22-alpine "
-        "container base image) ensures runtime stability. Zod enforces runtime boundary validation, sharing schema definitions "
+        "Backend REST API (Express 5, Node.js >= 22, Zod)",
+        "Express 5 provides an HTTP routing pipeline with native async error handling. Node.js >= 22.0.0 (supporting active LTS 22 and 24, "
+        "aligned with node:22-alpine container images) ensures runtime stability. Zod enforces runtime boundary validation, sharing schema definitions "
         "between client and server to guarantee end-to-end type safety."
     )
     add_bullet(
@@ -1240,7 +1240,7 @@ def build_docx():
     )
     
     add_heading_2(doc, "11.1 System Prerequisites")
-    add_bullet(doc, "Node.js Runtime", "Node.js >= 24.0.0 LTS and npm >= 10.0.0 (local development host).");
+    add_bullet(doc, "Node.js Runtime", "Node.js >= 22.0.0 (LTS 22 or 24) and npm >= 10.0.0 (local development host or container).");
     add_bullet(doc, "Database", "PostgreSQL 16+ or Docker Desktop running postgres:18-alpine.");
     add_bullet(doc, "Container Engine", "Docker Desktop with Compose v2 support (optional for containerized mode).");
     
@@ -1296,7 +1296,7 @@ def build_docx():
         ["usedcars@aureliamotors.com", "USED_CAR_STAFF", "Central Showroom", "Certified pre-owned inspections, trade-in valuations, price adjustment proposals"],
         ["service.transport@aureliamotors.com", "SERVICE_ADVISOR", "Transport Nagar Workshop", "Workshop bay appointment management, vehicle check-ins, service status"]
     ]
-    add_styled_table(doc, staff_headers, staff_rows, [Inches(1.8), Inches(1.3), Inches(1.5), Inches(2.17)])
+    add_styled_table(doc, staff_headers, staff_rows, [Inches(2.18), Inches(1.22), Inches(1.35), Inches(2.02)])
     
     add_body_p(
         doc,
@@ -1367,7 +1367,7 @@ def build_docx():
     add_bullet(doc, "Repository URL", "https://github.com/lochan87/aurelia-motors");
     add_bullet(doc, "Primary Branch", "main");
     add_bullet(doc, "Author", "Lochan T N");
-    add_bullet(doc, "License", 'Private repository ("private": true in package.json; hiring project evaluation)');
+    add_bullet(doc, "License", "No license file; submitted for hiring evaluation");
     
     add_heading_2(doc, "13.1 Reviewer Verification Commands")
     add_code_block(
@@ -1482,7 +1482,7 @@ Automotive retail across Tier-1 and Tier-2 Indian metropolitan markets has histo
 
 The platform is structured as an npm workspaces monorepo:
 * **Frontend SPA:** React 19, TypeScript, Vite, Tailwind CSS 4, React Router 7, TanStack Query v5.
-* **Backend REST API:** Express 5, Node.js >= 24.0.0 LTS (and `node:22-alpine` in Dockerfiles), Zod runtime validation.
+* **Backend REST API:** Express 5, Node.js >= 22.0.0 (LTS 22/24, `node:22-alpine` in Dockerfiles), Zod runtime validation.
 * **Data Persistence:** PostgreSQL 18 Alpine in Docker Compose (compatible with PostgreSQL 16+), Prisma 6.19 ORM.
 * **Security & Auth:** Argon2id password hashing, signed HttpOnly SameSite=Lax session cookies, CSRF protection tokens, location-scoped RBAC middleware.
 
@@ -1609,7 +1609,7 @@ Multi-tier automated test suite comprising **127 passing automated tests across 
 ## 11. Local Setup and Deployment
 
 ### Prerequisites
-* Node.js >= 24.0.0 LTS, npm >= 10.0.0
+* Node.js >= 22.0.0, npm >= 10.0.0
 * PostgreSQL 16+ or Docker Desktop running `postgres:18-alpine`
 
 ### Local Development
@@ -1658,7 +1658,7 @@ curl http://localhost/api/health
 * **Repository:** [https://github.com/lochan87/aurelia-motors](https://github.com/lochan87/aurelia-motors)
 * **Primary Branch:** `main`
 * **Author:** Lochan T N
-* **License:** Private repository (`"private": true` in `package.json`; hiring project evaluation)
+* **License:** No license file; submitted for hiring evaluation
 * **Verification Commands:**
   * Test Suite: `npm test`
   * Linting: `npm run lint`

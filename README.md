@@ -158,14 +158,14 @@ The web application starts at `http://localhost:5173` and the API runs at `http:
   - Protected staff directory and provisioning at `/staff/team` (Admin only, with last-admin safeguard)
   - Built-in Change Password modal in staff layout
   - Editorial brand landing page (`/`), privacy notice (`/privacy`), and 404 route (`*`)
-- 110 automated tests across unit and Supertest integration suites (including CMS operations, used-car price approvals, trade-in requests, content management, notifications, grounded AI assistant, enquiry submission, duplicate protection, DPDP consent, deterministic workload balancing, first-response SLA tracking, location scoping, portal CSV preview, and batch execution).
+- 127 automated tests across 18 unit and Supertest integration suites (including CMS operations, used-car price approvals, trade-in requests, content management, notifications, grounded AI assistant, enquiry submission, duplicate protection, DPDP consent, deterministic workload balancing, first-response SLA tracking, location scoping, portal CSV preview, and batch execution).
 - Passing ESLint, Prettier, strict TypeScript, and production build checks.
 
 ## Stack and versions
 
 | Area            | Choice                                                   |
 | --------------- | -------------------------------------------------------- |
-| Runtime         | Node.js 24.14.1 (engines: `>=24.0.0`)                    |
+| Runtime         | Node.js (engines: `>=22.0.0`, verified on Node 22 & 24)  |
 | Package manager | npm 10.8.0 workspaces                                    |
 | Language        | TypeScript 5.9.3                                         |
 | Frontend        | React 19.3.1, Vite 8.3.6, Tailwind CSS 4.3.4             |

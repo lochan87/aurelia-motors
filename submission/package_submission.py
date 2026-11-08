@@ -13,9 +13,9 @@ import subprocess
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ZIP_PATH = os.path.join(REPO_ROOT, "submission", "aurelia-motors-submission.zip")
 
-EXCLUDE_DIRS = {"node_modules", ".git", "dist", ".gemini", ".turbo", "__pycache__"}
+EXCLUDE_DIRS = {"node_modules", ".git", "dist", ".gemini", ".turbo", "__pycache__", "coverage", ".vite", "pdf_pages"}
 EXCLUDE_FILES = {".env", "aurelia-motors-submission.zip"}
-EXCLUDE_EXTS = {".log", ".tmp"}
+EXCLUDE_EXTS = {".log", ".tmp", ".zip"}
 
 def create_submission_zip():
     print(f"Creating submission zip from {REPO_ROOT}...")
