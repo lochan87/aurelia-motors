@@ -5,9 +5,9 @@
 **Project:** Isocode Software Engineering Intern Take-Home Assignment — Problem 4  
 **Author:** lochan87 <1DS22IS073@dsce.edu.in>  
 **Dealership Topology:** 3 Showrooms & 2 Authorized Workshops in Lucknow, Uttar Pradesh, India  
-**Date:** November 6, 2026  
+**Date:** November 8, 2026  
 **Assignment Deadline:** November 9, 2026, 11:59 PM IST  
-**Version:** 1.0.0 (Production Release / Milestone 7 Complete)
+**Version:** 1.0.0 (Production Release / Milestone 7 Complete — 127 Passing Tests)
 
 ---
 
@@ -626,7 +626,7 @@ _Note: The staff login screen includes 1-click quick-fill buttons for instant re
 
 The codebase has undergone comprehensive automated verification:
 
-- **Automated Test Results**: **126 passing tests across 15 test suites** executed via Vitest and Supertest:
+- **Automated Test Results**: **127 passing tests across 15 test suites** executed via Vitest and Supertest:
   1. `validation.test.ts` (2 tests): Request validation schemas and error envelope formatting.
   2. `health.test.ts` (7 tests): Database connection health probe and uptime reporting.
   3. `showrooms.test.ts` (3 tests): Showroom listing, code lookup, and active facility filtering.
@@ -640,7 +640,7 @@ The codebase has undergone comprehensive automated verification:
   11. `content.test.ts` (4 tests): Homepage banners and promotional campaign CMS.
   12. `notifications.test.ts` (5 tests): Staff notifications popover, unread counts, and mark-as-read workflows.
   13. `used-car-pricing.test.ts` (6 tests): Separation-of-duties price proposals and approval governance.
-  14. `ai.test.ts` (4 tests): Grounded lead intent summary, multi-channel response drafts, and inventory-backed stock recommendations.
+  14. `ai.test.ts` (5 tests): Grounded lead intent summary, multi-channel response drafts, inventory-backed stock recommendations, and engine provider attribution regression test.
   15. `e2e-journeys.test.ts` (14 tests): Full end-to-end integration journeys across all customer and staff workflows.
 - **Code Quality**: ESLint 9 passing with 0 warnings, Prettier 3 passing with 0 formatting warnings, strict TypeScript passing with 0 compilation errors, and production build succeeded in 907ms.
 

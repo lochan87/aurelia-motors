@@ -19,9 +19,9 @@ curl http://localhost:4000/api/health
 
 Services started:
 
-- `postgres`: PostgreSQL 18.1 alpine on port `55432:5432` with healthy status probe.
-- `api`: Node.js 22 alpine running Express API with automatic migration deployment on port `4000:4000`.
-- `web`: Nginx alpine serving optimized Vite React 19 production assets on port `80` (and `5173`) with API reverse proxy.
+- `postgres`: PostgreSQL 18.1 alpine on port `55432:5432` with healthy status probe and persistent volume.
+- `api`: Node.js 22 alpine running Express API with automatic migration deployment and sample data seeding on port `4000:4000`.
+- `web`: Nginx alpine serving optimized Vite React 19 production assets on port `80` (and `5173`) with API reverse proxy and health probe.
 
 ## Topology
 

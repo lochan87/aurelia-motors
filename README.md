@@ -206,7 +206,7 @@ npm run lint
 # Strict TypeScript typecheck across all workspaces
 npm run typecheck
 
-# Run full test suite (126 passing tests across 15 test suites)
+# Run full test suite (127 passing tests across 15 test suites)
 npm test
 
 # Production build (API + Web Vite production assets)

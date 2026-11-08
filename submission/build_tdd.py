@@ -38,9 +38,9 @@ METADATA = """
 **Project:** Isocode Software Engineering Intern Take-Home Assignment — Problem 4  
 **Author:** lochan87 <1DS22IS073@dsce.edu.in>  
 **Dealership Topology:** 3 Showrooms & 2 Authorized Workshops in Lucknow, Uttar Pradesh, India  
-**Date:** November 6, 2026  
+**Date:** November 8, 2026  
 **Assignment Deadline:** November 9, 2026, 11:59 PM IST  
-**Version:** 1.0.0 (Production Release / Milestone 7 Complete)
+**Version:** 1.0.0 (Production Release / Milestone 7 Complete — 127 Passing Tests)
 """
 
 SECTIONS = [
@@ -424,9 +424,9 @@ Aurelia Motors integrates intelligent lead assistance while maintaining strict a
 
 ### 14.1 Honest Architectural Labelling: Grounded Domain Engine vs External LLM
 Many systems misleadingly label hardcoded templates as "generative AI" or deploy ungrounded external LLMs that hallucinate non-existent car models and false prices. Aurelia Motors takes an honest, robust approach:
-- **Default Architecture**: Powered by the **Aurelia Grounded Domain Engine**, an in-process deterministic intelligence engine combining keyword intent extraction, urgency scoring, contextual multi-channel templating, and live PostgreSQL relational stock matching.
-- **Optional External LLM**: If the dealership configures an `AI_API_KEY` (Google Gemini 1.5 Flash), the system activates external neural synthesis for draft generation while strictly grounding the prompt with real database stock rows and sanitizing customer PII.
-- **Provider Transparency**: The API transparently reports its active intelligence provider (`provider: 'Aurelia Grounded Domain Engine (Deterministic Rule-Based & DB-Matched)'` or `'Gemini 1.5 Flash (Grounded LLM)'`).
+- **Aurelia Grounded Domain Engine**: Powered by an in-process deterministic intelligence engine combining keyword intent extraction, urgency scoring, contextual multi-channel templating, and live PostgreSQL relational stock matching.
+- **Data Privacy & Zero Hallucination**: Operates with zero external LLM dependencies, ensuring that customer personal data never leaves dealership infrastructure (DPDP Act compliance) and eliminate false vehicle specifications or hallucinations.
+- **Provider Transparency**: The API transparently and accurately identifies its provider as `'Aurelia Grounded Domain Engine'` across all AI endpoints, regardless of environment configuration.
 
 ### 14.2 Grounded Lead Operations Features
 1. **Structured Lead Intent & Urgency Summary (`POST /api/staff/ai/:leadId/summary`)**:
@@ -582,7 +582,7 @@ All accounts use the demo password `Aurelia2026!`:
         "title": "21. Test Suite & Verification Summary",
         "content": """
 The codebase has undergone comprehensive automated verification:
-- **Automated Test Results**: **126 passing tests across 15 test suites** executed via Vitest and Supertest:
+- **Automated Test Results**: **127 passing tests across 15 test suites** executed via Vitest and Supertest:
   1. `validation.test.ts` (2 tests): Request validation schemas and error envelope formatting.
   2. `health.test.ts` (7 tests): Database connection health probe and uptime reporting.
   3. `showrooms.test.ts` (3 tests): Showroom listing, code lookup, and active facility filtering.
@@ -596,7 +596,7 @@ The codebase has undergone comprehensive automated verification:
   11. `content.test.ts` (4 tests): Homepage banners and promotional campaign CMS.
   12. `notifications.test.ts` (5 tests): Staff notifications popover, unread counts, and mark-as-read workflows.
   13. `used-car-pricing.test.ts` (6 tests): Separation-of-duties price proposals and approval governance.
-  14. `ai.test.ts` (4 tests): Grounded lead intent summary, multi-channel response drafts, and inventory-backed stock recommendations.
+  14. `ai.test.ts` (5 tests): Grounded lead intent summary, multi-channel response drafts, inventory-backed stock recommendations, and engine provider attribution regression test.
   15. `e2e-journeys.test.ts` (14 tests): Full end-to-end integration journeys across all customer and staff workflows.
 - **Code Quality**: ESLint 9 passing with 0 warnings, Prettier 3 passing with 0 formatting warnings, strict TypeScript passing with 0 compilation errors, and production build succeeded in 907ms.
 """
@@ -608,7 +608,7 @@ The codebase has undergone comprehensive automated verification:
 To maintain architectural clarity and focus on the core requirements of Problem 4, the following boundaries were deliberately established:
 1. **Financial Payment Gateway**: Test-drive appointments and workshop service bookings are complimentary in accordance with authorized dealership customer care standards. Online down-payment collection (e.g. Razorpay/Stripe) is outside the scope of Problem 4.
 2. **Third-Party Paid SMS/WhatsApp Gateway**: Outbound messaging is implemented as structured notification templates and webhook boundaries rather than connecting to live paid commercial telecom aggregators.
-3. **AI Integration**: The platform transparently utilizes a deterministic Grounded Domain Engine querying real PostgreSQL stock by default, with optional external Gemini LLM activation, avoiding ungrounded AI hallucinations.
+3. **AI Integration**: The platform utilizes the in-house deterministic Aurelia Grounded Domain Engine querying live PostgreSQL stock and tariffs, eliminating external LLM dependencies, API costs, latency, and customer data leakage.
 """
     },
     {
@@ -961,8 +961,8 @@ def generate_pdf_document(output_path):
         [Paragraph("<b>Project:</b>", meta_style), Paragraph("Isocode SWE Intern Take-Home Assignment — Problem 4", meta_style)],
         [Paragraph("<b>Author:</b>", meta_style), Paragraph("lochan87 &lt;1DS22IS073@dsce.edu.in&gt;", meta_style)],
         [Paragraph("<b>Topology:</b>", meta_style), Paragraph("3 Showrooms & 2 Workshops in Lucknow, UP, India", meta_style)],
-        [Paragraph("<b>Date:</b>", meta_style), Paragraph("November 6, 2026 (Deadline: November 9, 2026, 11:59 PM IST)", meta_style)],
-        [Paragraph("<b>Status:</b>", meta_style), Paragraph("Milestone 7 of 7 Complete — 126 Passing Automated Tests", meta_style)],
+        [Paragraph("<b>Date:</b>", meta_style), Paragraph("November 8, 2026 (Deadline: November 9, 2026, 11:59 PM IST)", meta_style)],
+        [Paragraph("<b>Status:</b>", meta_style), Paragraph("Milestone 7 of 7 Complete — 127 Passing Automated Tests", meta_style)],
     ]
     t = Table(meta_rows, colWidths=[1.2*inch, 5.8*inch])
     t.setStyle(TableStyle([
