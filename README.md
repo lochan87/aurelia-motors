@@ -215,6 +215,9 @@ npm run build
 
 ## Documentation & Submission Deliverables
 
+- **Repository**: [https://github.com/lochan87/aurelia-motors](https://github.com/lochan87/aurelia-motors)
+- **Author**: Lochan T N
 - **Technical Design Document**: Available in markdown (`submission/Aurelia_Motors_Technical_Design_Document.md`), PDF (`submission/Aurelia_Motors_Technical_Design_Document.pdf`), and Microsoft Word (`submission/Aurelia_Motors_Technical_Design_Document.docx`).
+- **Release Readiness & Verification Audit**: [`submission/RELEASE_READINESS.md`](./submission/RELEASE_READINESS.md)
 - **Deployment Guide**: Comprehensive environment topology, security configuration, reverse-proxy headers, and database instructions in [`deployment.md`](./deployment.md).
 - **Architecture & Schema**: Complete database entity-relationship models and architectural design in [`docs/database-architecture.md`](./docs/database-architecture.md) and [`docs/architecture.md`](./docs/architecture.md).
