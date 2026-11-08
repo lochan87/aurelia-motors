@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Aurelia Motors — Technical Design Document Master Generator
+Version 1.0 — Completed Hiring Assignment
+Author: Lochan T N
+Repository: https://github.com/lochan87/aurelia-motors
+
 Generates:
 1. submission/Aurelia_Motors_Technical_Design_Document.docx (Master document)
 2. submission/Aurelia_Motors_Technical_Design_Document.pdf (Word COM export)
@@ -24,7 +28,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-# Color Constants
+# Color Palette Constants
 COLOR_NAVY_DARK   = RGBColor(15, 23, 42)      # #0f172a
 COLOR_SLATE_DARK  = RGBColor(30, 41, 59)      # #1e293b
 COLOR_ACCENT_BLUE = RGBColor(37, 99, 235)     # #2563eb
@@ -37,6 +41,9 @@ HEX_BORDER    = "CBD5E1"
 HEX_BLUE      = "2563EB"
 HEX_WHITE     = "FFFFFF"
 
+# -------------------------------------------------------------
+# XML Helper Functions for DOCX Styling
+# -------------------------------------------------------------
 def set_cell_background(cell, hex_color):
     shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{hex_color}"/>')
     cell._tc.get_or_add_tcPr().append(shd)
@@ -107,12 +114,12 @@ def add_header_footer(section):
 
 def add_heading_1(doc, text):
     p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(7)
-    p.paragraph_format.space_after = Pt(1.8)
+    p.paragraph_format.space_before = Pt(10)
+    p.paragraph_format.space_after = Pt(2.5)
     p.paragraph_format.keep_with_next = True
     run = p.add_run(text)
     run.font.name = 'Calibri'
-    run.font.size = Pt(14.5)
+    run.font.size = Pt(14)
     run.font.bold = True
     run.font.color.rgb = COLOR_NAVY_DARK
     return p
@@ -131,7 +138,7 @@ def add_heading_2(doc, text):
 
 def add_heading_3(doc, text):
     p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(7)
+    p.paragraph_format.space_before = Pt(6)
     p.paragraph_format.space_after = Pt(2)
     p.paragraph_format.keep_with_next = True
     run = p.add_run(text)
@@ -155,7 +162,7 @@ def add_body_p(doc, text):
 def add_bullet(doc, title, desc):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(0)
-    p.paragraph_format.space_after = Pt(2.0)
+    p.paragraph_format.space_after = Pt(1.8)
     p.paragraph_format.line_spacing = 1.15
     p.paragraph_format.left_indent = Inches(0.25)
     
@@ -185,7 +192,7 @@ def add_callout(doc, title, text):
     cell = table.cell(0, 0)
     cell.width = Inches(6.77)
     set_cell_background(cell, HEX_LIGHT_BG)
-    set_cell_margins(cell, top=90, bottom=90, left=150, right=150)
+    set_cell_margins(cell, top=80, bottom=80, left=140, right=140)
     set_cell_borders(cell, left={'val': 'single', 'sz': '24', 'color': HEX_BLUE})
     
     p = cell.paragraphs[0]
@@ -215,7 +222,7 @@ def add_code_block(doc, code_str):
     cell = table.cell(0, 0)
     cell.width = Inches(6.77)
     set_cell_background(cell, HEX_LIGHT_BG)
-    set_cell_margins(cell, top=70, bottom=70, left=130, right=130)
+    set_cell_margins(cell, top=65, bottom=65, left=120, right=120)
     border_style = {'val': 'single', 'sz': '4', 'color': HEX_BORDER}
     set_cell_borders(cell, top=border_style, bottom=border_style, left=border_style, right=border_style)
     
@@ -249,7 +256,7 @@ def add_styled_table(doc, headers, rows_data, col_widths):
         cell = hdr_cells[c_idx]
         cell.width = col_widths[c_idx]
         set_cell_background(cell, HEX_DARK_NAVY)
-        set_cell_margins(cell, top=70, bottom=70, left=90, right=90)
+        set_cell_margins(cell, top=65, bottom=65, left=80, right=80)
         border_s = {'val': 'single', 'sz': '4', 'color': HEX_BORDER}
         set_cell_borders(cell, top=border_s, bottom=border_s, left=border_s, right=border_s)
         
@@ -272,7 +279,7 @@ def add_styled_table(doc, headers, rows_data, col_widths):
             cell = row.cells[c_idx]
             cell.width = col_widths[c_idx]
             set_cell_background(cell, bg_col)
-            set_cell_margins(cell, top=55, bottom=55, left=90, right=90)
+            set_cell_margins(cell, top=50, bottom=50, left=80, right=80)
             border_s = {'val': 'single', 'sz': '4', 'color': HEX_BORDER}
             set_cell_borders(cell, top=border_s, bottom=border_s, left=border_s, right=border_s)
             
@@ -296,11 +303,11 @@ def add_figure(doc, img_path, caption):
     p_img.paragraph_format.keep_with_next = True
     p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run_img = p_img.add_run()
-    run_img.add_picture(img_path, width=Inches(6.77))
+    run_img.add_picture(img_path, width=Inches(6.75))
     
     p_cap = doc.add_paragraph()
     p_cap.paragraph_format.space_before = Pt(0)
-    p_cap.paragraph_format.space_after = Pt(5)
+    p_cap.paragraph_format.space_after = Pt(4)
     p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run_cap = p_cap.add_run(caption)
     run_cap.font.name = 'Calibri'
@@ -346,7 +353,7 @@ def generate_diagrams():
     mods = [
         ('Auth & RBAC', 'Argon2id Hashes\nHttpOnly Cookies\nCSRF Token Guard', 6),
         ('Catalogue & Price', 'Integer Paise Math\nGST, Cess & RTO\nPrice Books CMS', 22),
-        ('Booking Engine', 'Serializable Tx\nCapacity Checks\nDouble-Booking Lock', 38),
+        ('Booking Engine', 'Pessimistic Row Locks\nCapacity Checks\nDouble-Booking Guard', 38),
         ('Lead CRM & SLA', 'Zod Validation\nWorkload Router\n30-Min SLA Clock', 54),
         ('Used Car CMS', 'Two-Person Rule\nPrice Proposals\n150-Point Audits', 70),
         ('Grounded AI', 'Deterministic Rules\nStock Matching\nResponse Drafts', 86),
@@ -360,10 +367,10 @@ def generate_diagrams():
     ax.annotate('', xy=(53, 34), xytext=(53, 37), arrowprops=dict(arrowstyle='<->', color='#2563eb', lw=1.5))
     ax.text(54.5, 35.5, 'Internal HTTP', ha='left', va='center', fontsize=7, fontweight='bold', color='#2563eb')
     
-    db_box = patches.FancyBboxPatch((20, 2), 65, 11, boxstyle='round,pad=1', facecolor='#f0fdf4', edgecolor='#059669', linewidth=1.5)
+    db_box = patches.FancyBboxPatch((18, 2), 69, 11, boxstyle='round,pad=1', facecolor='#f0fdf4', edgecolor='#059669', linewidth=1.5)
     ax.add_patch(db_box)
-    ax.text(52.5, 10, 'Data Persistence Tier (PostgreSQL 16 via Prisma 6 ORM)', ha='center', va='center', fontsize=9.5, fontweight='bold', color='#047857')
-    ax.text(52.5, 6.5, '20 Normalized Tables • Serializable Transaction Isolation • Advisory Locks\nPhysical Inventory (45) • Pre-Owned (10) • Leads & SLA Timeline • Audit Logs', ha='center', va='center', fontsize=7.5, color='#334155')
+    ax.text(52.5, 10, 'Data Persistence Tier (PostgreSQL 18 Alpine via Prisma 6 ORM)', ha='center', va='center', fontsize=9.5, fontweight='bold', color='#047857')
+    ax.text(52.5, 6.5, '36 Relational Models • Interactive Transactions • Pessimistic Row-Level Locks\nPhysical Inventory (45) • Pre-Owned (10) • Leads & SLA Timeline • Auth Audits', ha='center', va='center', fontsize=7.5, color='#334155')
     
     ax.annotate('', xy=(52.5, 13), xytext=(52.5, 16), arrowprops=dict(arrowstyle='<->', color='#059669', lw=1.5))
     ax.text(54, 14.5, 'Prisma Client (TCP 5432)', ha='left', va='center', fontsize=7, fontweight='bold', color='#059669')
@@ -409,7 +416,7 @@ def generate_diagrams():
         ('exShowroomPaise', 'BigInt')
     ], '#2563eb')
 
-    draw_table(58, 35, 24, 18, 'InventoryUnit', [
+    draw_table(58, 35, 24, 18, 'NewVehicleInventory', [
         ('id (PK)', 'String'),
         ('variantId (FK)', 'String'),
         ('showroomId (FK)', 'String'),
@@ -454,13 +461,13 @@ def generate_diagrams():
         ('createdAt', 'DateTime')
     ], '#d97706')
 
-    draw_table(86, 10, 20, 20, 'Appointment', [
+    draw_table(86, 10, 20, 20, 'Appointments', [
         ('id (PK)', 'String'),
-        ('showroomId (FK)', 'String'),
-        ('variantId (FK)', 'String'),
+        ('facilityId (FK)', 'String'),
         ('bookingRef (UQ)', 'String'),
-        ('slotDate', 'DateTime'),
-        ('status', 'Enum')
+        ('startTime', 'DateTime'),
+        ('status', 'Enum'),
+        ('idempotencyKey', 'String')
     ], '#7c3aed')
 
     def draw_rel(x1, y1, x2, y2, label='1:N'):
@@ -524,12 +531,18 @@ def generate_diagrams():
 def build_docx():
     doc = docx.Document()
     
-    # Page Setup - A4 Portrait, 0.8 inch margins
+    # Document Core Properties
+    doc.core_properties.author = 'Lochan T N'
+    doc.core_properties.title = 'Aurelia Motors — Technical Design Document'
+    doc.core_properties.subject = 'Software Engineering Hiring Assignment'
+    doc.core_properties.comments = 'Completed Hiring Assignment — Version 1.0 — Aurelia Motors'
+    
+    # Page Setup - A4 Portrait, 0.70 top/bottom, 0.75 left/right margins
     section = doc.sections[0]
     section.page_width = Inches(8.27)
     section.page_height = Inches(11.69)
-    section.top_margin = Inches(0.7)
-    section.bottom_margin = Inches(0.7)
+    section.top_margin = Inches(0.70)
+    section.bottom_margin = Inches(0.70)
     section.left_margin = Inches(0.75)
     section.right_margin = Inches(0.75)
     
@@ -539,7 +552,7 @@ def build_docx():
     # COVER PAGE
     # =========================================================
     p_pre = doc.add_paragraph()
-    p_pre.paragraph_format.space_before = Pt(36)
+    p_pre.paragraph_format.space_before = Pt(32)
     p_pre.paragraph_format.space_after = Pt(4)
     run_pre = p_pre.add_run("TECHNICAL DESIGN DOCUMENT  |  SYSTEM SPECIFICATION")
     run_pre.font.name = 'Calibri'
@@ -558,7 +571,7 @@ def build_docx():
     
     p_sub = doc.add_paragraph()
     p_sub.paragraph_format.space_before = Pt(0)
-    p_sub.paragraph_format.space_after = Pt(18)
+    p_sub.paragraph_format.space_after = Pt(16)
     run_sub = p_sub.add_run("Full-Stack Digital Dealership Platform & Multi-Facility Operations System")
     run_sub.font.name = 'Calibri'
     run_sub.font.size = Pt(13)
@@ -577,30 +590,32 @@ def build_docx():
     
     p_div_sp = doc.add_paragraph()
     p_div_sp.paragraph_format.space_before = Pt(0)
-    p_div_sp.paragraph_format.space_after = Pt(20)
+    p_div_sp.paragraph_format.space_after = Pt(16)
     
     # Metadata Block Table
     meta_headers = ["Project Attribute", "Specification Detail"]
     meta_rows = [
         ["Project Name", "Aurelia Motors Enterprise Dealership Platform"],
-        ["Author", "Lochan T N <lochan87@dsce.edu.in>"],
-        ["Document Type", "Technical Design Document & Architectural Reference"],
-        ["Version & Release Status", "v1.0.0 (Production Release) — 127 Passing Automated Tests across 15 Suites"],
+        ["Author", "Lochan T N"],
+        ["Project Nature", "Software Engineering Hiring Project"],
+        ["Document Version", "Version 1.0"],
+        ["Project Status", "Completed Hiring Assignment"],
+        ["Automated Test Verification", "127 Passing Automated Tests across 18 Test Suites (100% Pass Rate)"],
         ["Target Network Topology", "3 Showrooms & 2 Authorized Workshops in Lucknow, UP, India"],
-        ["Core Architecture", "TypeScript Monorepo • React 19 SPA • Express 5 REST API • PostgreSQL 16 • Prisma 6"],
+        ["Core Architecture", "TypeScript Monorepo • React 19 SPA • Express 5 REST API • PostgreSQL 18 / 16+ • Prisma 6 ORM"],
         ["Repository URL", "https://github.com/lochan87/aurelia-motors"],
-        ["Publication Status", "Created, committed, and pushed to GitHub"],
-        ["Date of Release", "November 2026"]
+        ["Date of Completion", "November 2026"]
     ]
-    add_styled_table(doc, meta_headers, meta_rows, [Inches(2.2), Inches(4.47)])
+    add_styled_table(doc, meta_headers, meta_rows, [Inches(2.2), Inches(4.57)])
     
     p_cov_note = doc.add_paragraph()
-    p_cov_note.paragraph_format.space_before = Pt(14)
+    p_cov_note.paragraph_format.space_before = Pt(12)
     p_cov_note.paragraph_format.space_after = Pt(0)
     r_cn = p_cov_note.add_run(
-        "Executive Summary Note: This engineering design document provides an end-to-end technical overview "
+        "Executive Summary Note: This engineering design document provides an architectural and operational overview "
         "of the Aurelia Motors platform. It covers system topology, database schemas, core retail workflows, "
-        "CRM routing algorithms, grounded domain intelligence, RBAC security, data privacy, and testing verification."
+        "CRM routing algorithms, grounded domain intelligence, RBAC security, data privacy, and testing verification. "
+        "This project represents an individual hiring assessment prototype, not a commercial production deployment."
     )
     r_cn.font.name = 'Calibri'
     r_cn.font.size = Pt(8.5)
@@ -618,14 +633,14 @@ def build_docx():
     toc_items = [
         ("1. Executive Summary", "High-level overview, physical network topology, and key architectural metrics"),
         ("2. Problem Statement and Scope", "Franchise dealership challenges, DPDP Act 2023 compliance, Indian tax structure"),
-        ("3. Technology Stack and Architecture Decisions", "React 19, Express 5, PostgreSQL 16, TypeScript, integer paise math standard"),
+        ("3. Technology Stack and Architecture Decisions", "React 19, Express 5, PostgreSQL 18/16+, TypeScript, integer paise math standard"),
         ("4. System Architecture Diagram", "Multi-tier containerized topology, edge gateway routing, and request lifecycle"),
         ("5. Database Design and Entity Relationships", "Core ER model, Prisma schemas, facility scoping, and table catalog"),
         ("6. Core Customer Workflows", "Discovery, on-road pricing formulas, capacity-safe booking, and trade-ins"),
         ("7. Dealership Operations", "Lead routing, 30-min SLA engine, CSV portal ingestion, inventory CMS, price approvals"),
         ("8. AI-Assisted Features and Limitations", "Aurelia Grounded Domain Engine, lead summaries, message drafts, boundaries"),
         ("9. Authentication, Authorization and Data Privacy", "Argon2id, HttpOnly sessions, CSRF, RBAC matrix, DPDP 2023 compliance"),
-        ("10. Testing and Verification", "127 automated tests across 15 suites, unit, integration, and E2E journeys"),
+        ("10. Testing and Verification", "127 automated tests across 18 suites, unit, integration, and journey verification"),
         ("11. Local Setup and Deployment", "Prerequisites, local development, Docker Compose topology, demo credentials"),
         ("12. Known Limitations and Future Improvements", "Simulated gateways, concurrency limits, production hardening roadmap"),
         ("13. Repository and Reviewer Access", "GitHub repository details, test execution commands, and document governance")
@@ -635,12 +650,12 @@ def build_docx():
         
     add_callout(
         doc,
-        "Architectural North Star: Operational Integrity & Determinism",
+        "Architectural Focus: Operational Integrity & Determinism",
         "Aurelia Motors prioritizes data integrity and determinism over speculative complexity. "
-        "All monetary values are calculated in 64-bit integer paise to prevent floating-point drift. "
-        "Demonstrator fleet test-drives and workshop service bays enforce capacity checks using PostgreSQL "
-        "Serializable transactions to guarantee double-booking prevention under concurrent user load. "
-        "The AI domain engine operates on grounded inventory heuristics rather than ungrounded cloud LLMs."
+        "All monetary values are calculated in 64-bit integer paise to prevent floating-point rounding drift. "
+        "Demonstrator fleet test-drives and workshop service bays enforce capacity checks using interactive transactions "
+        "and pessimistic row-level database locks to serialize concurrent requests. "
+        "The AI domain engine operates on grounded database heuristics rather than probabilistic cloud LLMs."
     )
     
     # =========================================================
@@ -649,9 +664,9 @@ def build_docx():
     add_heading_1(doc, "1. Executive Summary")
     add_body_p(
         doc,
-        "Aurelia Motors is an enterprise-grade, full-stack digital automotive dealership and operations platform "
-        "designed for an authorized multi-facility passenger car franchise network in Lucknow, Uttar Pradesh, India. "
-        "The system unifies customer-facing digital automotive retail with internal back-office dealership operations."
+        "Aurelia Motors is an individual software engineering hiring project designed to model an authorized "
+        "multi-facility passenger car franchise network in Lucknow, Uttar Pradesh, India. The application unifies "
+        "customer-facing digital automotive retail with internal back-office dealership operations."
     )
     add_body_p(
         doc,
@@ -666,17 +681,18 @@ def build_docx():
     
     add_body_p(
         doc,
-        "The application bridges public customer engagement—including vehicle model discovery, variant comparisons, "
+        "The application provides public customer engagement—including vehicle model discovery, variant comparisons, "
         "transparent on-road pricing with reducing-balance EMI calculators, capacity-safe test-drive reservations, "
-        "service appointment scheduling, and certified used-car browsing with 150-point inspection findings—with "
-        "mission-critical staff operations. Operational capabilities include role-based staff authentication, "
-        "automated lead assignment with a 30-minute response-time SLA clock, external auto portal CSV batch ingestion, "
-        "centralized CMS inventory management, two-person used-car price adjustments, and grounded domain intelligence."
+        "service appointment scheduling, and certified used-car browsing with 150-point inspection findings—alongside "
+        "staff operations. Operational capabilities include role-based staff authentication, automated lead assignment "
+        "with a 30-minute response-time SLA clock, external auto portal CSV batch ingestion, centralized CMS inventory management, "
+        "two-person used-car price adjustments, and grounded domain intelligence."
     )
     add_body_p(
         doc,
-        "The platform is implemented in a modern TypeScript monorepo using React 19, Express 5, and PostgreSQL 16 "
-        "via Prisma 6 ORM. The implementation is verified by 127 automated tests across 15 test suites and fully containerized via Docker Compose."
+        "The platform is implemented in a modern TypeScript monorepo using React 19, Express 5, and PostgreSQL (PostgreSQL 18 "
+        "Alpine in Docker Compose, compatible with PostgreSQL 16+) via Prisma 6 ORM. The implementation is verified by "
+        "127 automated tests across 18 test suites and containerized via Docker Compose."
     )
 
     # =========================================================
@@ -685,8 +701,8 @@ def build_docx():
     add_heading_1(doc, "2. Problem Statement and Scope")
     add_body_p(
         doc,
-        "Automotive retail across Tier-1 and Tier-2 Indian metropolitan markets has historically suffered from acute operational "
-        "fragmentation. Prospective buyers face disjointed digital touchpoints, opaque on-road pricing estimates that omit local taxes, "
+        "Automotive retail across Tier-1 and Tier-2 Indian metropolitan markets has historically suffered from operational fragmentation. "
+        "Prospective buyers face disjointed digital touchpoints, opaque on-road pricing estimates that omit local taxes, "
         "frequent double-booking of demonstrator fleet vehicles, and unverified pre-owned vehicle quality claims. "
         "On the dealership side, sales consultants struggle with scattered customer enquiries across third-party auto portals "
         "(such as CarDekho and CarWale), slow response times that degrade conversion rates, and a lack of auditability "
@@ -711,14 +727,14 @@ def build_docx():
         "Indian Automotive Tax and Fiscal Architecture",
         "On-road pricing incorporates Ex-showroom base prices, Goods and Services Tax (GST) with applicable Compensation Cess, "
         "Uttar Pradesh State Road Transport Office (RTO) registration fees (8% for petrol/EV, 10% for diesel), mandatory multi-year "
-        "insurance premiums, dealer logistics charges, and statutory Tax Collected at Source (TCS) of 1% on transactions exceeding ₹10,00,000."
+        "insurance estimates, dealer logistics charges, and statutory Tax Collected at Source (TCS) of 1% on transactions exceeding ₹10,00,000."
     )
     
     add_heading_2(doc, "2.2 Implemented Scope vs. Simulated Boundaries")
     add_body_p(
         doc,
         "To maintain rigorous architectural focus without unnecessary commercial dependencies, the platform explicitly defines "
-        "what is implemented as production-quality application logic versus what is simulated:"
+        "what is implemented as working application logic versus what is simulated:"
     )
     add_bullet(
         doc,
@@ -751,28 +767,28 @@ def build_docx():
     add_bullet(
         doc,
         "Frontend SPA (React 19, TypeScript, Vite, Tailwind CSS 4)",
-        "React 19 provides modern concurrent rendering and robust state primitives. Vite delivers near-instantaneous hot module replacement. "
+        "React 19 provides modern concurrent rendering and robust state primitives. Vite delivers fast hot module replacement. "
         "Tailwind CSS 4 provides a modern, utility-first design system without CSS runtime overhead. React Router 7 manages declarative "
         "client routing and route protection. TanStack Query v5 manages asynchronous server state, optimistic mutations, and background caching."
     )
     add_bullet(
         doc,
         "Backend REST API (Express 5, Node.js 24 LTS, Zod)",
-        "Express 5 provides a battle-tested HTTP routing pipeline with native async error handling. Node.js 24 LTS ensures modern V8 "
-        "performance and long-term enterprise runtime stability. Zod enforces runtime boundary validation, sharing schema definitions "
-        "between client and server to guarantee absolute end-to-end type safety."
+        "Express 5 provides an HTTP routing pipeline with native async error handling. Node.js >= 24.0.0 LTS (and node:22-alpine "
+        "container base image) ensures runtime stability. Zod enforces runtime boundary validation, sharing schema definitions "
+        "between client and server to guarantee end-to-end type safety."
     )
     add_bullet(
         doc,
-        "Data Persistence (PostgreSQL 16, Prisma 6 ORM)",
-        "PostgreSQL 16 provides enterprise-grade ACID guarantees, row-level locking, and Serializable transaction isolation levels "
-        "required to eliminate booking race conditions. Prisma 6 generates type-safe database queries and manages declarative schema migrations."
+        "Data Persistence (PostgreSQL 18 Alpine / 16+, Prisma 6 ORM)",
+        "PostgreSQL provides ACID guarantees, row-level locking, and transactional consistency required to serialize booking requests. "
+        "Prisma 6.19 generates type-safe database queries and manages declarative schema migrations across 36 models."
     )
     add_bullet(
         doc,
         "Security & Authentication (Argon2id, Session Cookies, CSRF)",
         "Staff authentication utilizes Argon2id password hashing, signed HttpOnly SameSite=Lax session cookies, double-submit CSRF tokens, "
-        "and granular location-scoped Role-Based Access Control (RBAC) middleware."
+        "and location-scoped Role-Based Access Control (RBAC) middleware."
     )
     
     add_heading_2(doc, "3.2 Key Architectural Decisions and Trade-Offs")
@@ -788,8 +804,8 @@ def build_docx():
         "Deterministic Grounded Domain Engine vs. External Cloud LLM",
         "Automotive retail requires strict factual accuracy regarding stock availability, vehicle specifications, and pricing. "
         "Relying on external cloud LLMs introduces unpredictable latency, recurring API costs, external network failure modes, "
-        "and catastrophic hallucination risks (e.g., promising inventory that does not exist). Aurelia Motors implements a deterministic, "
-        "heuristic-driven domain engine directly grounded in live PostgreSQL data, delivering sub-15ms response times with 100% determinism."
+        "and generative confabulation risks. Aurelia Motors implements a deterministic, heuristic-driven domain engine directly "
+        "grounded in live PostgreSQL data, delivering fast local responses without generative errors or cloud API dependencies."
     )
 
     # =========================================================
@@ -830,13 +846,13 @@ def build_docx():
     add_bullet(
         doc,
         "4. Domain Services & Concurrency Controls",
-        "Business logic executes within specialized domain services. For booking operations, services wrap mutations in PostgreSQL "
-        "Serializable transactions with SELECT FOR UPDATE locks to eliminate double-booking race conditions."
+        "Business logic executes within specialized domain services. For booking operations, services wrap mutations in interactive Prisma "
+        "transactions with pessimistic row-level locking (SELECT ... FOR UPDATE) to serialize concurrent slot requests."
     )
     add_bullet(
         doc,
         "5. Data Access & Persistence Tier",
-        "Prisma Client executes parameterized SQL queries against PostgreSQL 16 over dedicated connection pools, returning strongly typed "
+        "Prisma Client executes parameterized SQL queries against PostgreSQL over dedicated connection pools, returning strongly typed "
         "models to the application tier."
     )
 
@@ -846,7 +862,7 @@ def build_docx():
     add_heading_1(doc, "5. Database Design and Entity Relationships")
     add_body_p(
         doc,
-        "The relational data model is normalized into 20 core tables designed to model dealership facilities, vehicle catalogs, "
+        "The relational data model is normalized into 36 tables designed to model dealership facilities, vehicle catalogs, "
         "physical inventory units, certified pre-owned cars, pricing books, staff authorization, leads, appointments, and audit trails."
     )
     
@@ -858,7 +874,7 @@ def build_docx():
         "The primary database models and their seeded record counts are summarized below:"
     )
     
-    db_headers = ["Entity Model", "Primary Key", "Key Foreign Keys", "Functional Responsibility", "Seeded Rows"]
+    db_headers = ["Prisma Model", "Primary Key", "Key Foreign Keys", "Functional Responsibility", "Seeded Rows"]
     db_rows = [
         ["Showroom", "id (CUID)", "None", "Physical retail sales facilities across Lucknow", "3 facilities"],
         ["Workshop", "id (CUID)", "None", "Authorized vehicle maintenance workshops with bay limits", "2 centers"],
@@ -868,13 +884,14 @@ def build_docx():
         ["UsedVehicle", "id (CUID)", "showroomId", "Certified pre-owned cars with masked plates & inspection score", "10 units"],
         ["UsedVehicleInspection", "id (CUID)", "usedVehicleId", "Comprehensive 150-point mechanical & electrical inspection", "10 audits"],
         ["PriceBook", "id (CUID)", "None", "Versioned pricing schemes with effective dates and overlap locks", "2 price books"],
+        ["PriceComponent", "id (CUID)", "priceEntryId", "Configurable fee/tax components (FIXED or PERCENT_OF_EXSHOWROOM)", "Seed components"],
         ["StaffUser", "id (CUID)", "None", "Staff credentials, Argon2id hashes, and RBAC operational roles", "4 accounts"],
-        ["Lead", "id (CUID)", "showroomId, assignedStaffId", "Inbound customer enquiries with 30-min SLA tracking clock", "Seeded & dynamic"],
+        ["Lead", "id (CUID)", "showroomId, assignedStaffId", "Inbound customer enquiries with 30-min SLA tracking clock", "Dynamic"],
         ["TestDriveAppointment", "id (CUID)", "showroomId, variantId", "Capacity-controlled demonstrator vehicle booking slots", "Dynamic"],
-        ["ServiceBooking", "id (CUID)", "workshopId", "Daily bay capacity-controlled workshop service reservations", "Dynamic"],
-        ["AuditLog", "id (CUID)", "staffUserId", "Immutable chronological audit log of staff mutations", "Dynamic"]
+        ["ServiceAppointment", "id (CUID)", "workshopId", "Daily bay capacity-controlled workshop service reservations", "Dynamic"],
+        ["AuthenticationAuditEvent", "id (CUID)", "staffUserId", "Immutable chronological audit log of staff authentication events", "Dynamic"]
     ]
-    add_styled_table(doc, db_headers, db_rows, [Inches(1.2), Inches(0.8), Inches(1.2), Inches(2.67), Inches(0.8)])
+    add_styled_table(doc, db_headers, db_rows, [Inches(1.5), Inches(0.8), Inches(1.3), Inches(2.47), Inches(0.7)])
 
     # =========================================================
     # SECTION 6: CORE CUSTOMER WORKFLOWS
@@ -882,7 +899,7 @@ def build_docx():
     add_heading_1(doc, "6. Core Customer Workflows")
     add_body_p(
         doc,
-        "The public retail application delivers transparent, self-service automotive retail capabilities across five core customer workflows:"
+        "The public retail application delivers self-service automotive retail capabilities across five core customer workflows:"
     )
     
     add_heading_2(doc, "6.1 Vehicle Discovery and Multi-Variant Comparison")
@@ -898,8 +915,8 @@ def build_docx():
     add_heading_2(doc, "6.2 On-Road Price Transparency and Financing Calculations")
     add_body_p(
         doc,
-        "Unlike commercial automotive portals that display indicative ex-showroom prices and conceal dealer fees, "
-        "Aurelia Motors provides an itemized, mathematically rigorous on-road price calculation tailored to Uttar Pradesh RTO regulations."
+        "Aurelia Motors provides an itemized on-road price calculation modeled on Uttar Pradesh RTO regulations and Indian tax rules. "
+        "Components are stored as configurable price entries calculated via basis points or fixed integer paise."
     )
     
     add_callout(
@@ -908,10 +925,10 @@ def build_docx():
         "On-Road Price = Ex-Showroom + RTO Registration + Insurance + TCS + Handling/Logistics + Optional Accessories\n\n"
         "Where:\n"
         "• Ex-Showroom: Versioned base price in integer paise defined in the active showroom price book.\n"
-        "• RTO Registration: 8% of Ex-Showroom for Petrol, Hybrid, and EV powertrains; 10% for Diesel powertrains.\n"
-        "• Comprehensive Insurance: Mandatory 1-year Own Damage + 3-year Third Party policy (calculated via bracketed base + 3.2% rate).\n"
-        "• Tax Collected at Source (TCS): Mandatory 1% under Section 206C(1F) of the Income Tax Act on any vehicle exceeding ₹10,00,000 (100,000,000 paise).\n"
-        "• Logistics & Handling: Fixed statutory administrative charge of ₹15,000 (1,500,000 paise)."
+        "• RTO Registration: Configurable percentage rate (e.g., 8% for Petrol/EV; 10% for Diesel in Uttar Pradesh).\n"
+        "• Comprehensive Insurance: Mandatory 1-year Own Damage + 3-year Third Party policy (bracketed base + percentage rate).\n"
+        "• Tax Collected at Source (TCS): Statutory 1% under Section 206C(1F) of the Income Tax Act on any vehicle exceeding ₹10,00,000 (100,000,000 paise).\n"
+        "• Logistics & Handling: Configurable dealer administrative fee (sample: ₹15,000)."
     )
     
     add_body_p(
@@ -933,24 +950,28 @@ def build_docx():
     add_heading_2(doc, "6.3 Capacity-Safe Test-Drive Reservations")
     add_body_p(
         doc,
-        "Test-drive bookings require real-time validation against the physical demonstrator fleet assigned to each showroom. "
-        "To prevent double-booking under concurrent user requests, the booking service executes inside a PostgreSQL Serializable transaction:"
+        "Test-drive bookings validate against the physical demonstrator fleet assigned to each showroom. "
+        "To serialize concurrent booking requests, the booking service executes inside an interactive Prisma transaction "
+        "featuring explicit pessimistic row-level locking on assigned demonstrator vehicle records:"
     )
     add_code_block(
         doc,
-        "// Concurrency-Safe Demonstrator Booking inside Serializable Transaction\n"
-        "await prisma.$transaction(async (tx) => {\n"
-        "  const conflict = await tx.testDriveAppointment.findFirst({\n"
-        "    where: { showroomId, variantId, slotDate, status: 'CONFIRMED' }\n"
-        "  });\n"
-        "  if (conflict) throw new ConflictError('Selected demonstrator slot already reserved');\n"
-        "  return tx.testDriveAppointment.create({ data: { bookingRef, showroomId, variantId, slotDate, ... } });\n"
-        "}, { isolationLevel: 'Serializable' });"
+        "// Concurrency-Safe Demonstrator Booking with Pessimistic Row Lock\n"
+        "return await prisma.$transaction(async (tx) => {\n"
+        "  const existing = await tx.testDriveAppointment.findUnique({ where: { idempotencyKey } });\n"
+        "  if (existing) return existing;\n"
+        "  // Pessimistic lock on showroom demo fleet to serialize concurrent bookings\n"
+        "  await tx.$queryRaw`SELECT id FROM demo_vehicles WHERE id = ANY(${vehicleIds}) FOR UPDATE`;\n"
+        "  const booked = await tx.testDriveAppointment.findMany({ where: { demoVehicleId: { in: vehicleIds }, ... } });\n"
+        "  const freeVehicle = demoVehicles.find((v) => !bookedIds.has(v.id));\n"
+        "  if (!freeVehicle) throw new AppError(409, 'SLOT_UNAVAILABLE', 'Selected slot is fully booked');\n"
+        "  return tx.testDriveAppointment.create({ data: { bookingReference, demoVehicleId: freeVehicle.id, ... } });\n"
+        "}, { isolationLevel: 'ReadCommitted' });"
     )
     add_body_p(
         doc,
         "Upon successful reservation, the customer receives an alphanumeric booking reference (e.g., TD-2026-8742) and an immutable "
-        "cancellation token. Customers can self-service cancel or reschedule reservations using this token without requiring an account."
+        "confirmation token. Customers can self-service cancel or view appointments using this reference and token."
     )
     
     add_heading_2(doc, "6.4 Workshop Service Appointment Scheduling")
@@ -958,18 +979,17 @@ def build_docx():
         doc,
         "Vehicle maintenance appointments are scheduled across the two authorized Lucknow workshops (Transport Nagar and Alambagh). "
         "The scheduling engine enforces daily capacity limits (maximum 8 service appointments per workshop per calendar day) "
-        "to prevent workshop overload. Customers select from standardized service packages (General Periodic Maintenance, "
-        "Monsoon Health Clinic, Brake & Suspension Overhaul, and Comprehensive Diagnostic Audit)."
+        "using pessimistic locks on the workshop row (`SELECT id FROM workshops WHERE id = ... FOR UPDATE`) inside an interactive transaction. "
+        "Customers select from standardized service packages (Periodic Maintenance, Monsoon Clinic, Brake Overhaul, and Diagnostic Audit)."
     )
     
     add_heading_2(doc, "6.5 Algorithmic Pre-Owned Trade-In Valuation")
     add_body_p(
         doc,
-        "Prospective buyers seeking to trade in an existing vehicle receive an instant, transparent valuation range without registering. "
+        "Prospective buyers seeking to trade in an existing vehicle receive an instant valuation range without registering. "
         "The valuation algorithm considers base original invoice price, annual straight-line depreciation (12% per year), "
         "mileage penalties (₹1.50 per km above 10,000 km/year threshold), and condition adjustment multipliers (0.90 for Fair, "
-        "1.00 for Good, 1.08 for Excellent). The engine outputs an indicative lower/upper valuation band and invites the customer "
-        "to schedule a formal physical evaluation."
+        "1.00 for Good, 1.08 for Excellent). The engine outputs an indicative lower/upper valuation band."
     )
 
     # =========================================================
@@ -1002,9 +1022,10 @@ def build_docx():
     )
     add_bullet(
         doc,
-        "3. Intelligent Workload Routing",
-        "Filters sales consultants assigned to the target showroom and selects the consultant with the lowest active lead count: "
-        "Workload = Active Leads + 0.5 * Assigned Today. Ties are broken deterministically using consultant ID ordering."
+        "3. Workload-Balanced Routing",
+        "Filters sales consultants assigned to the target showroom (or USED_CAR_STAFF for trade-ins). Selects the consultant "
+        "with the lowest count of active leads in statuses [NEW, ASSIGNED, CONTACTED, QUALIFIED, NEGOTIATING]. Ties are broken "
+        "deterministically by least recently assigned timestamp."
     )
     add_bullet(
         doc,
@@ -1015,16 +1036,16 @@ def build_docx():
     add_heading_2(doc, "7.2 Lead CRM Pipeline and 30-Minute SLA Tracking")
     add_body_p(
         doc,
-        "Dealership research demonstrates that responding to customer inquiries within 30 minutes increases conversion by over 300%. "
-        "The staff CRM inbox highlights active leads with real-time countdown timers. When a consultant logs an outreach activity "
-        "(Phone Call, WhatsApp Message, Email, or In-Person Showroom Visit), the system records the exact response timestamp. "
-        "If the response exceeds 30 minutes, the lead is permanently tagged as SLA breached, updating management analytics."
+        "Responding to customer inquiries promptly significantly increases conversion rates. The staff CRM inbox highlights "
+        "active leads with real-time countdown timers. When a consultant logs an outreach activity (Phone Call, WhatsApp Message, "
+        "Email, or In-Person Showroom Visit), the system records the exact response timestamp. If the response exceeds 30 minutes, "
+        "the lead is permanently tagged as SLA breached for management reporting."
     )
     
     add_heading_2(doc, "7.3 External Portal CSV Batch Ingestion")
     add_body_p(
         doc,
-        "Automotive dealerships receive high volumes of prospective leads exported from external portals (e.g., CarDekho and CarWale). "
+        "Dealerships receive prospective leads exported from external portals (e.g., CarDekho and CarWale). "
         "Aurelia Motors provides a two-stage CSV ingestion engine:"
     )
     add_bullet(
@@ -1043,7 +1064,7 @@ def build_docx():
     add_heading_2(doc, "7.4 Inventory CMS and Price Book Governance")
     add_body_p(
         doc,
-        "Dealership administrators manage the complete vehicle lifecycle via protected CMS endpoints: provisioning new vehicle models, "
+        "Dealership administrators manage the vehicle lifecycle via protected CMS endpoints: provisioning new vehicle models, "
         "configuring variant powertrain parameters, updating showroom stock allocations, and publishing versioned price books. "
         "Price books enforce non-overlapping effective date intervals, preventing conflicting retail prices."
     )
@@ -1051,7 +1072,7 @@ def build_docx():
     add_heading_2(doc, "7.5 Used-Car Pricing Proposals and Separation of Duties")
     add_body_p(
         doc,
-        "To prevent fraud and maintain margin discipline, certified pre-owned price adjustments enforce a strict two-person approval rule:"
+        "To maintain margin discipline, certified pre-owned price adjustments enforce a strict separation of duties:"
     )
     add_bullet(
         doc,
@@ -1062,8 +1083,9 @@ def build_docx():
     add_bullet(
         doc,
         "Administrative Decision & Separation of Duties",
-        "An Administrator reviews pending proposals (POST /api/staff/used-car-pricing/proposals/:id/approve). The system strictly enforces "
-        "separation of duties: the specialist who proposed the price is cryptographically forbidden from approving their own submission."
+        "An Administrator reviews pending proposals (POST /api/staff/used-car-pricing/proposals/:id/approve). The system enforces "
+        "separation of duties via role-based access control and an application-level identity check: the approving administrator "
+        "cannot be the staff member who authored the proposal (proposal.proposedByStaffId === reviewer.id)."
     )
 
     # =========================================================
@@ -1080,7 +1102,7 @@ def build_docx():
     add_bullet(
         doc,
         "1. Structured Lead Intent & Urgency Scoring (POST /api/staff/ai/:leadId/summary)",
-        "Parses unstructured enquiry notes, identifies customer powertrain preferences, extracts stated budget parameters, "
+        "Parses enquiry notes, identifies customer powertrain preferences, extracts stated budget parameters, "
         "and computes an objective urgency score (1 to 5) based on purchase timeframe keywords (e.g., 'immediate delivery', 'this weekend')."
     )
     add_bullet(
@@ -1094,7 +1116,7 @@ def build_docx():
         doc,
         "3. Inventory-Grounded Vehicle Recommendations (POST /api/staff/ai/:leadId/recommendations)",
         "Queries live PostgreSQL tables to identify physical inventory units and certified pre-owned cars matching the customer's "
-        "budget bracket (+/- 15%) and powertrain preferences. Excludes sold and reserved units to guarantee recommendations are 100% fulfillable."
+        "budget bracket (+/- 15%) and powertrain preferences. Strictly filters against units currently marked as AVAILABLE in the database."
     )
     
     add_heading_2(doc, "8.2 Explicit Boundaries and Limitations")
@@ -1102,9 +1124,9 @@ def build_docx():
         doc,
         "The AI domain engine adheres to strict engineering guardrails:"
     )
-    add_bullet(doc, "Zero Hallucination Risk", "Because responses are derived deterministically from database queries rather than probabilistic cloud LLMs, the engine never invents non-existent models, features, or inventory.");
+    add_bullet(doc, "Elimination of Generative Confabulation", "Because responses are derived deterministically from database queries and structured templates rather than probabilistic cloud LLMs, the engine does not invent non-existent models or stock.");
     add_bullet(doc, "No Automated External Transmission", "The engine generates message drafts for consultant review. It does not dispatch live telecom SMS or WhatsApp messages without human confirmation.");
-    add_bullet(doc, "Sub-15ms Execution Latency", "Executes locally on Node.js without network roundtrips to external cloud AI APIs, ensuring zero runtime cost and high availability.");
+    add_bullet(doc, "Fast Local Execution", "Executes in-process on the local Node.js runtime without external cloud API calls, avoiding third-party network latency and recurring API billing.");
 
     # =========================================================
     # SECTION 9: AUTHENTICATION, AUTHORIZATION AND DATA PRIVACY
@@ -1116,10 +1138,10 @@ def build_docx():
     )
     
     add_heading_2(doc, "9.1 Credential Security and Session Management")
-    add_bullet(doc, "Password Hashing", "Staff passwords are hashed using Argon2id with cryptographically secure random salts (minimum 8 characters, requiring uppercase, lowercase, numbers, and symbols).");
+    add_bullet(doc, "Password Hashing", "Staff passwords are hashed using Argon2id with secure random salts (minimum 8 characters, requiring uppercase, lowercase, numbers, and symbols).");
     add_bullet(doc, "HttpOnly Session Cookies", "Sessions are maintained via signed, HttpOnly, SameSite=Lax cookies, mitigating Cross-Site Scripting (XSS) session theft.");
     add_bullet(doc, "CSRF Defense", "Double-submit CSRF cookie and header validation is enforced across all mutating staff endpoints (POST, PATCH, DELETE, PUT).");
-    add_bullet(doc, "Brute-Force Rate Limiting", "Login endpoints enforce strict rate limits (max 5 failed attempts per 15-minute window) using Express rate-limiting middleware.");
+    add_bullet(doc, "Brute-Force Rate Limiting", "Login endpoints enforce rate limits (max 5 failed attempts per 15-minute window) using Express rate-limiting middleware.");
     
     add_heading_2(doc, "9.2 Role-Based Access Control (RBAC) Matrix")
     add_body_p(
@@ -1134,14 +1156,14 @@ def build_docx():
         ["USED_CAR_STAFF", "Assigned Showrooms", "Trade-In Enquiries", "No Access", "Propose Used Prices", "No Access"],
         ["SERVICE_ADVISOR", "Assigned Workshops", "No Access", "Workshop Bay Queue", "No Access", "No Access"]
     ]
-    add_styled_table(doc, rbac_headers, rbac_rows, [Inches(1.5), Inches(1.1), Inches(1.1), Inches(1.1), Inches(1.1), Inches(0.77)])
+    add_styled_table(doc, rbac_headers, rbac_rows, [Inches(1.5), Inches(1.1), Inches(1.1), Inches(1.1), Inches(1.1), Inches(0.87)])
     
     add_heading_2(doc, "9.3 Data Privacy & DPDP Act 2023 Compliance")
     add_bullet(
         doc,
         "Explicit Consent Auditing",
         "Customer enquiry forms require an affirmative checkbox consenting to contact under the Digital Personal Data Protection Act 2023. "
-        "The database records consent timestamps, consent text versions, and client IP hashes."
+        "The CustomerConsent table records consent timestamps, consent text versions, and client IP hashes."
     )
     add_bullet(
         doc,
@@ -1156,36 +1178,34 @@ def build_docx():
     add_heading_1(doc, "10. Testing and Verification")
     add_body_p(
         doc,
-        "Aurelia Motors employs a multi-tiered automated testing pyramid spanning unit calculations, integration endpoints, "
-        "and simulated end-to-end customer and staff operational journeys. The suite is executed using Vitest and Supertest."
+        "Aurelia Motors employs a multi-tiered automated test suite executed via Vitest and Supertest. "
+        "The automated test suite comprises 127 automated test assertions across 18 dedicated test files:"
     )
     
-    add_heading_2(doc, "10.1 Multi-Tiered Testing Strategy")
+    add_heading_2(doc, "10.1 Multi-Tiered Testing Strategy and Scope")
     add_bullet(
         doc,
-        "Tier 1: Domain Unit Tests (@aurelia/shared)",
-        "Validates core mathematical algorithms: on-road price tax itemization, reducing-balance EMI loan calculations, "
-        "used vehicle depreciation depreciation algorithms, and Indian currency/number formatting."
+        "Tier 1: Domain Unit Tests (@aurelia/shared — 3 suites, 14 tests)",
+        "Validates mathematical calculations: on-road price tax itemization, reducing-balance EMI loan calculations, "
+        "used vehicle depreciation algorithms, and Indian currency/number formatting."
     )
     add_bullet(
         doc,
-        "Tier 2: API & Integration Tests (@aurelia/api)",
-        "Executes Supertest HTTP assertions against real Express routes, verifying Zod schema boundary validation, "
-        "Prisma database queries, Argon2id authentication, session cookie encryption, CSRF token validation, and RBAC authorization."
+        "Tier 2: API & Integration Tests (@aurelia/api — 14 suites, 99 tests)",
+        "Executes Supertest HTTP assertions against real Express routes and PostgreSQL, verifying Zod schema boundary validation, "
+        "Prisma database queries, Argon2id authentication, session cookies, CSRF tokens, and RBAC authorization."
     )
     add_bullet(
         doc,
-        "Tier 3: End-to-End System Journey Tests",
-        "Simulates complete multi-step user workflows across isolated database transactions: Customer Journey 1 (Model Discovery to Lead Assignment), "
-        "Customer Journey 2 (Certified Pre-Owned Inspection to Trade-In Valuation), Customer Journey 3 (Test-Drive Double-Booking Prevention), "
-        "Customer Journey 4 (Workshop Service Bay Capacity Limits), and Staff Operations (CRM Response Tracking, CSV Ingestion, and AI Operations)."
+        "Tier 3: End-to-End System Journey Tests (@aurelia/api — 1 suite, 14 tests)",
+        "e2e-journeys.test.ts executes multi-step integration journey assertions via Supertest against the running Express HTTP pipeline "
+        "and PostgreSQL database: Model Discovery to Lead Assignment, Certified Pre-Owned Inspection to Trade-In Valuation, "
+        "Test-Drive Double-Booking Prevention, Workshop Bay Capacity Limits, and Staff CRM Operations. "
+        "Note on Test Scope: The repository does not include browser-driven UI automation (such as Playwright or Cypress); "
+        "all automated test assertions operate at the shared domain logic and API integration levels."
     )
     
     add_heading_2(doc, "10.2 Automated Test Suite Inventory")
-    add_body_p(
-        doc,
-        "The automated test suite comprises 127 automated test assertions across 15 dedicated test files:"
-    )
     
     test_headers = ["Package & Suite File", "Test Scope & Focus", "Test Count", "Key Verification Assertions"]
     test_rows = [
@@ -1203,12 +1223,12 @@ def build_docx():
         ["@aurelia/api/cms.test.ts", "Admin CMS Governance", "7 tests", "Model/variant provisioning, inventory stock updates, price book overlap locks"],
         ["@aurelia/api/used-car-pricing.test.ts", "Pricing Governance", "6 tests", "Price proposals, separation of duties, self-approval prevention (403)"],
         ["@aurelia/api/ai.test.ts", "Grounded Domain AI", "6 tests", "Deterministic lead intent summaries, multi-channel response drafts, stock match"],
-        ["@aurelia/api/notifications.test.ts", "Staff Notifications", "5 tests", "Real-time in-app alerts, unread counts, cross-staff ownership guards"],
+        ["@aurelia/api/notifications.test.ts", "Staff Notifications", "5 tests", "In-app alerts, unread counts, cross-staff ownership guards"],
         ["@aurelia/api/content.test.ts", "CMS Promotions", "4 tests", "Homepage promotional banners, finance schemes, admin mutation guards"],
         ["@aurelia/api/trade-ins.test.ts", "Trade-In Valuations", "5 tests", "Algorithmic valuation bands, DPDP consent, reference tracking"],
-        ["@aurelia/api/e2e-journeys.test.ts", "End-to-End Journeys", "14 tests", "Complete multi-step customer and staff lifecycle integration journeys"]
+        ["@aurelia/api/e2e-journeys.test.ts", "API Journey Tests", "14 tests", "Multi-step customer and staff lifecycle integration journeys via Supertest"]
     ]
-    add_styled_table(doc, test_headers, test_rows, [Inches(1.8), Inches(1.1), Inches(0.7), Inches(3.07)])
+    add_styled_table(doc, test_headers, test_rows, [Inches(1.8), Inches(1.1), Inches(0.7), Inches(3.17)])
 
     # =========================================================
     # SECTION 11: LOCAL SETUP AND DEPLOYMENT
@@ -1216,12 +1236,12 @@ def build_docx():
     add_heading_1(doc, "11. Local Setup and Deployment")
     add_body_p(
         doc,
-        "Aurelia Motors supports two deployment modes: local multi-workspace development via npm and fully containerized Docker Compose."
+        "Aurelia Motors supports two deployment modes: local multi-workspace development via npm and containerized Docker Compose."
     )
     
     add_heading_2(doc, "11.1 System Prerequisites")
-    add_bullet(doc, "Node.js Runtime", "Node.js >= 24.0.0 LTS and npm >= 10.0.0.");
-    add_bullet(doc, "Database", "PostgreSQL 16 (or Docker Desktop for containerized deployment).");
+    add_bullet(doc, "Node.js Runtime", "Node.js >= 24.0.0 LTS and npm >= 10.0.0 (local development host).");
+    add_bullet(doc, "Database", "PostgreSQL 16+ or Docker Desktop running postgres:18-alpine.");
     add_bullet(doc, "Container Engine", "Docker Desktop with Compose v2 support (optional for containerized mode).");
     
     add_heading_2(doc, "11.2 Local Development Quickstart")
@@ -1240,7 +1260,7 @@ def build_docx():
     )
     add_body_p(
         doc,
-        "The public web application will be accessible at http://localhost:5173, and the Express REST API at http://localhost:4000."
+        "The public web application is accessible at http://localhost:5173, and the Express REST API at http://localhost:4000."
     )
     
     add_heading_2(doc, "11.3 Containerized Docker Compose Deployment")
@@ -1259,24 +1279,31 @@ def build_docx():
         doc,
         "Docker Container Topology:"
     )
-    add_bullet(doc, "aurelia-web", "Nginx Alpine reverse proxy on host port 80, serving optimized React 19 production assets.");
-    add_bullet(doc, "aurelia-api", "Express 5 Node.js 24 Alpine container on host port 4000 (proxied via Nginx on /api/*).");
-    add_bullet(doc, "aurelia-db", "PostgreSQL 16 Alpine container on host port 55432 (mapped to internal port 5432).");
+    add_bullet(doc, "aurelia-web", "Nginx Alpine reverse proxy on host port 80, serving React 19 production assets.");
+    add_bullet(doc, "aurelia-api", "Express 5 Node.js container (node:22-alpine) on host port 4000 (proxied via Nginx on /api/*).");
+    add_bullet(doc, "aurelia-postgres", "PostgreSQL 18 Alpine container (postgres:18-alpine) on host port 55432 (mapped to internal port 5432).");
     
     add_heading_2(doc, "11.4 Seed Demonstration Accounts")
     add_body_p(
         doc,
-        "The database seed script provisions four demonstration accounts representing distinct operational roles:"
+        "The database seed provisions four demonstration accounts representing distinct operational roles:"
     )
     
-    staff_headers = ["Staff Email", "Default Password", "Operational Role", "Assigned Location", "Demonstration Purpose"]
+    staff_headers = ["Staff Email", "Operational Role", "Assigned Facility", "Demonstration Scope"]
     staff_rows = [
-        ["admin@aureliamotors.com", "Admin@123456", "ADMIN", "All Facilities", "Full dealership administration, CMS, price approvals, staff user management"],
-        ["sales.gomti@aureliamotors.com", "Sales@123456", "SALES_CONSULTANT", "Gomti Nagar Showroom", "Showroom lead inbox, 30-min SLA response tracking, test-drive schedules"],
-        ["usedcars@aureliamotors.com", "UsedCars@123456", "USED_CAR_STAFF", "Central Showroom", "Certified pre-owned inspections, trade-in valuations, price adjustment proposals"],
-        ["service.transport@aureliamotors.com", "Service@123456", "SERVICE_ADVISOR", "Transport Nagar Workshop", "Workshop bay appointment management, vehicle check-ins, service status"]
+        ["admin@aureliamotors.com", "ADMIN", "All Facilities", "Full dealership administration, CMS, price approvals, staff user management"],
+        ["sales.gomti@aureliamotors.com", "SALES_CONSULTANT", "Gomti Nagar Showroom", "Showroom lead inbox, 30-min SLA response tracking, test-drive schedules"],
+        ["usedcars@aureliamotors.com", "USED_CAR_STAFF", "Central Showroom", "Certified pre-owned inspections, trade-in valuations, price adjustment proposals"],
+        ["service.transport@aureliamotors.com", "SERVICE_ADVISOR", "Transport Nagar Workshop", "Workshop bay appointment management, vehicle check-ins, service status"]
     ]
-    add_styled_table(doc, staff_headers, staff_rows, [Inches(1.8), Inches(1.0), Inches(1.2), Inches(1.2), Inches(1.47)])
+    add_styled_table(doc, staff_headers, staff_rows, [Inches(1.8), Inches(1.3), Inches(1.5), Inches(2.17)])
+    
+    add_body_p(
+        doc,
+        "Note on Demonstration Credentials: In accordance with security best practices, plaintext passwords are not published "
+        "in this technical specification. Demonstration staff accounts are provisioned with environment-configurable credentials "
+        "documented in deployment.md (default: AURELIA_DEMO_PASSWORD). No production credentials exist."
+    )
 
     # =========================================================
     # SECTION 12: KNOWN LIMITATIONS AND FUTURE IMPROVEMENTS
@@ -1304,8 +1331,8 @@ def build_docx():
     add_bullet(
         doc,
         "Database-Level Concurrency Locks",
-        "Capacity checks and double-booking guards leverage PostgreSQL Serializable transactions and row-level locks. "
-        "While optimal for single-region multi-showroom deployments, extreme high-throughput scale would benefit from distributed Redis locks."
+        "Capacity checks and double-booking guards leverage PostgreSQL interactive transactions and row-level locks. "
+        "While robust for single-node multi-facility deployments, extreme high-throughput scale would benefit from distributed Redis locks."
     )
     
     add_heading_2(doc, "12.2 Production Hardening Roadmap")
@@ -1313,19 +1340,19 @@ def build_docx():
         doc,
         "Real-Time WebSocket / SSE Push",
         "Upgrade staff notification and lead SLA countdown polling intervals to native Server-Sent Events (SSE) or WebSockets "
-        "for instant zero-latency inbox alerts."
+        "for zero-latency inbox alerts."
     )
     add_bullet(
         doc,
         "External Automotive Inventory Feeds",
         "Implement automated DMS (Dealer Management System) sync protocols (DMS-Open, CDK, or Reynolds & Reynolds) for automated "
-        "real-time synchronization of factory vehicle dispatches and yard inventory."
+        "synchronization of factory vehicle dispatches and yard inventory."
     )
     add_bullet(
         doc,
         "Multi-Showroom Read Replicas",
         "Deploy PostgreSQL read replicas across AWS ap-south-1 (Mumbai) and ap-south-2 (Hyderabad) regions to serve public vehicle "
-        "browsing queries with sub-5ms latencies."
+        "browsing queries with low latency."
     )
 
     # =========================================================
@@ -1335,22 +1362,22 @@ def build_docx():
     add_body_p(
         doc,
         "The Aurelia Motors platform source code, automated test suites, deployment manifests, and technical documentation "
-        "are fully version-controlled and accessible via the official GitHub repository:"
+        "are version-controlled and accessible via the official GitHub repository:"
     )
     add_bullet(doc, "Repository URL", "https://github.com/lochan87/aurelia-motors");
-    add_bullet(doc, "Primary Branch", "master");
-    add_bullet(doc, "Author & Engineering Lead", "Lochan T N <lochan87@dsce.edu.in>");
-    add_bullet(doc, "License", "Private Academic & Technical Evaluation License");
+    add_bullet(doc, "Primary Branch", "main");
+    add_bullet(doc, "Author", "Lochan T N");
+    add_bullet(doc, "License", 'Private repository ("private": true in package.json; hiring project evaluation)');
     
     add_heading_2(doc, "13.1 Reviewer Verification Commands")
     add_code_block(
         doc,
-        "# Execute complete test suite (127 automated tests)\n"
+        "# Execute complete test suite (127 automated tests across 18 suites)\n"
         "npm test\n\n"
         "# Execute code formatting & lint checks\n"
         "npm run lint\n\n"
         "# Verify TypeScript types across all workspaces\n"
-        "npm run typecheck --workspaces"
+        "npm run typecheck"
     )
     add_body_p(
         doc,
@@ -1392,13 +1419,16 @@ def generate_markdown_tdd():
     
     md_content = """# Aurelia Motors — Technical Design Document
 
-**Enterprise Automotive Dealership Platform & Multi-Facility Operations System**
+**Digital Automotive Dealership Platform & Multi-Facility Operations System**
 
-* **Author:** Lochan T N (<lochan87@dsce.edu.in>)
+* **Author:** Lochan T N
+* **Project Nature:** Software Engineering Hiring Project
+* **Document Version:** Version 1.0
+* **Project Status:** Completed Hiring Assignment
 * **Topology:** 3 Showrooms & 2 Authorized Workshops in Lucknow, Uttar Pradesh, India
 * **Repository:** [https://github.com/lochan87/aurelia-motors](https://github.com/lochan87/aurelia-motors)
-* **Release Status:** Production Release (v1.0.0) — 127 Passing Automated Tests across 15 Suites
-* **Technology Stack:** TypeScript Monorepo, React 19 SPA, Express 5 REST API, PostgreSQL 16, Prisma 6 ORM
+* **Automated Verification:** 127 Passing Automated Tests across 18 Test Suites (100% Pass Rate)
+* **Technology Stack:** TypeScript Monorepo, React 19 SPA, Express 5 REST API, PostgreSQL 18 / 16+, Prisma 6 ORM
 
 ---
 
@@ -1421,13 +1451,13 @@ def generate_markdown_tdd():
 
 ## 1. Executive Summary
 
-Aurelia Motors is an enterprise-grade full-stack digital automotive dealership and operations platform engineered for an authorized multi-facility passenger car franchise network in Lucknow, Uttar Pradesh, India. The system unifies customer-facing digital automotive retail with internal back-office dealership operations.
+Aurelia Motors is an individual software engineering hiring project designed to model an authorized multi-facility passenger car franchise network in Lucknow, Uttar Pradesh, India. The application unifies customer-facing digital automotive retail with internal back-office dealership operations.
 
 The physical franchise network modeled and seeded in the platform comprises three retail showrooms and two authorized workshops:
-* **Showroom 1 (LKO-CENTRAL):** Central Lucknow Flagship, Ashok Marg, Hazratganj (high-volume sedan and crossover sales).
+* **Showroom 1 (LKO-CENTRAL):** Central Lucknow Flagship, Ashok Marg, Hazratganj (sedan and crossover sales).
 * **Showroom 2 (LKO-GOMTI):** Gomti Nagar Boutique Centre, Gomti Nagar Phase 2 (executive sedans and electric vehicles).
-* **Showroom 3 (LKO-KANPUR):** Kanpur Road Commercial Facility, Kanpur Highway Corridor (SUVs and certified pre-owned units).
-* **Workshop 1 (LKO-WS-TRANS):** Transport Nagar Heavy Maintenance Center (8 service bays, accident repairs, scheduled maintenance).
+* **Showroom 3 (LKO-KANPUR):** Kanpur Road Facility, Kanpur Highway Corridor (SUVs and certified pre-owned units).
+* **Workshop 1 (LKO-WS-TRANS):** Transport Nagar Maintenance Center (8 service bays, accident repairs, scheduled maintenance).
 * **Workshop 2 (LKO-WS-ALAM):** Alambagh Express Service Clinic (8 service bays, fast-track maintenance, diagnostic servicing).
 
 The platform bridges public customer retail (model discovery, multi-variant comparison, transparent on-road pricing with reducing-balance EMI calculators, capacity-safe test-drive bookings, workshop service scheduling, and certified pre-owned cars with 150-point inspection findings) with operational dealership back-office execution (role-based staff authentication, automated lowest-workload lead routing, 30-minute response-time SLA tracking, portal CSV batch ingestion, CMS inventory management, two-person used-car price governance, and grounded domain intelligence).
@@ -1436,11 +1466,11 @@ The platform bridges public customer retail (model discovery, multi-variant comp
 
 ## 2. Problem Statement and Scope
 
-Automotive retail across Tier-1 and Tier-2 Indian metropolitan markets has historically suffered from fragmented customer touchpoints, opaque pricing estimates omitting state taxes, frequent double-booking of demonstrator fleet vehicles, and unverified pre-owned claims. On the dealership side, sales consultants face scattered leads across third-party auto portals (CarDekho, CarWale), slow response times exceeding conversion windows, and lack of audit trails for used-car price reductions.
+Automotive retail across Tier-1 and Tier-2 Indian metropolitan markets has historically suffered from fragmented customer touchpoints, opaque pricing estimates omitting state taxes, frequent double-booking of demonstrator fleet vehicles, and unverified pre-owned claims. On the dealership side, sales consultants face scattered leads across third-party auto portals (CarDekho, CarWale), slow response times exceeding conversion windows, and lack of auditability for used-car price reductions.
 
 ### 2.1 Indian Regulatory and Fiscal Framework
 * **Digital Personal Data Protection Act 2023 (DPDP Act):** Mandates explicit, auditable customer consent prior to collecting personal identifiers. The platform captures consent on all public forms, records immutable timestamps, and masks vehicle registration numbers (`UP32-XX-1234`) on public pre-owned listings.
-* **Automotive Tax Structure:** On-road pricing incorporates Ex-showroom base prices, GST with applicable Compensation Cess, Uttar Pradesh State RTO registration fees (8% for petrol/EV, 10% for diesel), mandatory multi-year insurance premiums, logistics charges, and statutory Tax Collected at Source (TCS) of 1% on transactions exceeding ₹10,00,000.
+* **Automotive Tax Structure:** On-road pricing incorporates Ex-showroom base prices, GST with applicable Compensation Cess, Uttar Pradesh State RTO registration fees (8% for petrol/EV, 10% for diesel), mandatory insurance estimates, logistics charges, and statutory Tax Collected at Source (TCS) of 1% on transactions exceeding ₹10,00,000.
 
 ### 2.2 Implemented Scope vs. Simulated Boundaries
 * **Fully Implemented:** Public customer web SPA, authenticated staff CRM portal, PostgreSQL schema via Prisma 6 ORM, concurrency-safe test-drive and workshop booking engine, lead CRM with automated lowest-workload consultant routing, 30-minute response SLA tracking, CSV batch ingestion, two-person used car pricing governance, and deterministic grounded domain intelligence.
@@ -1452,13 +1482,13 @@ Automotive retail across Tier-1 and Tier-2 Indian metropolitan markets has histo
 
 The platform is structured as an npm workspaces monorepo:
 * **Frontend SPA:** React 19, TypeScript, Vite, Tailwind CSS 4, React Router 7, TanStack Query v5.
-* **Backend REST API:** Express 5, Node.js 24 LTS, Zod runtime validation.
-* **Data Persistence:** PostgreSQL 16, Prisma 6 ORM.
+* **Backend REST API:** Express 5, Node.js >= 24.0.0 LTS (and `node:22-alpine` in Dockerfiles), Zod runtime validation.
+* **Data Persistence:** PostgreSQL 18 Alpine in Docker Compose (compatible with PostgreSQL 16+), Prisma 6.19 ORM.
 * **Security & Auth:** Argon2id password hashing, signed HttpOnly SameSite=Lax session cookies, CSRF protection tokens, location-scoped RBAC middleware.
 
 ### Key Architectural Decisions
 * **Integer Paise Currency Standard:** All monetary values are strictly represented as 64-bit BigInt integer paise (1 INR = 100 paise) to prevent floating-point precision loss.
-* **Deterministic Grounded Domain Engine:** Operates via rule-based heuristics grounded in live PostgreSQL data, delivering sub-15ms response times with zero hallucination risk, zero API costs, and full test determinism.
+* **Deterministic Grounded Domain Engine:** Operates via rule-based heuristics grounded in live PostgreSQL data, delivering fast local responses without generative confabulation, API billing costs, or external network dependencies.
 
 ---
 
@@ -1470,8 +1500,8 @@ The platform is structured as an npm workspaces monorepo:
 1. **Ingress & Edge Proxy Tier:** Nginx reverse proxy on port 80/443 serves React 19 static assets, injects X-Request-ID headers, enforces rate limits, and proxies `/api/*` requests to Express.
 2. **Application Middleware:** Express 5 parses JSON and cookies, enforces CORS, logs request traces via Pino, and executes CSRF middleware on mutating endpoints.
 3. **Zod Validation:** Route controllers validate incoming payloads using isomorphic Zod schemas shared between client and server.
-4. **Domain Services & Concurrency Controls:** Booking operations execute inside PostgreSQL Serializable transactions with row-level locks to prevent double-booking.
-5. **Persistence Tier:** Prisma Client executes parameterized SQL against PostgreSQL 16.
+4. **Domain Services & Concurrency Controls:** Booking operations execute inside interactive Prisma transactions with pessimistic row-level locking (`SELECT ... FOR UPDATE`) to serialize concurrent slot requests.
+5. **Persistence Tier:** Prisma Client executes parameterized SQL against PostgreSQL over dedicated connection pools.
 
 ---
 
@@ -1483,12 +1513,12 @@ The platform is structured as an npm workspaces monorepo:
 * **Showroom & Workshop:** Facility locations across Lucknow with operating hours and geographic coordinates.
 * **VehicleModel & VehicleVariant:** 6 passenger car models, 15 powertrain trims, detailed technical specifications.
 * **NewVehicleInventory:** 45 physical showroom vehicles tracking VIN, stock number, and lifecycle status (`AVAILABLE`, `RESERVED`, `SOLD`).
-* **UsedVehicle & UsedVehicleInspection:** 10 certified pre-owned units with 150-point inspection findings and masked registration plates.
-* **PriceBook & PriceBookItem:** Versioned pricing books with effective date intervals and overlap prevention.
+* **UsedVehicle & UsedVehicleInspection:** 10 certified pre-owned units with 150-point inspection findings and masked registration plates (`UP32-XX-1234`).
+* **PriceBook & PriceComponent:** Versioned pricing books with configurable component breakdowns (fixed paise or basis points).
 * **StaffUser & StaffLocationAssignment:** Staff credentials, Argon2id hashes, and RBAC operational roles.
 * **Lead & LeadActivity:** Inbound customer enquiries with 30-minute SLA countdown timers and consultation activity timelines.
-* **TestDriveAppointment & ServiceBooking:** Capacity-controlled demonstrator vehicle and workshop service bay bookings.
-* **AuditLog:** Immutable chronological audit logs of all administrative mutations.
+* **TestDriveAppointment & ServiceAppointment:** Capacity-controlled demonstrator vehicle and workshop service bay bookings.
+* **AuthenticationAuditEvent:** Immutable chronological audit log of staff authentication events.
 
 ---
 
@@ -1500,16 +1530,16 @@ Prospective buyers browse 6 passenger vehicle models and 15 variants, filtering 
 ### 6.2 On-Road Price Transparency and EMI Calculations
 Itemized on-road pricing formula:
 $$\text{On-Road Price} = \text{Ex-Showroom} + \text{RTO} + \text{Insurance} + \text{TCS} + \text{Logistics} + \text{Accessories}$$
-* **RTO:** 8% for Petrol/EV/Hybrid; 10% for Diesel.
-* **TCS:** 1% on transactions exceeding ₹10,00,000 (100,000,000 paise).
+* **RTO:** Configurable rate (sample: 8% for Petrol/EV/Hybrid; 10% for Diesel in Uttar Pradesh).
+* **TCS:** Statutory 1% on transactions exceeding ₹10,00,000 (100,000,000 paise).
 * **Reducing-Balance EMI Formula:**
 $$E = P \cdot r \cdot \frac{(1+r)^n}{(1+r)^n - 1}$$
 
 ### 6.3 Capacity-Safe Test-Drive Reservations
-Wraps demonstrator slot reservations in PostgreSQL Serializable transactions with conflict checks to eliminate double-booking race conditions. Returns a booking reference (e.g., `TD-2026-8742`) and cancellation token.
+Wraps demonstrator slot reservations in interactive Prisma transactions with pessimistic row-level locks (`SELECT id FROM demo_vehicles WHERE id = ANY(...) FOR UPDATE`) to serialize concurrent requests. Enforces idempotency via unique `idempotencyKey` constraints. Returns a booking reference (e.g., `TD-2026-8742`) and confirmation token.
 
 ### 6.4 Workshop Service Appointment Scheduling
-Enforces daily workshop bay capacity limits (maximum 8 service appointments per workshop per calendar day) across standard maintenance packages.
+Enforces daily workshop bay capacity limits (maximum 8 service appointments per workshop per calendar day) using pessimistic row locks on the workshop row (`SELECT id FROM workshops WHERE id = ... FOR UPDATE`) inside an interactive transaction.
 
 ### 6.5 Algorithmic Pre-Owned Trade-In Valuation
 Multi-variable algorithmic valuation model considering original invoice price, annual straight-line depreciation (12%/year), mileage penalties (₹1.50/km above 10,000 km/yr), and condition multipliers (0.90 Fair, 1.00 Good, 1.08 Excellent).
@@ -1521,8 +1551,7 @@ Multi-variable algorithmic valuation model considering original invoice price, a
 ![Lead Workflow](diagrams/lead_workflow.png)
 
 ### 7.1 Inbound Lead Capture and Automated Routing
-Captures customer enquiries across web forms and portal CSV imports. Enforces DPDP Act 2023 consent, detects duplicates within a 30-day window, and automatically routes leads to the sales consultant with the lowest active workload:
-$$\text{Workload} = L_{\text{active}} + 0.5 \cdot L_{\text{assigned\_today}}$$
+Captures customer enquiries across web forms and portal CSV imports. Enforces DPDP Act 2023 consent, detects duplicates within a 30-day window, and automatically routes leads to the sales consultant with the lowest count of active leads (`[NEW, ASSIGNED, CONTACTED, QUALIFIED, NEGOTIATING]`), breaking ties by least recently assigned timestamp.
 
 ### 7.2 Lead CRM Pipeline and 30-Minute SLA Tracking
 Staff dashboard displays active leads with real-time countdown timers against a 30-minute first-response SLA. Logging a customer interaction records response timestamps; exceeding 30 minutes permanently tags the lead as SLA breached.
@@ -1534,7 +1563,7 @@ Two-stage ingestion pipeline: Stage 1 parses and validates CSV rows (POST `/api/
 Administrators manage models, variants, physical showroom inventory allocations, and promotional banners. Price books enforce non-overlapping date intervals.
 
 ### 7.5 Used-Car Pricing Proposals and Separation of Duties
-Used Car Specialists submit price adjustment proposals in integer paise with written justification. Administrators approve or reject proposals. Proposers are cryptographically prevented from self-approving their own proposals.
+Used Car Specialists submit price adjustment proposals in integer paise with written justification. Administrators review, approve, or reject proposals. Separation of duties is enforced at the application and authorization layer: the approving staff member must hold the ADMIN role and cannot approve their own proposal (`proposal.proposedByStaffId === reviewer.id`).
 
 ---
 
@@ -1543,36 +1572,37 @@ Used Car Specialists submit price adjustment proposals in integer paise with wri
 The Aurelia Grounded Domain Engine provides deterministic, rules-based staff assistance grounded in live PostgreSQL data:
 1. **Lead Intent & Urgency Scoring (POST `/api/staff/ai/:leadId/summary`):** Extracts powertrain preferences, budget brackets, and computes urgency scores (1-5).
 2. **Multi-Channel Response Drafts (POST `/api/staff/ai/:leadId/response-draft`):** Generates personalized WhatsApp, SMS, and Email drafts for consultant review and manual dispatch.
-3. **Inventory Recommendations (POST `/api/staff/ai/:leadId/recommendations`):** Matches customer preferences against real available showroom and pre-owned inventory (+/- 15% budget).
+3. **Inventory Recommendations (POST `/api/staff/ai/:leadId/recommendations`):** Matches customer preferences against available showroom and pre-owned inventory (+/- 15% budget), strictly filtered by `status: 'AVAILABLE'`.
 
 ### Boundaries & Guardrails
-* Zero hallucination risk (queries live database state).
-* No automated external transmission (requires consultant confirmation).
-* Sub-15ms local execution latency.
+* Eliminates generative confabulation because outputs are generated deterministically from database queries and structured templates.
+* No automated external transmission: generates drafts for human-in-the-loop staff review.
+* Executes in-process on the local Node.js runtime without external API network overhead.
 
 ---
 
 ## 9. Authentication, Authorization and Data Privacy
 
-* **Credentials:** Argon2id hashing with secure salts, rate-limited login endpoints.
+* **Credentials:** Argon2id hashing with secure random salts, rate-limited login endpoints.
 * **Sessions:** Signed, HttpOnly, SameSite=Lax session cookies with CSRF tokens.
 * **RBAC Roles:** `ADMIN` (all facilities, full CMS/admin), `SALES_CONSULTANT` (showroom-scoped leads & test-drives), `USED_CAR_STAFF` (trade-ins & price proposals), `SERVICE_ADVISOR` (workshop bay queues).
-* **Data Privacy:** Explicit DPDP Act 2023 consent recording, plate masking on pre-owned listings (`UP32-XX-1234`), immutable audit logging.
+* **Data Privacy:** Explicit DPDP Act 2023 consent recording, plate masking on pre-owned listings (`UP32-XX-1234`), immutable authentication audit logging (`AuthenticationAuditEvent`).
 
 ---
 
 ## 10. Testing and Verification
 
-Multi-tier automated test suite comprising **127 automated tests across 15 test suites**:
-* **Domain Unit Tests (14 tests):** Shared finance formulas, on-road pricing math, currency formatting.
-* **API & Integration Tests (99 tests):** Express routes, Zod validation, Prisma queries, Argon2id auth, RBAC access control.
-* **End-to-End System Journeys (14 tests):** Complete customer and staff workflows:
+Multi-tier automated test suite comprising **127 passing automated tests across 18 test suites**:
+* **Domain Unit Tests (@aurelia/shared — 3 suites, 14 tests):** Shared finance formulas, on-road pricing math, currency formatting.
+* **API Integration Tests (@aurelia/api — 14 suites, 99 tests):** Express routes, Zod validation, Prisma queries, Argon2id auth, RBAC access control.
+* **API Journey Integration Tests (@aurelia/api — 1 suite, 14 tests in `e2e-journeys.test.ts`):** Complete customer and staff workflows:
   * Customer Journey 1: Model Discovery -> On-Road Pricing -> Enquiry -> Consultant Assignment.
   * Customer Journey 2: Pre-Owned Browsing -> 150-Point Report -> Trade-In Valuation.
   * Customer Journey 3: Test-Drive Booking -> Double-Booking Rejection -> Cancellation.
   * Customer Journey 4: Workshop Service Booking -> Bay Capacity Enforcement.
   * Staff Operations: CRM Response Tracking -> CSV Batch Ingestion -> Grounded AI Operations.
   * Security & Isolation: Cross-Showroom Data Isolation -> CSRF Defense -> Admin Barriers.
+* **Note on Test Scope:** `e2e-journeys.test.ts` executes multi-step integration journey assertions via Supertest against the running Express HTTP pipeline and PostgreSQL database. The repository does not include browser-driven UI automation (such as Playwright or Cypress); all automated test assertions operate at the shared domain logic and API integration levels.
 
 ---
 
@@ -1580,7 +1610,7 @@ Multi-tier automated test suite comprising **127 automated tests across 15 test 
 
 ### Prerequisites
 * Node.js >= 24.0.0 LTS, npm >= 10.0.0
-* PostgreSQL 16 (or Docker Desktop)
+* PostgreSQL 16+ or Docker Desktop running `postgres:18-alpine`
 
 ### Local Development
 ```bash
@@ -1605,10 +1635,12 @@ curl http://localhost/api/health
 ```
 
 ### Seed Demonstration Accounts
-* **Admin:** `admin@aureliamotors.com` / `Admin@123456`
-* **Sales Consultant:** `sales.gomti@aureliamotors.com` / `Sales@123456`
-* **Used Car Specialist:** `usedcars@aureliamotors.com` / `UsedCars@123456`
-* **Service Advisor:** `service.transport@aureliamotors.com` / `Service@123456`
+* **Admin:** `admin@aureliamotors.com` (All Facilities — CMS, price approvals, staff administration)
+* **Sales Consultant:** `sales.gomti@aureliamotors.com` (Gomti Nagar Showroom — Lead CRM, SLA tracking, test-drives)
+* **Used Car Specialist:** `usedcars@aureliamotors.com` (Central Showroom — 150-point inspections, price adjustment proposals)
+* **Service Advisor:** `service.transport@aureliamotors.com` (Transport Nagar Workshop — Bay capacity queue, service check-ins)
+
+*Note on Demonstration Credentials:* In accordance with security best practices, plaintext passwords are not published in this technical specification. Demonstration staff accounts are provisioned with environment-configurable credentials documented in `deployment.md` (default: `AURELIA_DEMO_PASSWORD`). No production credentials exist.
 
 ---
 
@@ -1616,7 +1648,7 @@ curl http://localhost/api/health
 
 * **Simulated Gateways:** Payment deposits generate cryptographic references rather than processing live payment gateway transactions.
 * **Simulated Telecom:** WhatsApp/SMS drafts are formatted for human review rather than transmitted over live aggregator APIs.
-* **Concurrency Scale:** PostgreSQL Serializable transactions provide strong consistency; extreme multi-node scale would benefit from Redis Redlock.
+* **Concurrency Scale:** PostgreSQL interactive transactions and row-level locks provide strong consistency; multi-node distributed scale would benefit from Redis Redlock.
 * **Future Roadmap:** Server-Sent Events (SSE) for instant CRM notifications, external DMS sync protocols, and read replicas for multi-region scale.
 
 ---
@@ -1624,11 +1656,13 @@ curl http://localhost/api/health
 ## 13. Repository and Reviewer Access
 
 * **Repository:** [https://github.com/lochan87/aurelia-motors](https://github.com/lochan87/aurelia-motors)
-* **Author:** Lochan T N (<lochan87@dsce.edu.in>)
+* **Primary Branch:** `main`
+* **Author:** Lochan T N
+* **License:** Private repository (`"private": true` in `package.json`; hiring project evaluation)
 * **Verification Commands:**
   * Test Suite: `npm test`
   * Linting: `npm run lint`
-  * Typecheck: `npm run typecheck --workspaces`
+  * Typecheck: `npm run typecheck`
 """
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write(md_content)
@@ -1672,7 +1706,6 @@ def verify_rendered_pages(pdf_path):
             
         print(f"PASSED: All {num_pages} pages rendered to PNG in submission/pdf_pages/ for visual verification.")
         
-        # Check target page count (10-14 pages)
         if 10 <= num_pages <= 14:
             print(f"PASSED: Page count {num_pages} is squarely within target range (10-14 pages).")
         else:
